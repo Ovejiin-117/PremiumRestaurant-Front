@@ -8,7 +8,7 @@ export interface User {
     active?: boolean;
     birthDate?: string;
     registrationDate?: string;
-    loginDates?: string[]; // Array of unique YYYY-MM-DD strings
+    loginDates?: string[]; // Arreglo de cadenas únicas en formato YYYY-MM-DD
 }
 
 
@@ -56,16 +56,16 @@ export interface OrderItem {
 
 export interface Shift {
     id: string;
-    startTime: string; // ISO string
-    endTime?: string;  // ISO string
+    startTime: string; // Cadena en formato ISO
+    endTime?: string;  // Cadena en formato ISO
 }
 
 export interface Order {
     id: string;
     items: OrderItem[];
     total: number;
-    orderedBy: string; // Username
-    createdAt: string; // ISO string
+    orderedBy: string; // Nombre de usuario
+    createdAt: string; // Cadena en formato ISO
     shiftId: string;
 }
 
@@ -81,21 +81,21 @@ export interface TaxConfig {
     rounding: 'total' | 'item';
 }
 
-export type PromotionType = 'percentage' | 'quantity_offer' | 'combo'; // quantity_offer = NxM
+export type PromotionType = 'percentage' | 'quantity_offer' | 'combo'; // oferta por cantidad = NxM
 
 export interface Promotion {
     id: string;
     name: string;
     type: PromotionType;
-    value?: number; // For percentage (e.g., 20)
-    pay?: number;   // For NxM: Pay N
-    take?: number;  // For NxM: Get M
-    targetItemIds: string[]; // List of MenuItem IDs
+    value?: number; // Para porcentaje (ej. 20)
+    pay?: number;   // Para NxM: Paga N
+    take?: number;  // Para NxM: Lleva M
+    targetItemIds: string[]; // Lista de IDs de MenuItem
     active: boolean;
     validityMode: 'permanent' | 'date_range';
-    startDate?: string; // ISO string
-    endDate?: string;   // ISO string
-    daysOfWeek?: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
+    startDate?: string; // Cadena en formato ISO
+    endDate?: string;   // Cadena en formato ISO
+    daysOfWeek?: number[]; // 0=Dom, 1=Lun, ..., 6=Sáb
 }
 
 export type AuditAction = 'user_login' | 'user_logout' | 'shift_open' | 'shift_close' | 'user_create' | 'user_update' | 'user_delete' | 'user_status_change' | 'menu_create' | 'menu_update' | 'menu_delete' | 'menu_stock_toggle' | 'category_create' | 'category_rename' | 'category_delete' | 'subcategory_create' | 'subcategory_rename' | 'subcategory_delete' | 'section_create' | 'section_rename' | 'section_delete' | 'ticket_reprint' | 'audit_config_update' | 'tax_config_update' | 'promotion_create' | 'promotion_update' | 'promotion_delete' | 'promotion_toggle' | 'supply_create' | 'supply_update' | 'supply_delete' | 'supply_stock_adjust';
@@ -104,10 +104,10 @@ export type AuditConfig = Record<AuditAction, boolean>;
 
 export interface AuditLogEntry {
     id: string;
-    timestamp: string; // ISO String
+    timestamp: string; // Cadena en formato ISO
     userId: string;
-    username: string; // Captured at event time
+    username: string; // Capturado al momento del evento
     action: AuditAction;
-    details: string; // Human readable description
-    entityId?: string; // ID of affected object (user, product, etc)
+    details: string; // Descripción legible para humanos
+    entityId?: string; // ID del objeto afectado (usuario, producto, etc.)
 }

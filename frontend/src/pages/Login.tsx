@@ -21,14 +21,14 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
             setFade(true);
             const timer = setTimeout(() => {
                 setFade(false);
-                setTimeout(() => setError(""), 500); // Wait for fade out
+                setTimeout(() => setError(""), 500); // Esperar a que termine el desvanecimiento
             }, 3000);
             return () => clearTimeout(timer);
         }
     }, [error]);
 
     const handleLogin = () => {
-        // Find user by username (case insensitive) and check if active
+        // Buscar usuario por nombre de usuario (sin distinción de mayúsculas/minúsculas) y verificar si está activo
         const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.active !== false);
 
         if (!foundUser) {
@@ -62,7 +62,7 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
                 padding: "1.5rem"
             }}
         >
-            {/* Theme Toggle */}
+            {/* Selector de tema */}
             <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 style={{

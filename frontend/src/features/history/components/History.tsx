@@ -27,10 +27,10 @@ export default function History({
     const [showFilters, setShowFilters] = useState(false);
     const [showShiftPicker, setShowShiftPicker] = useState(false);
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-    const [expandedShifts, setExpandedShifts] = useState<Set<string>>(new Set([currentShiftId || 'current'])); // Default open current
+    const [expandedShifts, setExpandedShifts] = useState<Set<string>>(new Set([currentShiftId || 'current'])); // Por defecto abrir el actual
     const [shiftFilterDate, setShiftFilterDate] = useState("");
 
-    // Standard Filter States
+    // Estados estándar de filtros
     const [filterMinPrice, setFilterMinPrice] = useState("");
     const [filterMaxPrice, setFilterMaxPrice] = useState("");
     const [filterTime, setFilterTime] = useState("");
@@ -59,18 +59,18 @@ export default function History({
         return `Turno (Iniciado: ${startStr})`;
     };
 
-    // 1. Organize Shifts
+    // 1. Organizar turnos
     const organizedShifts = useMemo(() => {
         let relevantShifts: Shift[] = [];
 
         if (shiftFilterDate) {
-            // Calendar Filter Mode: Show all shifts from that date
+            // Modo de filtro por calendario: mostrar todos los turnos de esa fecha
             relevantShifts = shifts.filter(s => {
                 const localStartTime = new Date(s.startTime).toLocaleDateString('en-CA');
                 return localStartTime === shiftFilterDate;
             });
         } else {
-            // Default Mode: Current + Last 6
+            // Modo predeterminado: Actual + últimos 6
             const currentShift = shifts.find(s => s.id === currentShiftId);
             const pastShifts = shifts
                 .filter(s => s.id !== currentShiftId)
@@ -81,9 +81,9 @@ export default function History({
             else relevantShifts = pastShifts;
         }
 
-        // Group orders by shift
-        // If an order has no shiftId (legacy), we could group it in "Sin Turno" or hide it. 
-        // For now, let's group "Sin Turno" as a fallback if needed, or strictly follow shifts.
+        // Agrupar pedidos por turno
+        // Si un pedido no tiene shiftId (legado), podríamos agruparlo en "Sin Turno" u ocultarlo.
+        // Por ahora, seguimos estrictamente los turnos.
         return relevantShifts.map(shift => {
             const shiftOrders = history.filter(o => o.shiftId === shift.id);
             return {
@@ -106,7 +106,7 @@ export default function History({
         setReprintingOrder(order.id);
         setReprintStatus('printing');
 
-        // Simulate printing process
+        // Simular proceso de impresión
         setTimeout(() => {
             setReprintStatus('success');
             setTimeout(() => {
@@ -127,7 +127,7 @@ export default function History({
         <div className={`scale-${uiScale}`}>
             <div className="page-container">
 
-                {/* Header */}
+                {/* Encabezado */}
                 <div className="title-bar">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <button onClick={back} className="btn-back">← Volver al panel</button>
@@ -138,7 +138,7 @@ export default function History({
                             setLayoutOrientation={setLayoutOrientation}
                             showOrientation={false}
                         />
-                        {/* Ticket Width Selector */}
+                        {/* Selector de ancho de ticket */}
                         <CustomSelect
                             label="PAPEL"
                             value={ticketWidth.toString()}
@@ -155,7 +155,7 @@ export default function History({
                     <h1 style={{ margin: 0 }}>Historial de Tickets</h1>
                 </div>
 
-                {/* Top Controls: Filter Toggle & Shift Filter */}
+                {/* Controles superiores: Alternar filtros y filtro de turno */}
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button
                         onClick={() => setShowFilters(!showFilters)}
@@ -192,7 +192,7 @@ export default function History({
                     </button>
                 </div>
 
-                {/* Shift Filter Panel */}
+                {/* Panel de filtro de turno */}
                 {showShiftPicker && (
                     <div className="glass-card" style={{
                         marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap'
@@ -222,7 +222,7 @@ export default function History({
                     </div>
                 )}
 
-                {/* Extended Filters (Price, Time, User) */}
+                {/* Filtros avanzados (precio, hora, usuario) */}
                 {showFilters && (
                     <div className="glass-card" style={{
                         marginBottom: '1.5rem',
@@ -253,7 +253,7 @@ export default function History({
                     </div>
                 )}
 
-                {/* ACCORDION SHIFT LIST */}
+                {/* LISTA ACORDEÓN DE TURNOS */}
                 {organizedShifts.length === 0 ? (
                     <div style={{ textAlign: 'center', marginTop: '40px', opacity: 0.5 }}>No hay turnos registrados.</div>
                 ) : (
@@ -261,7 +261,7 @@ export default function History({
                         {organizedShifts.map(({ shift, orders, label }) => {
                             const isOpen = expandedShifts.has(shift.id);
 
-                            // Apply ticket content filtering within the shift
+                            // Aplicar filtrado por contenido de ticket dentro del turno
                             const displayedOrders = orders.filter(order => {
                                 if (!isAdmin && order.orderedBy !== user.username) return false;
                                 if (filterMinPrice && order.total < Number(filterMinPrice)) return false;
@@ -278,7 +278,7 @@ export default function History({
                                     border: '1px solid var(--card-border)',
                                     overflow: 'hidden'
                                 }}>
-                                    {/* Accordion Header */}
+                                    {/* Encabezado del acordeón */}
                                     <div
                                         onClick={() => toggleShift(shift.id)}
                                         style={{
@@ -312,7 +312,7 @@ export default function History({
                                         </div>
                                     </div>
 
-                                    {/* Accordion Content (Tickets Grid) */}
+                                    {/* Contenido del acordeón (cuadrícula de tickets) */}
                                     {isOpen && (
                                         <div style={{ padding: '2rem', borderTop: '1px solid var(--card-border)', background: 'var(--bg-color)' }}>
                                             {displayedOrders.length === 0 ? (
@@ -344,20 +344,20 @@ export default function History({
                                                                 fontSize: ticketWidth <= 58 ? '11px' : '13px',
                                                                 margin: '0 auto'
                                                             }}>
-                                                                {/* Ticket Header */}
+                                                                {/* Encabezado del ticket */}
                                                                 <div style={{ textAlign: 'center', marginBottom: '1rem', borderBottom: '1px dashed #94a3b8', paddingBottom: '0.75rem' }}>
                                                                     <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>RESTAURANT PRO</div>
                                                                     <div style={{ fontSize: '0.85em' }}>Ticket de Venta</div>
                                                                     <div style={{ fontSize: '10px', marginTop: '0.25rem', opacity: 0.8 }}>{order.createdAt}</div>
                                                                 </div>
 
-                                                                {/* Ticket Info */}
+                                                                {/* Información del ticket */}
                                                                 <div style={{ marginBottom: '1rem', fontSize: '0.9em' }}>
                                                                     <div><strong>Usuario:</strong> {order.orderedBy}</div>
                                                                     <div style={{ opacity: 0.7 }}><strong>ID:</strong> {order.id.slice(0, 8)}</div>
                                                                 </div>
 
-                                                                {/* Items */}
+                                                                {/* Artículos */}
                                                                 <div style={{ borderBottom: '1px dashed #94a3b8', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
                                                                     <table style={{ width: '100%', fontSize: 'inherit', borderCollapse: 'collapse' }}>
                                                                         <thead>
@@ -406,12 +406,12 @@ export default function History({
                                                                     <span>${order.total.toFixed(2)}</span>
                                                                 </div>
 
-                                                                {/* Reprint Button */}
+                                                                {/* Botón de reimpresión */}
                                                                 <button onClick={() => handleReprint(order)} style={{ width: '100%', padding: '0.75rem', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '0.25rem', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85em' }}>
                                                                     REIMPRIMIR TICKET
                                                                 </button>
 
-                                                                {/* Ticket Footer Visual */}
+                                                                {/* Elemento visual al pie del ticket */}
                                                                 <div style={{ position: 'absolute', bottom: '-10px', left: 0, width: '100%', height: '10px', background: 'linear-gradient(-45deg, #f8fafc 5px, transparent 0), linear-gradient(45deg, #f8fafc 5px, transparent 0)', backgroundSize: '10px 10px' }}></div>
                                                             </div>
                                                         );
@@ -427,7 +427,7 @@ export default function History({
                     </div>
                 )}
             </div>
-            {/* Reprinting Notification Overlay */}
+            {/* Notificación superpuesta de reimpresión */}
             {
                 reprintingOrder && (
                     <div style={{
@@ -481,7 +481,7 @@ export default function History({
                                     ID: {reprintingOrder.slice(0, 8)}
                                 </div>
 
-                                {/* Progress Bar Container */}
+                                {/* Contenedor de barra de progreso */}
                                 <div style={{
                                     width: '100%',
                                     height: '3px',

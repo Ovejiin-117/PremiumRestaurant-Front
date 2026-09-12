@@ -44,7 +44,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
         const { name, oldName, parentCat, parentSub } = formData;
         const trimmedName = name.trim();
 
-        // Uniqueness check for creations or renames
+        // Verificación de unicidad para creaciones o cambios de nombre
         if (activeModal?.startsWith('CREATE')) {
             if (!handlers.isNameUnique(trimmedName)) {
                 alert(`⚠️ Error: El nombre "${trimmedName}" ya existe como categoría, subcategoría, sección o producto. Por favor elige otro.`);
@@ -126,7 +126,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {/* Parent Selectors */}
+                        {/* Selectores de padres */}
                         {(activeModal === 'CREATE_SUB' || activeModal === 'EDIT_SUB' || activeModal === 'CREATE_SEC' || activeModal === 'EDIT_SEC') && (
                             <CustomSelect
                                 label="Categoría Padre"
@@ -148,7 +148,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                             />
                         )}
 
-                        {/* Selection for Edit */}
+                        {/* Selección para edición */}
                         {isEdit && (
                             <CustomSelect
                                 label={`Seleccionar ${entityType}`}
@@ -165,7 +165,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                             />
                         )}
 
-                        {/* Name Input */}
+                        {/* Campo de entrada para nombre */}
                         <div className="form-group">
                             <label className="form-label">Nombre de la {entityType}</label>
                             <input
@@ -246,7 +246,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                     boxShadow: '0 25px 100px -20px rgba(0, 0, 0, 0.7)', overflow: 'hidden'
                 }}
             >
-                {/* Header */}
+                {/* Encabezado */}
                 <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
                     <div>
                         <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', background: 'linear-gradient(to right, #fff, #999)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -263,7 +263,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                     </button>
                 </div>
 
-                {/* Grid of 6 Buttons */}
+                {/* Cuadrícula de 6 botones */}
                 <div style={{
                     padding: '2rem',
                     display: 'grid',
@@ -280,7 +280,7 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                     <ActionButton type="EDIT_SEC" icon="⚙️" label="Editar Sección" color="#f59e0b" />
                 </div>
 
-                {/* Footer */}
+                {/* Pie de página */}
                 <div style={{ padding: '1rem 2rem', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', background: 'rgba(255,255,255,0.01)' }}>
                     <button
                         onClick={onClose}

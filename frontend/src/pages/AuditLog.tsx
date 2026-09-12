@@ -47,7 +47,7 @@ const ACTION_OPTIONS: { value: AuditAction | "all", label: string }[] = [
     { value: 'promotion_toggle', label: 'Estado de la Promoción' }
 ];
 
-// --- Subcomponent: Robust Searchable Dropdown ---
+// --- Subcomponente: Menú desplegable con búsqueda ---
 const FilterDropdown = ({
     value,
     onChange,
@@ -66,12 +66,12 @@ const FilterDropdown = ({
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [isTyping, setIsTyping] = useState(false);
 
-    // Close on click outside
+    // Cerrar al hacer clic afuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
-                // Reset search term to selected value on close if no new value picked
+                // Restablecer término de búsqueda al valor seleccionado si no se eligió uno nuevo al cerrar
                 setIsTyping(false);
             }
         };
@@ -79,7 +79,7 @@ const FilterDropdown = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Sync input with value when not typing
+    // Sincronizar campo de entrada con el valor cuando no se está escribiendo
     useEffect(() => {
         if (!isTyping) {
             const current = options.find(o => o.value === value);
@@ -87,9 +87,9 @@ const FilterDropdown = ({
         }
     }, [value, isTyping, options]);
 
-    // Derived filtered options
+    // Opciones filtradas derivadas
     const filtered = useMemo(() => {
-        // Show all if the search term exactly matches the current selected label (meaning user hasn't typed a new search yet)
+        // Mostrar todas si el término de búsqueda coincide exactamente con la etiqueta seleccionada actualmente (el usuario aún no ha escrito una nueva búsqueda)
         const current = options.find(o => o.value === value);
         if (current && searchTerm === current.label && !isTyping) return options;
 
@@ -137,7 +137,7 @@ const FilterDropdown = ({
                     }}
                 />
 
-                {/* Arrow Icon */}
+                {/* Ícono de flecha */}
                 <div style={{
                     position: 'absolute',
                     right: '1em',
@@ -150,7 +150,7 @@ const FilterDropdown = ({
                     color: 'var(--text-color)'
                 }}>▼</div>
 
-                {/* Dropdown Menu */}
+                {/* Menú desplegable */}
                 {isOpen && (
                     <div style={{
                         position: 'absolute',
@@ -222,7 +222,7 @@ export default function AuditLog({
     const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
     const [isConfigOpen, setIsConfigOpen] = useState(false);
 
-    // Prepare User Options (Unique from log + registered users)
+    // Preparar opciones de usuario (únicos del registro + usuarios registrados)
     const userOptions = useMemo(() => {
         const uniqueNames = new Set([...users.map(u => u.username), ...auditLog.map(l => l.username)]);
         return [
@@ -231,12 +231,12 @@ export default function AuditLog({
         ];
     }, [users, auditLog]);
 
-    // Sorting
+    // Ordenamiento
     const sortedLog = useMemo(() => {
         return [...auditLog].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }, [auditLog]);
 
-    // Filtering
+    // Filtrado
     const filteredLog = useMemo(() => {
         return sortedLog.filter(entry => {
             if (filterUser !== "all" && entry.username !== filterUser) return false;
@@ -300,7 +300,7 @@ export default function AuditLog({
         <div className={`scale-${uiScale}`}>
             <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4em' }}>
 
-                {/* Header */}
+                {/* Encabezado */}
                 <div className="title-bar" style={{ marginBottom: '2em' }}>
                     <div>
                         <button onClick={back} className="btn-back" style={{ marginBottom: "1em" }}>
@@ -316,8 +316,7 @@ export default function AuditLog({
                     />
                 </div>
 
-                {/* Filter Grid */}
-                {/* Filter Grid */}
+                {/* Cuadrícula de filtros */}
                 <div style={{
                     display: 'flex',
                     gap: '2em',
@@ -359,7 +358,7 @@ export default function AuditLog({
                         />
                     </div>
 
-                    {/* Developer Configuration Button */}
+                    {/* Botón de configuración de desarrollador */}
                     {user.role === 'developer' && (
                         <div style={{
                             flex: '0 0 auto',
@@ -398,7 +397,7 @@ export default function AuditLog({
                     )}
                 </div>
 
-                {/* Developer Config Panel */}
+                {/* Panel de configuración de desarrollador */}
                 {isConfigOpen && user.role === 'developer' && (
                     <div className="glass-card" style={{
                         marginBottom: '2em',
@@ -477,7 +476,7 @@ export default function AuditLog({
                     </div>
                 )}
 
-                {/* Feed */}
+                {/* Lista de eventos */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
                     {filteredLog.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '4em', opacity: 0.5 }}>
@@ -495,9 +494,9 @@ export default function AuditLog({
                                     padding: 0,
                                     borderLeft: `4px solid ${meta.color}`,
                                     transition: 'transform 0.1s',
-                                    overflow: 'visible' // Important for Z-index if needed
+                                    overflow: 'visible' // Importante para Z-index si es necesario
                                 }}>
-                                    {/* Card Header (Clickable) */}
+                                    {/* Encabezado de tarjeta (clicable) */}
                                     <div
                                         onClick={() => toggleExpand(entry.id)}
                                         style={{
@@ -508,7 +507,7 @@ export default function AuditLog({
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        {/* Icon Box */}
+                                        {/* Contenedor de ícono */}
                                         <div style={{
                                             width: '2.75em', height: '2.75em', borderRadius: '0.75em',
                                             background: `${meta.color}20`, color: meta.color,
@@ -518,7 +517,7 @@ export default function AuditLog({
                                             {meta.icon}
                                         </div>
 
-                                        {/* Main Info */}
+                                        {/* Información principal */}
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.2em' }}>
                                                 <span style={{ fontWeight: 'bold', fontSize: '1em', color: 'var(--text-color)' }}>{entry.username}</span>
@@ -537,7 +536,7 @@ export default function AuditLog({
                                             </div>
                                         </div>
 
-                                        {/* Chevron */}
+                                        {/* Flecha indicadora */}
                                         <div style={{
                                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)',
                                             transition: 'transform 0.2s',
@@ -546,7 +545,7 @@ export default function AuditLog({
                                         }}>▼</div>
                                     </div>
 
-                                    {/* Expanded Metadata */}
+                                    {/* Metadatos expandidos */}
                                     {isExpanded && (
                                         <div style={{
                                             padding: '1em',

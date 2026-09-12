@@ -24,7 +24,7 @@ export default function Promotions({
     back, promotions, setPromotions, menu, categories, subCategories, sections,
     uiScale, setUiScale, layoutOrientation, setLayoutOrientation, logAction, user
 }: Props) {
-    // --- State ---
+    // --- Estado ---
     const [viewMode, setViewMode] = useState<'list' | 'select_type' | 'create' | 'edit'>('list');
     const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
     const [selectedItemForDetails, setSelectedItemForDetails] = useState<MenuItem | null>(null);
@@ -33,7 +33,7 @@ export default function Promotions({
     const [isConfirmingEdit, setIsConfirmingEdit] = useState(false);
     const [showExitConfirm, setShowExitConfirm] = useState<{ active: boolean, onConfirm: () => void } | null>(null);
 
-    // Form State
+    // Estado del formulario
     const [formData, setFormData] = useState<{
         name: string;
         type: PromotionType;
@@ -57,10 +57,10 @@ export default function Promotions({
         validityMode: 'permanent',
         startDate: '',
         endDate: '',
-        daysOfWeek: [] // Empty means all days
+        daysOfWeek: [] // Vacío significa todos los días
     });
 
-    // Check for unsaved changes
+    // Verificar cambios sin guardar
     const hasUnsavedChanges = useMemo(() => {
         if (viewMode === 'list' || viewMode === 'select_type') return false;
 
@@ -108,7 +108,7 @@ export default function Promotions({
         section: ""
     });
 
-    // --- Filtering Logic ---
+    // --- Lógica de filtrado ---
     const getFilterScore = (item: MenuItem) => {
         if (!filters.name) return 0;
         const name = item.name.toLowerCase();
@@ -133,7 +133,7 @@ export default function Promotions({
             .sort((a, b) => getFilterScore(b) - getFilterScore(a));
     }, [menu, filters]);
 
-    // Validations & Handlers
+    // Validaciones y manejadores
     const resetForm = () => {
         setFormData({
             name: '',
@@ -215,7 +215,7 @@ export default function Promotions({
         }
     };
 
-    // --- Render Helpers ---
+    // --- Auxiliares de renderizado ---
     const getDaysLabel = (days?: number[]) => {
         if (!days || days.length === 0) return "Todos los día";
         const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -290,7 +290,7 @@ export default function Promotions({
                                         overflow: 'hidden',
                                         boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
                                     }}>
-                                        {/* Status indicator line */}
+                                        {/* Línea indicadora de estado */}
                                         <div style={{
                                             position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
                                             background: promo.active ? 'var(--primary-color)' : 'var(--text-secondary)',
@@ -298,7 +298,7 @@ export default function Promotions({
                                         }} />
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                                            {/* Type Icon */}
+                                            {/* Ícono de tipo */}
                                             <div style={{
                                                 width: '50px', height: '50px', borderRadius: '12px',
                                                 background: promo.active ? 'var(--primary-color-alpha-10)' : 'var(--card-hover-bg)',
@@ -474,7 +474,7 @@ export default function Promotions({
                         </div>
 
                         <div style={{ display: 'grid', gap: '1.5rem', width: '100%' }}>
-                            {/* Common: Name */}
+                            {/* Común: Nombre */}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Nombre de la Promoción</label>
                                 <input
@@ -486,7 +486,7 @@ export default function Promotions({
                                 />
                             </div>
 
-                            {/* Type Specific Fields */}
+                            {/* Campos específicos del tipo */}
                             {formData.type === 'percentage' && (
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Porcentaje de Descuento (%)</label>
@@ -565,7 +565,7 @@ export default function Promotions({
                                 </div>
                             )}
 
-                            {/* Common: Target Items */}
+                            {/* Común: Artículos objetivo */}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
                                     {formData.type === 'percentage' ? "Productos a Descontar" :
@@ -660,7 +660,7 @@ export default function Promotions({
                                                                 </div>
                                                             </div>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                                                                {/* Combo counter appears before price so price+dots never shift */}
+                                                                {/* El contador de combo aparece antes del precio para que el precio y puntos nunca se muevan */}
                                                                 {formData.type === 'combo' && isSelected && (
                                                                     <div
                                                                         style={{
@@ -734,7 +734,7 @@ export default function Promotions({
                                 </div>
                             </div>
 
-                            {/* Common: Validity */}
+                            {/* Común: Vigencia */}
                             <div className="glass-card" style={{ background: 'var(--card-hover-bg)' }}>
                                 <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Vigencia y Horarios</label>
 
@@ -783,7 +783,7 @@ export default function Promotions({
                                 </div>
                             </div>
 
-                            {/* Actions */}
+                            {/* Acciones */}
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                                 <button
                                     onClick={handleSave}
@@ -807,7 +807,7 @@ export default function Promotions({
                 )}
             </div>
 
-            {/* Product Details Modal */}
+            {/* Modal de detalles del producto */}
             {selectedItemForDetails && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 2000,

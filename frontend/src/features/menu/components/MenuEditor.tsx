@@ -118,7 +118,7 @@ export default function MenuEditor(props: Props) {
         type: ""
     });
 
-    // Custom Security Modal States
+    // Estados del modal de seguridad personalizado
     const [pendingAction, setPendingAction] = React.useState<{ type: string, data?: any, callback: () => void } | null>(null);
     const [showSecurityModal, setShowSecurityModal] = React.useState(false);
     const [showExitConfirm, setShowExitConfirm] = React.useState(false);
@@ -141,7 +141,7 @@ export default function MenuEditor(props: Props) {
     const canEdit = !isWaiter && !isOrderingMode;
     const showOrderingUI = !!isWaiter || !!isOrderingMode;
 
-    // Filter Logic
+    // Lógica de filtrado
     const isFiltering = !!(filters.name || filters.minPrice || filters.maxPrice || filters.category || filters.subcategory || filters.section);
 
     const getFilterScore = (item: MenuItem) => {
@@ -183,7 +183,7 @@ export default function MenuEditor(props: Props) {
                 style={{ display: "flex", gap: "2rem", flexDirection: layoutOrientation === 'horizontal' ? 'row' : 'column' }}
                 onClick={handlers.handleBackgroundClick}
             >
-                {/* Main Content */}
+                {/* Contenido principal */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <MenuHeader
                         back={handleBack}
@@ -232,11 +232,11 @@ export default function MenuEditor(props: Props) {
                             ) : (
                                 <ItemList
                                     items={filteredAndSortedItems}
-                                    cat="search" // Use a dummy cat for search results
+                                    cat="search" // Usar una categoría ficticia para los resultados de búsqueda
                                     variant="detailed-list"
                                     canEdit={canEdit}
                                     showOrderingUI={showOrderingUI}
-                                    deleteItemMode={{}} // No item delete in search mode for now to keep it simple
+                                    deleteItemMode={{}} // Sin eliminación de producto en modo búsqueda por ahora para simplificar
                                     editItemMode={{}}
                                     confirmDeleteId={state.confirmDeleteId}
                                     setConfirmDeleteId={state.setConfirmDeleteId}
@@ -297,17 +297,17 @@ export default function MenuEditor(props: Props) {
                                     deleteSectionMode={state.deleteSectionMode}
                                     handleDeleteSection={handlers.handleDeleteSection}
                                     menu={menu}
-                                    // ItemList props
+                                    // Props de ItemList
                                     startEdit={handlers.startEdit}
                                     handleAddToOrder={handlers.handleAddToOrder}
                                     user={user}
                                     isShiftOpen={!!currentShiftId}
-                                    // Reorder props
+                                    // Props de reordenamiento
                                     isReorderMode={state.isReorderMode}
                                     setIsReorderMode={state.setIsReorderMode}
                                     handleReorder={handlers.handleReorder}
-                                    // Filters
-                                    // Subcategory & Section rename props
+                                    // Filtros
+                                    // Props de renombrado de subcategoría y sección
                                     editingSubKey={state.editingSubKey}
                                     editingSubNewName={state.editingSubNewName}
                                     setEditingSubNewName={state.setEditingSubNewName}
@@ -328,7 +328,7 @@ export default function MenuEditor(props: Props) {
                     )}
                 </div>
 
-                {/* Bill Panel for Ordering Mode */}
+                {/* Panel de cuenta para modo de toma de pedidos */}
                 {showOrderingUI && (
                     <OrderPanel
                         currentOrder={state.currentOrder}
@@ -350,7 +350,7 @@ export default function MenuEditor(props: Props) {
                     />
                 )}
 
-                {/* Formal Shift Required Modal */}
+                {/* Modal de turno requerido formal */}
                 {state.showShiftModal && (
                     <div style={{
                         position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
@@ -384,7 +384,7 @@ export default function MenuEditor(props: Props) {
                     </div>
                 )}
 
-                {/* Exit Confirmation Modal */}
+                {/* Modal de confirmación de salida */}
                 {showExitConfirm && (
                     <div style={{
                         position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
@@ -432,7 +432,7 @@ export default function MenuEditor(props: Props) {
                     </div>
                 )}
 
-                {/* Shared Security Modal */}
+                {/* Modal de seguridad compartido */}
                 <SecurityModal
                     isOpen={showSecurityModal}
                     onClose={() => { setShowSecurityModal(false); setPendingAction(null); }}
@@ -448,7 +448,7 @@ export default function MenuEditor(props: Props) {
                     message="Esta acción requiere confirmación del administrador."
                 />
 
-                {/* Product Details Modal */}
+                {/* Modal de detalles del producto */}
                 {selectedItemForDetails && (
                     <div style={{
                         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 2000,
@@ -638,7 +638,7 @@ export default function MenuEditor(props: Props) {
                     );
                 })()}
 
-                {/* Global Add Item Form */}
+                {/* Formulario global para agregar producto */}
                 {state.showAddItemGlobal && (
                     <AddItemForm
                         onSave={(name, price, type, desc, img, cat, sub, sec) => {
@@ -669,7 +669,7 @@ export default function MenuEditor(props: Props) {
                     );
                 })()}
 
-                {/* Taxonomy Manager */}
+                {/* Administrador de taxonomía */}
                 {state.showTaxonomyManager && (
                     <TaxonomyManager
                         categories={props.categories}

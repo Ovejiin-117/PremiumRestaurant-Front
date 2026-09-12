@@ -21,14 +21,14 @@ textarea,
 }
 
 :root {
-  /* Dynamic base font size that scales with resolution */
+  /* Tamaño de fuente base dinámico que escala con la resolución */
   --fluid-min-size: 14px;
   --fluid-max-size: 26px;
   --base-font-size: clamp(var(--fluid-min-size), 0.5vw + 0.5vh + 8px, var(--fluid-max-size));
   --scale-multiplier: 1;
   --global-scale: 1;
 
-  /* Theme Variables - Dark (Default) */
+  /* Variables de tema - Oscuro (Predeterminado) */
   --bg-color: #020617;
   --text-color: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.6);
@@ -61,19 +61,19 @@ textarea,
   --input-bg: #f8fafc;
   --input-border: #cbd5e1;
   --input-placeholder: #94a3b8;
-  /* Keep primary/danger/success similar or adjust for contrast */
+  /* Mantener primary/danger/success similares o ajustar para contraste */
   --glass-bg: rgba(255, 255, 255, 0.8);
   --watermark-color: rgba(15, 23, 42, 0.1);
 }
 
-/* Let the root respond to viewport, then elements inside follow rem */
+/* Permitir que la raíz responda a la ventana gráfica, luego los elementos internos siguen rem */
 html {
   font-size: calc(var(--base-font-size) * var(--global-scale));
   transition: font-size 0.3s ease;
 }
 
 
-/* Scaling containers adjust their internal relative units (em) based on multiplier */
+/* Los contenedores con escalado ajustan sus unidades relativas internas (em) según el multiplicador */
 [class^="scale-"] {
   font-size: calc(1rem * var(--scale-multiplier));
 }
@@ -102,7 +102,7 @@ body {
 }
 
 
-/* Utility Classes for Premium Responsive Layouts */
+/* Clases de utilidad para diseños adaptables prémium */
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -188,7 +188,7 @@ body {
   font-weight: 600;
 }
 
-/* Watermark */
+/* Marca de agua */
 .watermark {
   position: fixed;
   bottom: 1.5rem;
@@ -204,7 +204,7 @@ body {
   opacity: 0.5;
 }
 
-/* Protect History tickets from drastic fluid scaling */
+/* Proteger los tickets del historial de escalado fluido drástico */
 .history-ticket {
   font-size: 14px !important;
   --base-font-size: 14px;
@@ -214,7 +214,7 @@ body {
   font-size: inherit;
 }
 
-/* Animations */
+/* Animaciones */
 @keyframes wiggle {
   0% {
     transform: rotate(0deg);
@@ -263,7 +263,7 @@ body {
   cursor: grabbing;
 }
 
-/* Responsive Form Helpers */
+/* Clases auxiliares para formularios adaptables */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -302,7 +302,7 @@ select:focus {
   box-shadow: 0 0 0 2px var(--primary-color-alpha-20);
 }
 
-/* Performance Mode Tweaks */
+/* Ajustes para el modo de rendimiento */
 .performance-mode *,
 .performance-mode *::after,
 .performance-mode *::before {
@@ -322,7 +322,7 @@ select:focus {
   border-color: var(--primary-color) !important;
 }
 
-/* No Animations Utility */
+/* Utilidad para deshabilitar animaciones */
 .no-animations *,
 .no-animations *::after,
 .no-animations *::before {
@@ -330,7 +330,7 @@ select:focus {
   transition: none !important;
 }
 
-/* Custom Scrollbar Styling */
+/* Estilos de barra de desplazamiento personalizada */
 ::-webkit-scrollbar {
   width: 8px;
   max-height: 40px;
@@ -352,7 +352,7 @@ select:focus {
   background-clip: content-box;
 }
 
-/* Light Mode Scrollbar - Visible White */
+/* Barra de desplazamiento para modo claro - blanco visible */
 [data-theme="light"] ::-webkit-scrollbar-thumb {
   background: #ffffff;
   border: 1px solid #cbd5e1;
@@ -374,7 +374,7 @@ select:focus {
   }
 }
 
-/* Global Back Button Style (matches CustomSelect) */
+/* Estilo global del botón Atrás (coincide con CustomSelect) */
 .btn-back {
   display: inline-flex;
   align-items: center;

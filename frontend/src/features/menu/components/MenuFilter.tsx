@@ -132,7 +132,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                     <div className="glass-card" style={{
                         marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'flex-end', padding: '1.25rem'
                     }}>
-                        {/* Name Filter */}
+                        {/* Filtro por nombre */}
                         <div style={{ flex: '2 1 280px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <label className="form-label" style={{ fontSize: '0.7em', fontWeight: 'bold', color: 'var(--text-secondary)' }}>NOMBRE</label>
                             <input
@@ -144,7 +144,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                             />
                         </div>
 
-                        {/* Price Filter */}
+                        {/* Filtro por precio */}
                         <div style={{ flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <label className="form-label" style={{ fontSize: '0.7em' }}>PRECIO ($)</label>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -165,7 +165,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                             </div>
                         </div>
 
-                        {/* Item Type Filter */}
+                        {/* Filtro por tipo de producto */}
                         <div style={{ flex: '1 1 180px' }}>
                             <CustomSelect
                                 label="Tipo de Item"
@@ -184,7 +184,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                             />
                         </div>
 
-                        {/* Category Filter */}
+                        {/* Filtro por categoría */}
                         <div style={{ flex: '1 1 180px' }}>
                             <CustomSelect
                                 label="Categoría"
@@ -203,7 +203,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                             />
                         </div>
 
-                        {/* Subcategory Filter */}
+                        {/* Filtro por subcategoría */}
                         <div style={{ flex: '1 1 180px' }}>
                             <CustomSelect
                                 label="Subcategoría"
@@ -222,7 +222,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                             />
                         </div>
 
-                        {/* Section Filter */}
+                        {/* Filtro por sección */}
                         <div style={{ flex: '1 1 180px' }}>
                             <CustomSelect
                                 label="Sección"
@@ -241,7 +241,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
                         </div>
 
 
-                        {/* Clear Button */}
+                        {/* Botón limpiar */}
                         <div style={{ flex: '0 0 100px' }}>
                             <button
                                 onClick={clearFilters}

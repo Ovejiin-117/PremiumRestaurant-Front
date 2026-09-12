@@ -155,7 +155,7 @@ const CustomSelect = <T extends string>({
                     from { opacity: 0; transform: translateY(-12px) scale(0.95); }
                     to { opacity: 1; transform: translateY(0) scale(1); }
                 }
-                /* Hide scrollbar for Chrome, Safari and Opera */
+                /* Ocultar barra de desplazamiento para Chrome, Safari y Opera */
                 div::-webkit-scrollbar {
                     display: none;
                 }

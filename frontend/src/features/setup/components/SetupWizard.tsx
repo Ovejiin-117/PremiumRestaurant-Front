@@ -39,15 +39,15 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
     const [displayedText, setDisplayedText] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Developer Setup State
+    // Estado de configuración del desarrollador
     const [devPassword, setDevPassword] = useState("");
     const [confirmDevPassword, setConfirmDevPassword] = useState("");
     const [error, setError] = useState("");
 
-    // Tutorial State
+    // Estado del tutorial
     const [slideIndex, setSlideIndex] = useState(0);
 
-    // Typewriter Effect for "Welcome"
+    // Efecto máquina de escribir para "Bienvenido"
     useEffect(() => {
         if (step !== 'language') return;
 
@@ -114,7 +114,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: "'Outfit', sans-serif", color: 'var(--text-color)'
         }}>
-            {/* Background Effects */}
+            {/* Efectos de fondo */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                 background: 'var(--bg-color)',
@@ -129,7 +129,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                 border: '1px solid var(--card-border)',
                 position: 'relative'
             }}>
-                {/* Theme Toggle */}
+                {/* Alternador de tema */}
                 <button
                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     style={{
@@ -143,7 +143,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                     {theme === 'dark' ? '☀️' : '🌙'}
                 </button>
 
-                {/* STEP 1: LANGUAGE */}
+                {/* PASO 1: IDIOMA */}
                 {step === 'language' && (
                     <>
                         <div style={{ height: '80px', display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
@@ -180,7 +180,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                     </>
                 )}
 
-                {/* STEP 2: BUSINESS TYPE */}
+                {/* PASO 2: TIPO DE NEGOCIO */}
                 {step === 'business_type' && (
                     <>
                         <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Tipo de Negocio</h2>
@@ -223,7 +223,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                     </>
                 )}
 
-                {/* STEP 3: DEV SETUP */}
+                {/* PASO 3: CONFIGURACIÓN DE DESARROLLADOR */}
                 {step === 'dev_setup' && (
                     <>
                         <div style={{ background: '#3b82f6', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', marginBottom: '1.5rem' }}>🛡️</div>
@@ -275,7 +275,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                     </>
                 )}
 
-                {/* STEP 4: TUTORIAL */}
+                {/* PASO 4: TUTORIAL */}
                 {step === 'tutorial' && (
                     <>
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>

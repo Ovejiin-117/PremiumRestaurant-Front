@@ -25,7 +25,7 @@ export default function VisualSettings({
 
     return (
         <div className="page-container" style={{ position: 'relative', paddingTop: '4rem' }}>
-            {/* Stick to the very left top */}
+            {/* Fijar en la esquina superior izquierda */}
             <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem' }}>
                 <button className="btn-back" onClick={back} style={{ margin: 0 }}>
                     ← VOLVER AL PANEL
@@ -47,7 +47,7 @@ export default function VisualSettings({
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
 
-                {/* SECTION: VISUALS */}
+                {/* SECCIÓN: APARIENCIA */}
                 <div className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--card-border)' }}>
                     <div style={{
                         background: 'rgba(255,255,255,0.03)', padding: '0.75rem 1.5rem',
@@ -59,7 +59,7 @@ export default function VisualSettings({
                     </div>
 
                     <div style={{ padding: '0' }}>
-                        {/* Theme Row */}
+                        {/* Fila de tema */}
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)'
@@ -83,7 +83,7 @@ export default function VisualSettings({
                             </div>
                         </div>
 
-                        {/* Animations Row */}
+                        {/* Fila de animaciones */}
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '1.25rem 1.5rem'
@@ -109,7 +109,7 @@ export default function VisualSettings({
                     </div>
                 </div>
 
-                {/* SECTION: PERFORMANCE */}
+                {/* SECCIÓN: RENDIMIENTO */}
                 <div className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--card-border)' }}>
                     <div style={{
                         background: 'rgba(255,255,255,0.03)', padding: '0.75rem 1.5rem',
@@ -121,7 +121,7 @@ export default function VisualSettings({
                     </div>
 
                     <div style={{ padding: '0' }}>
-                        {/* Performance Row */}
+                        {/* Fila de rendimiento */}
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)'
@@ -145,7 +145,7 @@ export default function VisualSettings({
                             </div>
                         </div>
 
-                        {/* Images Row */}
+                        {/* Fila de imágenes */}
                         <div style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '1.25rem 1.5rem'
@@ -171,7 +171,7 @@ export default function VisualSettings({
                     </div>
                 </div>
 
-                {/* SECTION: DEVELOPER */}
+                {/* SECCIÓN: DESARROLLADOR */}
                 {isAdmin && (
                     <div className="glass-card" style={{
                         padding: 0, overflow: 'hidden',

@@ -55,7 +55,7 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Common container utility */
+/* Utilidad común para contenedores */
 .container {
   max-width: 1400px;
   margin: 0 auto;

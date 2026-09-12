@@ -5,8 +5,8 @@ import SettingsControls from "../../../components/ui/SettingsControls";
 import SecurityModal from "../../../components/ui/SecurityModal";
 
 type Props = {
-    user: User; // Current logged in user
-    users: User[]; // All users
+    user: User; // Usuario actualmente autenticado
+    users: User[]; // Todos los usuarios
     setUsers: (users: User[]) => void;
     back: () => void;
     uiScale: UIScale;
@@ -19,7 +19,7 @@ type Props = {
 
 type Mode = 'normal' | 'delete_selection' | 'edit_selection';
 
-// Internal component for delete confirmation (copied pattern from MenuEditor)
+// Componente interno para confirmación de eliminación (patrón copiado de MenuEditor)
 const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete, style = {} }: { id: string, activeId: string | null, setActiveId: (id: string | null) => void, onDelete: () => void, style?: React.CSSProperties }) => {
     const isConfirming = activeId === id;
     return (
@@ -52,17 +52,17 @@ export default function UserManagement({
     uiScale, setUiScale, layoutOrientation, setLayoutOrientation,
     isShiftOpen, logAction
 }: Props) {
-    // Menu States
+    // Estados de menú
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showCreateInput, setShowCreateInput] = useState(false);
     const [mode, setMode] = useState<Mode>('normal');
 
-    // Creation State
+    // Estado de creación
     const [newName, setNewName] = useState("");
     const [newPass, setNewPass] = useState("");
     const [newRole, setNewRole] = useState<Role>("waiter");
 
-    // Editing State
+    // Estado de edición
     const [editingUsername, setEditingUsername] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
     const [editPass, setEditPass] = useState("");
@@ -74,16 +74,16 @@ export default function UserManagement({
     const [infoUser, setInfoUser] = useState<User | null>(null);
     const [revealPassword, setRevealPassword] = useState(false);
 
-    // Custom Security Modal States
+    // Estados del modal de seguridad personalizado
     const [pendingAction, setPendingAction] = useState<{ type: 'create' | 'edit' | 'delete' | 'reveal', data: any } | null>(null);
     const [showSecurityModal, setShowSecurityModal] = useState(false);
 
-    // Deletion State
+    // Estado de eliminación
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const [msg, setMsg] = useState("");
 
-    // Close menus on click outside
+    // Cerrar menús al hacer clic afuera
     useEffect(() => {
         const handleClickOutside = () => {
             if (mode !== 'normal') {
@@ -115,7 +115,7 @@ export default function UserManagement({
         setMsg("");
     };
 
-    // Permission check: Only Developer and Manager can access
+    // Verificación de permisos: Solo Desarrollador y Gerente pueden acceder
     if (user.role === "waiter") {
         return <div style={{ color: "var(--text-color)", padding: 20 }}>Acceso denegado</div>;
     }
@@ -132,7 +132,7 @@ export default function UserManagement({
             return;
         }
 
-        // Permissions logic
+        // Lógica de permisos
         if (user.role === "manager" && newRole === "developer") {
             setMsg("Los gerentes no pueden crear desarrolladores");
             return;
@@ -143,8 +143,8 @@ export default function UserManagement({
         }
 
 
-        // Age Validation
-        const birth = new Date(newBirthDate + 'T00:00:00'); // Force local time
+        // Validación de edad
+        const birth = new Date(newBirthDate + 'T00:00:00'); // Forzar hora local
         const todayDate = new Date();
         let age = todayDate.getFullYear() - birth.getFullYear();
         const m = todayDate.getMonth() - birth.getMonth();
@@ -154,14 +154,14 @@ export default function UserManagement({
         if (age > 100) { setMsg("Fecha de nacimiento no válida (Max 100 años)"); return; }
 
 
-        // Instead of prompt, show custom modal
+        // En lugar de prompt, mostrar modal personalizado
         setPendingAction({ type: 'create', data: null });
         setShowSecurityModal(true);
     };
 
     const confirmAddUser = () => {
         const today = new Date().toISOString().split('T')[0];
-        const randomId = Math.random().toString(36).substring(2, 9).toUpperCase(); // e.g. "X7A2B9C"
+        const randomId = Math.random().toString(36).substring(2, 9).toUpperCase(); // ej. "X7A2B9C"
         const newUser: User = {
             id: randomId,
             username: newName,
@@ -177,7 +177,7 @@ export default function UserManagement({
         logAction('user_create', `Usuario creado: ${newUser.username} (${newUser.role})`, newUser.id);
         setMsg("Usuario creado exitosamente");
 
-        // Reset form
+        // Restablecer formulario
         setNewName("");
         setNewPass("");
         setNewRole("waiter");
@@ -196,7 +196,7 @@ export default function UserManagement({
             return;
         }
 
-        // Instead of prompt, show custom modal
+        // En lugar de prompt, mostrar modal personalizado
         setPendingAction({ type: 'delete', data: usernameToDelete });
         setShowSecurityModal(true);
     };
@@ -215,15 +215,15 @@ export default function UserManagement({
         setEditName(targetUser.username);
         setEditPass(targetUser.password || "");
         setEditRole(targetUser.role);
-        setEditActive(targetUser.active !== false); // Default to true if undefined
+        setEditActive(targetUser.active !== false); // Predeterminado a verdadero si es indefinido
         setEditBirthDate(targetUser.birthDate || "");
     };
 
     const saveEdit = (originalUsername: string) => {
         if (!editName || !editPass || !editBirthDate) return;
 
-        // Age Validation
-        const birth = new Date(editBirthDate + 'T00:00:00'); // Force local time
+        // Validación de edad
+        const birth = new Date(editBirthDate + 'T00:00:00'); // Forzar hora local
         const todayDate = new Date();
         let age = todayDate.getFullYear() - birth.getFullYear();
         const m = todayDate.getMonth() - birth.getMonth();
@@ -232,19 +232,19 @@ export default function UserManagement({
         if (age < 18) { alert("El usuario debe ser mayor de 18 años"); return; }
         if (age > 100) { alert("Fecha de nacimiento no válida (Max 100 años)"); return; }
 
-        // Instead of prompt, show custom modal
+        // En lugar de prompt, mostrar modal personalizado
         setPendingAction({ type: 'edit', data: originalUsername });
         setShowSecurityModal(true);
     };
 
     const confirmSaveEdit = (originalUsername: string) => {
-        // Check if name changed and conflicts
+        // Verificar si el nombre cambió y entra en conflicto
         if (editName.toLowerCase() !== originalUsername.toLowerCase() && users.find(u => u.username.toLowerCase() === editName.toLowerCase())) {
             alert("Nombre de usuario ya existe");
             return;
         }
 
-        // Permissions logic for edit
+        // Lógica de permisos para edición
         if (user.role === "manager" && editRole === "developer") {
             alert("No puedes asignar rol de desarrollador");
             return;
@@ -252,7 +252,7 @@ export default function UserManagement({
 
         const updatedUsers = users.map(u => {
             if (u.username === originalUsername) {
-                // Check for status change
+                // Verificar si hubo cambio de estado
                 if (u.active !== editActive) {
                     logAction('user_status_change', `Usuario ${editActive ? 'activado' : 'desactivado'}: ${editName}`, u.id);
                 }
@@ -267,7 +267,7 @@ export default function UserManagement({
         setEditingUsername(null);
     };
 
-    // Helper to check if current user can edit/delete target user
+    // Función auxiliar para verificar si el usuario actual puede editar/eliminar al usuario objetivo
     const canManageUser = (targetUser: User) => {
         if (user.role === 'developer') return true;
         if (user.role === 'manager') return targetUser.role === 'waiter';
@@ -298,7 +298,7 @@ export default function UserManagement({
                         />
                     </div>
 
-                    {/* Main Menu Button */}
+                    {/* Botón del menú principal */}
                     <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
                         <button
                             onClick={() => {
@@ -314,7 +314,7 @@ export default function UserManagement({
                             {mode === 'delete_selection' ? 'MODO ELIMINAR' : mode === 'edit_selection' ? 'MODO EDITAR' : 'Opciones de Usuario ▼'}
                         </button>
 
-                        {/* Dropdown Menu */}
+                        {/* Menú desplegable */}
                         {showUserMenu && mode === 'normal' && (
                             <div className="glass-card" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.75rem', width: 'clamp(300px, 45vw, 450px)', zIndex: 50, boxShadow: '0 20px 40px rgba(0,0,0,0.6)', border: '1px solid var(--card-border)', padding: 0, overflow: 'hidden' }}>
                                 {!showCreateInput ? (
@@ -383,12 +383,12 @@ export default function UserManagement({
                         const filteredUsers = users
                             .filter(u => u.role === section.role)
                             .sort((a, b) => {
-                                // Put deactivated (manually inactive) users at the end
+                                // Poner usuarios desactivados (manualmente inactivos) al final
                                 const aInactive = a.active === false;
                                 const bInactive = b.active === false;
                                 if (aInactive && !bInactive) return 1;
                                 if (!aInactive && bInactive) return -1;
-                                // Otherwise sort by original array order (mocking creation order)
+                                // De lo contrario ordenar por el orden original del arreglo (simulando orden de creación)
                                 return 0;
                             });
 
@@ -414,7 +414,7 @@ export default function UserManagement({
                                                 opacity: isEffectivelyActive ? 1 : 0.8
                                             }} onClick={e => e.stopPropagation()}>
 
-                                                {/* Info Button */}
+                                                {/* Botón de información */}
                                                 {editingUsername !== u.username && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setInfoUser(u) }}
@@ -440,7 +440,7 @@ export default function UserManagement({
                                                     </button>
                                                 )}
 
-                                                {/* Delete Mode Overlay */}
+                                                {/* Capa superpuesta del modo eliminar */}
                                                 {mode === 'delete_selection' && canManageUser(u) && (
                                                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <DeleteConfirmBtn
@@ -453,7 +453,7 @@ export default function UserManagement({
                                                     </div>
                                                 )}
 
-                                                {/* Edit Mode Overlay */}
+                                                {/* Capa superpuesta del modo editar */}
                                                 {mode === 'edit_selection' && editingUsername !== u.username && canManageUser(u) && (
                                                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         <button
@@ -465,7 +465,7 @@ export default function UserManagement({
                                                     </div>
                                                 )}
 
-                                                {/* User Card Content OR Edit Form */}
+                                                {/* Contenido de tarjeta de usuario O formulario de edición */}
                                                 {editingUsername === u.username ? (
                                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', opacity: 1 }} onClick={e => e.stopPropagation()}>
                                                         <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9em', fontWeight: '800', color: 'var(--primary-color)', borderBottom: `1px solid var(--primary-color-alpha-20)`, paddingBottom: '0.4rem' }}>EDITAR PERFIL</h4>
@@ -545,7 +545,7 @@ export default function UserManagement({
                                                                 fontSize: '0.65em',
                                                                 padding: '0.15em 0.4em',
                                                                 borderRadius: '0.25em',
-                                                                background: isEffectivelyActive ? 'var(--primary-color-alpha-20)' : (!isManuallyActive ? 'var(--primary-color-alpha-20)' /* using same alpha for red-ish is complex without logic */ : 'var(--card-hover-bg)'),
+                                                                background: isEffectivelyActive ? 'var(--primary-color-alpha-20)' : (!isManuallyActive ? 'var(--primary-color-alpha-20)' /* usar el mismo alfa para tonos rojizos es complejo sin lógica adicional */ : 'var(--card-hover-bg)'),
                                                                 color: statusColor,
                                                                 border: `1px solid ${isEffectivelyActive ? 'var(--primary-color-alpha-20)' : 'transparent'}`
                                                             }}>
@@ -566,7 +566,7 @@ export default function UserManagement({
                     })}
                 </div>
 
-                {/* Info Modal */}
+                {/* Modal de información */}
                 {infoUser && (
                     <div
                         style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1.5rem' }}
@@ -595,7 +595,7 @@ export default function UserManagement({
                                 <div>
                                     <label className="form-label" style={{ fontSize: '0.7em' }}>CONTRASEÑA</label>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
-                                        {/* Permission check: Managers can't see other managers passwords */}
+                                        {/* Verificación de permisos: Los gerentes no pueden ver contraseñas de otros gerentes */}
                                         {!(user.role === 'manager' && infoUser.role === 'manager' && user.id !== infoUser.id) ? (
                                             !revealPassword ? (
                                                 <>
@@ -645,7 +645,7 @@ export default function UserManagement({
                 )}
 
 
-                {/* Shared Security Modal */}
+                {/* Modal de seguridad compartido */}
                 <SecurityModal
                     isOpen={showSecurityModal}
                     onClose={() => { setShowSecurityModal(false); setPendingAction(null); }}

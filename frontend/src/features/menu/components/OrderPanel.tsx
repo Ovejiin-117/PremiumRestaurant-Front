@@ -78,7 +78,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                 taxAmount += Math.round(itemTax * 100) / 100;
             });
         } else {
-            // Calculate on total sum (which already includes combo discounts)
+            // Calcular sobre la suma total (que ya incluye descuentos por combos)
             if (taxConfig.mode === 'inclusive') {
                 subtotal = totalSum / (1 + taxRate);
                 taxAmount = totalSum - subtotal;
@@ -137,7 +137,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                     <div style={{ marginBottom: '1rem', maxHeight: '40vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
                         {currentOrder.map((orderItem, index) => (
                             <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: '0.75rem', background: 'var(--card-hover-bg)', borderRadius: '0.5rem', marginBottom: '0.5rem', border: '1px solid var(--card-border)' }}>
-                                {/* Row 1: Name and Delete */}
+                                {/* Fila 1: Nombre y eliminación */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{
@@ -190,7 +190,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                                     </button>
                                 </div>
 
-                                {/* Row 2: Controls and Totals */}
+                                {/* Fila 2: Controles y totales */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', background: 'var(--card-border)', padding: '2px', borderRadius: '0.4rem' }}>

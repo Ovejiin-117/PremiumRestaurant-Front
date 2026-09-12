@@ -25,7 +25,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
 }) => {
     const isConfirming = activeId === id;
 
-    // Detect if this is a DELETE button by label to use red colors if not specified
+    // Detectar si es un botón de ELIMINAR según la etiqueta para usar colores rojos si no se especifican
     const isDelete = label === 'ELIMINAR';
     const finalColor = isConfirming
         ? (confirmColor || (isDelete ? 'var(--danger-color)' : 'var(--primary-color)'))

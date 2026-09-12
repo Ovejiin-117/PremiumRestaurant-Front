@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"; // useState kept for isVerifying, passwordInput, verifyAction, error
+import { useState, useMemo } from "react"; // useState se mantiene para isVerifying, passwordInput, verifyAction, error
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import type { User, Shift, Order, UIScale, LayoutOrientation } from "../../../types";
 import SettingsControls from "../../../components/ui/SettingsControls";
@@ -34,7 +34,7 @@ export default function ShiftManagement({
     const textScale = uiScale === 'small' ? 0.85 : uiScale === 'large' ? 1.25 : 1;
 
 
-    // Statistics Calculation
+    // Cálculo de estadísticas
     const currentShiftOrders = useMemo(() => {
         if (!currentShiftId) return [];
         return history.filter(o => o.shiftId === currentShiftId);
@@ -52,14 +52,14 @@ export default function ShiftManagement({
             }
             salesByUser[order.orderedBy].total += order.total;
             order.items.forEach(item => {
-                // Per user items
+                // Artículos por usuario
                 if (!salesByUser[order.orderedBy].items[item.name]) {
                     salesByUser[order.orderedBy].items[item.name] = { quantity: 0, totalPrice: 0 };
                 }
                 salesByUser[order.orderedBy].items[item.name].quantity += item.quantity;
                 salesByUser[order.orderedBy].items[item.name].totalPrice += item.quantity * item.price;
 
-                // Aggregated all items
+                // Todos los artículos agregados
                 if (!allItems[item.name]) {
                     allItems[item.name] = { quantity: 0, totalPrice: 0 };
                 }
@@ -174,7 +174,7 @@ export default function ShiftManagement({
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "2em" }}>
 
-                    {/* Controls Section */}
+                    {/* Sección de controles */}
                     <div className="glass-card">
                         <h3 style={{ marginTop: 0 }}>Controles de Turno</h3>
 
@@ -232,8 +232,7 @@ export default function ShiftManagement({
                         </div>
                     </div>
 
-                    {/* Statistics Summary (Simplified as requested) */}
-                    {/* Statistics Summary & Charts */}
+                    {/* Resumen de estadísticas y gráficos */}
                     <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                         <div className="glass-card" style={{ flex: 1 }}>
                             <h3 style={{ marginTop: 0, marginBottom: "1.5rem" }}>Resumen del Turno</h3>
@@ -249,7 +248,7 @@ export default function ShiftManagement({
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5em', minHeight: '20em' }}>
-                                {/* Sales by User (Pie Chart) */}
+                                {/* Ventas por usuario (gráfico circular) */}
                                 <div style={{ background: 'var(--card-hover-bg)', padding: '1.3em', borderRadius: '1em', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column' }}>
                                     <h4 style={{ margin: '0 0 1em 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>VENTAS POR USUARIO (%)</h4>
                                     <div style={{ flex: 1, minHeight: '13em' }}>
@@ -282,7 +281,7 @@ export default function ShiftManagement({
                                     </div>
                                 </div>
 
-                                {/* Top Products (Bar Chart) */}
+                                {/* Productos más vendidos (gráfico de barras) */}
                                 <div style={{ background: 'var(--card-hover-bg)', padding: '1.3em', borderRadius: '1em', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column' }}>
                                     <h4 style={{ margin: '0 0 1em 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>TOP PRODUCTOS (CANTIDAD)</h4>
                                     <div style={{ flex: 1, minHeight: '16em', marginTop: '1em' }}>

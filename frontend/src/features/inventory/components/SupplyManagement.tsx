@@ -66,7 +66,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
 
     return (
         <div className="page-container animate-fade-in" style={{ padding: '2rem' }}>
-            {/* Header */}
+            {/* Encabezado */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <button onClick={back} className="btn-back">
@@ -90,7 +90,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                 </button>
             </div>
 
-            {/* Main Content */}
+            {/* Contenido principal */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
                 {supplies.length === 0 && !isAdding && (
                     <div className="glass-card" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '5rem', opacity: 0.5 }}>

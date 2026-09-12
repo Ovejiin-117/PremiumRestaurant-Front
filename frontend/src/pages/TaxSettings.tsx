@@ -39,7 +39,7 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
 
         logAction('tax_config_update', details);
         setTaxConfig(localTaxConfig);
-        setIsVerified(false); // Relock after save
+        setIsVerified(false); // Volver a bloquear tras guardar
         setShowSaveConfirm(false);
         back();
     };
@@ -225,7 +225,7 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
                         </div>
                     </div>
 
-                    {/* Preview Section */}
+                    {/* Sección de vista previa */}
                     <div style={{ marginTop: '2.5rem', padding: '2rem', background: 'var(--card-hover-bg)', borderRadius: '1rem', border: '1px solid var(--card-border)' }}>
                         <div style={{ fontSize: '0.85em', fontWeight: 700, opacity: 0.7, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>VISTA PREVIA DE EJEMPLO</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>

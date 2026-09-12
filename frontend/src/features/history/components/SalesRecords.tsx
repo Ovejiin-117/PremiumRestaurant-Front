@@ -41,18 +41,18 @@ export default function SalesRecords({
         return `Turno (Iniciado: ${startStr})`;
     };
 
-    // Organize Shifts like in History.tsx
+    // Organizar turnos como en History.tsx
     const organizedShifts = useMemo(() => {
         let relevantShifts: Shift[] = [];
 
         if (shiftFilterDate) {
-            // Find shifts that fall on the same day as shiftFilterDate
+            // Buscar turnos que coincidan con el mismo día que shiftFilterDate
             relevantShifts = shifts.filter(s => {
                 const localStartTime = new Date(s.startTime).toLocaleDateString('en-CA');
                 return localStartTime === shiftFilterDate;
             });
         } else {
-            // Default: Current + Last 10 shifts for records
+            // Predeterminado: Turno actual + últimos 10 turnos para los registros
             const currentShift = shifts.find(s => s.id === currentShiftId);
             const pastShifts = shifts
                 .filter(s => s.id !== currentShiftId)
@@ -66,7 +66,7 @@ export default function SalesRecords({
         return relevantShifts.map(shift => {
             const shiftOrders = history.filter(o => o.shiftId === shift.id);
 
-            // Flatten shift orders into individual item sales
+            // Aplanar pedidos del turno en ventas individuales de artículos
             const salesData: any[] = [];
             shiftOrders.forEach(order => {
                 order.items.forEach(item => {
@@ -102,7 +102,7 @@ export default function SalesRecords({
     return (
         <div className={`scale-${uiScale}`}>
             <div className="page-container">
-                {/* Header Section - Same as History.tsx */}
+                {/* Sección de encabezado - Igual que History.tsx */}
                 <div className="title-bar">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <button onClick={back} className="btn-back">← Volver al panel</button>
@@ -117,7 +117,7 @@ export default function SalesRecords({
                     <h1 style={{ margin: 0 }}>Historial de Ventas</h1>
                 </div>
 
-                {/* Filter Controls - Same as History.tsx */}
+                {/* Controles de filtro - Igual que History.tsx */}
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button
                         onClick={() => setShowShiftPicker(!showShiftPicker)}
@@ -137,7 +137,7 @@ export default function SalesRecords({
                     </button>
                 </div>
 
-                {/* Shift Filter Panel - Same as History.tsx */}
+                {/* Panel de filtro de turnos - Igual que History.tsx */}
                 {showShiftPicker && (
                     <div className="glass-card" style={{
                         marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap'
@@ -167,7 +167,7 @@ export default function SalesRecords({
                     </div>
                 )}
 
-                {/* Shifts Accordion Group */}
+                {/* Grupo acordeón de turnos */}
                 {organizedShifts.length === 0 ? (
                     <div className="glass-card" style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
                         No se encontraron turnos para la fecha seleccionada.
@@ -184,7 +184,7 @@ export default function SalesRecords({
                                     border: '1px solid var(--card-border)',
                                     overflow: 'hidden'
                                 }}>
-                                    {/* Accordion Header */}
+                                    {/* Encabezado del acordeón */}
                                     <div
                                         onClick={() => toggleShift(shift.id)}
                                         style={{
@@ -225,7 +225,7 @@ export default function SalesRecords({
                                         </div>
                                     </div>
 
-                                    {/* Accordion Content (Sales Table) */}
+                                    {/* Contenido del acordeón (tabla de ventas) */}
                                     {isOpen && (
                                         <div style={{ padding: '0 1rem 1.5rem 1rem' }}>
                                             <div style={{ background: 'rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>

@@ -37,7 +37,7 @@ const EditItemForm: React.FC<EditItemFormProps> = ({
     const [localImage, setLocalImage] = React.useState(item.image || '');
     const [localType, setLocalType] = React.useState<ItemType>(item.type || 'alimento');
 
-    // Taxonomy Selection
+    // Selección taxonómica
     const [selectedCat, setSelectedCat] = React.useState(item.category);
     const [selectedSub, setSelectedSub] = React.useState(item.subcategory || '');
     const [selectedSec, setSelectedSec] = React.useState(item.section || '');
@@ -54,7 +54,7 @@ const EditItemForm: React.FC<EditItemFormProps> = ({
         selectedSub !== (item.subcategory || '') ||
         selectedSec !== (item.section || '');
 
-    // Filter available options
+    // Filtrar opciones disponibles
     const availableSubs = selectedCat ? (subCategories[selectedCat] || []) : [];
     const subKey = selectedCat && selectedSub ? `${selectedCat}::${selectedSub}` : '';
     const availableSecs = subKey ? (sections[subKey] || []) : [];
@@ -153,7 +153,7 @@ const EditItemForm: React.FC<EditItemFormProps> = ({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {/* Taxonomy Selection Grid */}
+                    {/* Cuadrícula de selección taxonómica */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             <label style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--primary-color)', textTransform: 'uppercase' }}>Categoría *</label>

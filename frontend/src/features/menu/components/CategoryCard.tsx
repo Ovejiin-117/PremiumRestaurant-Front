@@ -36,16 +36,16 @@ interface CategoryCardProps {
     handleDeleteSection: (cat: string, sub: string, sec: string) => void;
     handleDeleteItem: (id: string) => void;
     menu: MenuItem[];
-    // ItemList props
+    // Props de ItemList
     startEdit: (item: MenuItem) => void;
     handleAddToOrder: (item: MenuItem) => void;
     user: User;
-    // Reorder props
+    // Props de reordenamiento
     isReorderMode: boolean;
     setIsReorderMode: (b: boolean) => void;
     handleReorder: (draggedCat: string, targetCat: string) => void;
     isShiftOpen: boolean;
-    // Filter props
+    // Props de filtrado
     filters: {
         name: string;
         minPrice: string;
@@ -54,7 +54,7 @@ interface CategoryCardProps {
         subcategory: string;
         section: string;
     };
-    // Renaming props
+    // Props de renombrado
     editingSubKey: string | null;
     editingSubNewName: string;
     setEditingSubNewName: (s: string) => void;
@@ -85,15 +85,15 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         subCategories, handleDeleteSubCategory, newSectionName, setNewSectionName,
         saveNewSection, sections, deleteSectionMode,
         handleDeleteSection, handleDeleteItem, menu,
-        // ItemList props
+        // Props de ItemList
         startEdit,
         handleAddToOrder, user,
-        // Reorder props
+        // Props de reordenamiento
         isReorderMode, setIsReorderMode, handleReorder,
-        // Filters
+        // Filtros
         filters,
         isShiftOpen,
-        // Renaming
+        // Renombrado
         editingSubKey, editingSubNewName, setEditingSubNewName,
         startRenameSubCategory, saveRenameSubCategory,
         editingSecKey, editingSecNewName, setEditingSecNewName,
@@ -138,7 +138,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         localStorage.setItem(key, JSON.stringify(collapsedSecs));
     }, [collapsedSecs, user.username, cat, viewSuffix]);
 
-    // Respond to global toggle
+    // Responder al cambio de alternancia global
     useEffect(() => {
         if (!globalCollapseState) return;
 
@@ -170,12 +170,12 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         setCollapsedSecs(prev => ({ ...prev, [secKey]: !prev[secKey] }));
     };
 
-    // Long-press logic
+    // Lógica de pulsación prolongada
     const timerRef = React.useRef<any>(null);
 
     const onPointerDown = (e: React.PointerEvent) => {
         if (!canEdit || isReorderMode) return;
-        // Don't trigger on buttons or inputs
+        // No activar en botones o campos de entrada
         if ((e.target as HTMLElement).closest('button, input, .action-menu')) return;
 
         timerRef.current = setTimeout(() => {
@@ -188,7 +188,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         if (timerRef.current) clearTimeout(timerRef.current);
     };
 
-    // Drag and Drop handlers
+    // Manejadores de arrastrar y soltar (Drag and Drop)
     const onDragStart = (e: React.DragEvent) => {
         if (!isReorderMode) {
             e.preventDefault();
@@ -257,7 +257,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                 </div>
             )}
 
-            {/* Header */}
+            {/* Encabezado */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)', paddingBottom: '0.4rem', marginBottom: '0.75rem' }}>
                 {editingCatOriginalName === cat ? (
                     <div style={{ display: 'flex', gap: '8px', width: '100%', alignItems: 'center' }}>
@@ -290,7 +290,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
 
             {!isCollapsed && (
                 <>
-                    {/* Forms in Main Category */}
+                    {/* Formularios en la categoría principal */}
 
                     {canEdit && addingToKey[cat]?.type === 'subcat' && (
                         <div style={{ background: 'var(--primary-color-alpha-20)', padding: '1.25rem', borderRadius: '0.75rem', marginBottom: '1.5rem', border: '2px dashed var(--primary-color)' }}>
@@ -328,7 +328,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                             return (
                                 <div key={sub} style={{ marginTop: '16px', borderTop: '1px dashed var(--card-border)', paddingTop: '16px', paddingLeft: '12px', position: 'relative' }}>
 
-                                    {/* SUBCATEGORY DELETE OVERLAY */}
+                                    {/* SUPERPOSICIÓN DE ELIMINACIÓN DE SUBCATEGORÍA */}
                                     {canEdit && deleteSubCatMode[cat] && (
                                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
                                             <ConfirmButton
@@ -341,7 +341,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                         </div>
                                     )}
 
-                                    {/* SUBCATEGORY RENAME OVERLAY */}
+                                    {/* SUPERPOSICIÓN DE RENOMBRADO DE SUBCATEGORÍA */}
                                     {mode === 'edit_sub_selection' && modeContext === cat && editingSubKey !== subKey && (
                                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }} onClick={e => e.stopPropagation()}>
                                             <button onClick={(e) => { e.stopPropagation(); startRenameSubCategory(cat, sub); }} style={{ background: 'var(--primary-color)', color: 'white', border: '2px solid white', padding: '0.5em 1em', fontSize: '1em', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>EDITAR</button>
@@ -381,7 +381,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
 
                                     {!isSubCollapsed && (
                                         <>
-                                            {/* Form for Section in Subcategory */}
+                                            {/* Formulario para sección en subcategoría */}
                                             {canEdit && addingToKey[subKey]?.type === 'section' && (
                                                 <div style={{ background: 'var(--primary-color-alpha-20)', padding: '1.25rem', borderRadius: '0.75rem', marginBottom: '1.5rem', border: '2px dashed var(--primary-color)' }}>
                                                     <div className="form-group">
@@ -420,7 +420,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                                     return (
                                                         <div key={sec} style={{ marginTop: '0.5rem', paddingLeft: '0.75rem', borderLeft: '2px solid var(--primary-color-alpha-20)', position: 'relative' }}>
 
-                                                            {/* SECTION DELETE OVERLAY */}
+                                                            {/* SUPERPOSICIÓN DE ELIMINACIÓN DE SECCIÓN */}
                                                             {canEdit && deleteSectionMode[cat] && (
                                                                 <div style={{ position: 'absolute', inset: 0, background: 'var(--glass-bg)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', backdropFilter: 'blur(4px)' }}>
                                                                     <ConfirmButton
@@ -433,7 +433,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                                                 </div>
                                                             )}
 
-                                                            {/* SECTION RENAME OVERLAY */}
+                                                            {/* SUPERPOSICIÓN DE RENOMBRADO DE SECCIÓN */}
                                                             {mode === 'edit_sec_selection' && modeContext === cat && editingSecKey !== secKey && (
                                                                 <div style={{ position: 'absolute', inset: 0, background: 'var(--glass-bg)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', backdropFilter: 'blur(4px)' }} onClick={e => e.stopPropagation()}>
                                                                     <button onClick={(e) => { e.stopPropagation(); startRenameSection(cat, sub, sec); }} style={{ background: 'var(--primary-color)', color: 'white', border: '2px solid white', padding: '0.2rem 0.5rem', fontSize: '0.8em', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>EDITAR</button>

@@ -24,7 +24,7 @@ interface UseMenuEditorProps {
 export const useMenuEditor = ({
     user, menu, setMenu, categories, setCategories, subCategories, setSubCategories, sections, setSections, history, setHistory, currentShiftId, logAction, promotions
 }: UseMenuEditorProps) => {
-    // Global Mode (Category Level)
+    // Modo global (Nivel de categoría)
     const [showCatMenu, setShowCatMenu] = useState(false);
     const [showCatInput, setShowCatInput] = useState(false);
     const [newCatName, setNewCatName] = useState('');
@@ -33,7 +33,7 @@ export const useMenuEditor = ({
     const [editingCatNewName, setEditingCatNewName] = useState('');
     const [modeContext, setModeContext] = useState<string | null>(null);
 
-    // Per-Category State
+    // Estado por categoría
     const [openActionMenuCat, setOpenActionMenuCat] = useState<string | null>(null);
     const [openActionMenuSub, setOpenActionMenuSub] = useState<string | null>(null);
     const [deleteSubCatMode, setDeleteSubCatMode] = useState<Record<string, boolean>>({});
@@ -41,16 +41,16 @@ export const useMenuEditor = ({
     const [deleteItemMode, setDeleteItemMode] = useState<Record<string, boolean>>({});
     const [editItemMode, setEditItemMode] = useState<Record<string, boolean>>({});
 
-    // 2-Step Confirmation State
+    // Estado de confirmación en 2 pasos
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-    // Adding State
+    // Estado de adición
     const [addingToKey, setAddingToKey] = useState<Record<string, { type: 'item' | 'subcat' | 'section' | null }>>({});
 
     const [newSubCatName, setNewSubCatName] = useState('');
     const [newSectionName, setNewSectionName] = useState('');
 
-    // Editing State
+    // Estado de edición
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
     const [editPrice, setEditPrice] = useState('');
@@ -66,12 +66,12 @@ export const useMenuEditor = ({
     const [editingSecKey, setEditingSecKey] = useState<string | null>(null);
     const [editingSecNewName, setEditingSecNewName] = useState('');
 
-    // Order State
+    // Estado del pedido
     type OrderItem = { menuItem: MenuItem; quantity: number; notes?: string };
     const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
     const [orderNote, setOrderNote] = useState("");
 
-    // Auto-clear context when mode is normal
+    // Limpiar automáticamente el contexto cuando el modo es normal
     useEffect(() => {
         if (mode === 'normal') {
             setModeContext(null);
@@ -81,10 +81,10 @@ export const useMenuEditor = ({
     const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
     const [showShiftModal, setShowShiftModal] = useState(false);
 
-    // Reorder Mode
+    // Modo de reordenamiento
     const [isReorderMode, setIsReorderMode] = useState(false);
 
-    // Global Expansion State
+    // Estado de expansión global
     const [globalCollapseState, setGlobalCollapseState] = useState<'expanded' | 'collapsed' | null>(() => {
         return localStorage.getItem(`rp_global_collapse_${user.username}`) as any || null;
     });
@@ -101,21 +101,21 @@ export const useMenuEditor = ({
         });
     };
 
-    // Uniqueness & Cleanup Logic
+    // Lógica de unicidad y limpieza
     const isNameUnique = (name: string, excludeId?: string) => {
         const lowerName = name.trim().toLowerCase();
         if (!lowerName) return false;
 
-        // Check categories
+        // Verificar categorías
         if (categories.some(c => c.toLowerCase() === lowerName)) return false;
 
-        // Check subcategories
+        // Verificar subcategorías
         if (Object.values(subCategories).some(subs => subs.some(s => s.toLowerCase() === lowerName))) return false;
 
-        // Check sections
+        // Verificar secciones
         if (Object.values(sections).some(secs => secs.some(s => s.toLowerCase() === lowerName))) return false;
 
-        // Check products
+        // Verificar productos
         if (menu.some(m => m.name.toLowerCase() === lowerName && m.id !== excludeId)) return false;
 
         return true;
@@ -134,7 +134,7 @@ export const useMenuEditor = ({
 
         const usedNames = new Set<string>();
 
-        // 1. Clean Categories & Map Changes
+        // 1. Limpiar categorías y mapear cambios
         finalCategories = finalCategories.map(cat => {
             let name = cat;
             if (usedNames.has(name.toLowerCase())) {
@@ -159,7 +159,7 @@ export const useMenuEditor = ({
             return name;
         });
 
-        // 2. Clean Subcategories & Map Changes
+        // 2. Limpiar subcategorías y mapear cambios
         const updatedSubs: Record<string, string[]> = {};
         Object.entries(finalSubCategories).forEach(([cat, subs]) => {
             updatedSubs[cat] = subs.map(sub => {
@@ -183,7 +183,7 @@ export const useMenuEditor = ({
         });
         finalSubCategories = updatedSubs;
 
-        // 3. Clean Sections & Map Changes
+        // 3. Limpiar secciones y mapear cambios
         const updatedSecs: Record<string, string[]> = {};
         Object.entries(finalSections).forEach(([subKey, secs]) => {
             const [cat, sub] = subKey.split('::');
@@ -201,25 +201,25 @@ export const useMenuEditor = ({
         });
         finalSections = updatedSecs;
 
-        // 4. Orphan Recovery (Fix for previous broken cleanup)
+        // 4. Recuperación de huérfanos (Corrección para limpiezas incompletas previas)
         finalMenu = finalMenu.map(m => {
             let item = { ...m };
 
-            // Fix Category Orphans
+            // Corregir huérfanos de categoría
             if (item.category && !finalCategories.includes(item.category)) {
                 const match = finalCategories.find(c => c.toLowerCase().endsWith(item.category.toLowerCase()));
                 if (match) { item.category = match; hasChanged = true; }
             }
             const subKey = `${item.category}::${item.subcategory}`;
 
-            // Fix Subcategory Orphans
+            // Corregir huérfanos de subcategoría
             const currentCatSubs = finalSubCategories[item.category] || [];
             if (item.subcategory && !currentCatSubs.includes(item.subcategory)) {
                 const subToMatch = item.subcategory.toLowerCase();
                 const match = currentCatSubs.find(s => s.toLowerCase().endsWith(subToMatch));
                 if (match) { item.subcategory = match; hasChanged = true; }
             }
-            // Fix Section Orphans
+            // Corregir huérfanos de sección
             const currentSubSecs = finalSections[subKey] || [];
             if (item.section && !currentSubSecs.includes(item.section)) {
                 const secToMatch = item.section.toLowerCase();
@@ -229,7 +229,7 @@ export const useMenuEditor = ({
             return item;
         });
 
-        // 5. Final Item Name Uniqueness
+        // 5. Unicidad final de nombres de productos
         finalMenu = finalMenu.map(item => {
             let name = item.name;
             if (usedNames.has(name.toLowerCase())) {
@@ -438,7 +438,7 @@ export const useMenuEditor = ({
             [cat]: currentSubs.map(s => s === originalSub ? value : s)
         });
 
-        // Update sections
+        // Actualizar secciones
         const oldKey = `${cat}::${originalSub}`;
         const newKey = `${cat}::${editingSubNewName}`;
         if (sections[oldKey]) {
@@ -448,7 +448,7 @@ export const useMenuEditor = ({
             setSections(newSecs);
         }
 
-        // Update menu items
+        // Actualizar elementos del menú
         setMenu(menu.map(m =>
             (m.category === cat && m.subcategory === originalSub)
                 ? { ...m, subcategory: editingSubNewName }
@@ -483,7 +483,7 @@ export const useMenuEditor = ({
             [subKey]: currentSecs.map(s => s === originalSec ? value : s)
         });
 
-        // Update menu items
+        // Actualizar elementos del menú
         setMenu(menu.map(m =>
             (m.category === cat && m.subcategory === sub && m.section === originalSec)
                 ? { ...m, section: editingSecNewName }
@@ -648,15 +648,15 @@ export const useMenuEditor = ({
         const now = new Date();
         let total = 0;
 
-        // Create a pool of all individual items in the order
+        // Crear un grupo de todos los artículos individuales en el pedido
         let itemsPool = currentOrder.flatMap(item =>
             Array(item.quantity).fill(item.menuItem)
         );
 
-        // 1. Process COMBOS first (highest priority)
+        // 1. Procesar COMBOS primero (mayor prioridad)
         const comboPromos = promotions.filter(p => p.type === 'combo' && isPromotionActive(p, now));
 
-        // Sort combos by targetItemIds length descending to apply complex combos first
+        // Ordenar combos por cantidad de targetItemIds descendente para aplicar combos complejos primero
         comboPromos.sort((a, b) => (b.targetItemIds?.length || 0) - (a.targetItemIds?.length || 0));
 
         comboPromos.forEach(promo => {
@@ -687,7 +687,7 @@ export const useMenuEditor = ({
             }
         });
 
-        // 2. Process LxM and Percentages on remaining items
+        // 2. Procesar LxM y porcentajes en los artículos restantes
         const remainingItemsById = itemsPool.reduce((acc, item) => {
             if (!acc[item.id]) acc[item.id] = { menuItem: item, quantity: 0 };
             acc[item.id].quantity++;
@@ -753,7 +753,7 @@ export const useMenuEditor = ({
         const formattedDate = now.toLocaleDateString();
         const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
-        // Calculate individual item prices after percentage/LxM promos (excluding combos)
+        // Calcular precios de artículos individuales tras promociones porcentuales/LxM (excluyendo combos)
         const itemsWithPromos = currentOrder.map(o => {
             const baseTotal = o.menuItem.price * o.quantity;
             const applicablePromos = promotions.filter(p =>
@@ -778,13 +778,13 @@ export const useMenuEditor = ({
             return {
                 menuItemId: o.menuItem.id,
                 name: o.menuItem.name,
-                price: bestTotal / o.quantity, // Average price per unit for this line
+                price: bestTotal / o.quantity, // Precio promedio por unidad para esta línea
                 quantity: o.quantity,
                 notes: o.notes || orderNote
             };
         });
 
-        // Check if there is a remaining discount (from combos)
+        // Verificar si hay un descuento restante (de combos)
         const itemsSum = itemsWithPromos.reduce((a, b) => a + (b.price * b.quantity), 0);
         const comboDiscount = itemsSum - finalTotal;
 

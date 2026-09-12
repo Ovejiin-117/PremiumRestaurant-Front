@@ -15,7 +15,7 @@ import SupplyManagement from './features/inventory/components/SupplyManagement';
 import type { User, MenuItem, Order, UIScale, LayoutOrientation, Shift, Theme, AuditLogEntry, AuditAction, AuditConfig, TaxConfig, Promotion, SupplyItem } from './types';
 import './App.css';
 
-// ... (INITIAL_USERS and INITIAL_MENU remain same, not shown here to save space, but relying on existing context) 
+// ... (INITIAL_USERS e INITIAL_MENU permanecen igual, no se muestran aquí para ahorrar espacio, basándose en el contexto existente)
 const INITIAL_USERS: User[] = [
   { id: 'dev-001', username: 'Desarrollador', role: 'developer', password: 'DEVELOPERON', registrationDate: '2026-01-01', birthDate: '1990-01-01', loginDates: [] },
   { id: 'mgr-001', username: 'Gerente', role: 'manager', password: '123', registrationDate: '2026-01-01', birthDate: '1985-05-15', loginDates: [] },
@@ -78,7 +78,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [view, setView] = useState<View>('login');
 
-  // Independent scale states for each major view
+  // Estados de escala independientes para cada vista principal
   const [dashboardScale, setDashboardScale] = useState<UIScale>('medium');
   const [gestionScale, setGestionScale] = useState<UIScale>('medium');
   const [menuEditorScale, setMenuEditorScale] = useState<UIScale>('medium');
@@ -88,7 +88,7 @@ function App() {
   const [promotionsScale, setPromotionsScale] = useState<UIScale>('medium');
   const [ticketWidth, setTicketWidth] = useState<number>(80);
 
-  // Independent orientation states
+  // Estados de orientación independientes
   const [dashboardOrientation, setDashboardOrientation] = useState<LayoutOrientation>('vertical');
   const [gestionOrientation, setGestionOrientation] = useState<LayoutOrientation>('vertical');
   const [menuEditorOrientation, setMenuEditorOrientation] = useState<LayoutOrientation>('vertical');
@@ -97,7 +97,7 @@ function App() {
   const [turnoOrientation, setTurnoOrientation] = useState<LayoutOrientation>('horizontal');
   const [promotionsOrientation, setPromotionsOrientation] = useState<LayoutOrientation>('horizontal');
 
-  // Visual Settings
+  // Ajustes visuales
   const [loginTheme, setLoginTheme] = useState<Theme>(() => (localStorage.getItem('rp_login_theme') as Theme) || 'dark');
   const [theme, setTheme] = useState<Theme>(loginTheme);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
@@ -112,30 +112,30 @@ function App() {
     return saved === null ? true : saved === 'true';
   });
 
-  // Promotions State
+  // Estado de promociones
   const [promotions, setPromotions] = useState<Promotion[]>(() => {
     const saved = localStorage.getItem('rp_promotions');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Inventory (Supplies) State
+  // Estado de inventario (insumos)
   const [supplies, setSupplies] = useState<SupplyItem[]>(() => {
     const saved = localStorage.getItem('rp_supplies');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Save Inventory
+  // Guardar inventario
   useEffect(() => {
     localStorage.setItem('rp_supplies', JSON.stringify(supplies));
   }, [supplies]);
 
-  // Load theme preferences based on user or login state
+  // Cargar preferencias de tema según el usuario o estado de inicio de sesión
   useEffect(() => {
     if (user) {
       const savedUserTheme = localStorage.getItem(`theme_${user.username}`) as Theme;
       setTheme(savedUserTheme || 'dark');
 
-      // Restore UI scales and other preferences
+      // Restaurar escalas de interfaz y otras preferencias
       const savedDash = localStorage.getItem(`uiScale_dashboard_${user.username}`);
       const savedGest = localStorage.getItem(`uiScale_gestion_${user.username}`);
       const savedMenuEdit = localStorage.getItem(`uiScale_menu_editor_${user.username}`) || localStorage.getItem(`uiScale_menu_${user.username}`);
@@ -176,7 +176,7 @@ function App() {
     }
   }, [user, loginTheme]);
 
-  // Apply Theme, Animations classes and Global Scale
+  // Aplicar clases de tema, animaciones y escala global
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.setProperty('--global-scale', globalScale.toString());
@@ -193,7 +193,7 @@ function App() {
     }
   }, [theme, animationsEnabled, performanceMode]);
 
-  // Save UI settings only when user is logged in
+  // Guardar ajustes de interfaz solo cuando el usuario ha iniciado sesión
   useEffect(() => { if (user) localStorage.setItem(`uiScale_dashboard_${user.username}`, dashboardScale); }, [dashboardScale, user]);
   useEffect(() => { if (user) localStorage.setItem(`uiScale_gestion_${user.username}`, gestionScale); }, [gestionScale, user]);
   useEffect(() => { if (user) localStorage.setItem(`uiScale_menu_editor_${user.username}`, menuEditorScale); }, [menuEditorScale, user]);
@@ -214,12 +214,12 @@ function App() {
   useEffect(() => { localStorage.setItem('rp_performance_mode', performanceMode.toString()); }, [performanceMode]);
   useEffect(() => { localStorage.setItem('rp_show_images', showImages.toString()); }, [showImages]);
 
-  // Scroll to top on view change
+  // Desplazar hacia arriba al cambiar de vista
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
 
-  // Handle theme updates manually to avoid race conditions during login/logout
+  // Manejar actualizaciones de tema manualmente para evitar condiciones de carrera durante inicio/cierre de sesión
   const updateTheme = (newTheme: Theme) => {
     setTheme(newTheme);
     if (user) {
@@ -230,14 +230,14 @@ function App() {
     }
   };
 
-  // Persistence logic - Initializing states with localStorage if available
+  // Lógica de persistencia: inicializar estados con localStorage si está disponible
   const [isSetupComplete, setIsSetupComplete] = useState<boolean>(() => {
     return localStorage.getItem('rp_setup_complete') === 'true';
   });
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('rp_users');
-    return saved ? JSON.parse(saved) : (localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : []); // Only load defaults if setup was previously done (legacy) or empty if new logic
+    return saved ? JSON.parse(saved) : (localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : []); // Solo cargar valores predeterminados si la configuración previa ya se completó (legado) o vacío con la nueva lógica
   });
 
   const [categories, setCategories] = useState<string[]>(() => {
@@ -261,7 +261,7 @@ function App() {
   });
 
   const [history, setHistory] = useState<Order[]>(() => {
-    // Reset order history as requested by user
+    // Reiniciar historial de pedidos según lo solicitado por el usuario
     localStorage.removeItem('rp_history');
     return [];
   });
@@ -275,7 +275,7 @@ function App() {
     return localStorage.getItem('rp_currentShiftId');
   });
 
-  // Audit Log State
+  // Estado del registro de auditoría
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>(() => {
     const saved = localStorage.getItem('rp_auditLogs');
     return saved ? JSON.parse(saved) : [];
@@ -291,11 +291,11 @@ function App() {
     return saved ? JSON.parse(saved) : DEFAULT_TAX_CONFIG;
   });
 
-  // Helper to log actions
+  // Función auxiliar para registrar acciones
   const logAction = (action: AuditAction, details: string, entityId?: string) => {
-    if (!user) return; // Should not happen if logged in
+    if (!user) return; // No debería ocurrir si la sesión está iniciada
 
-    // Check if action is enabled (audit_config_update and tax_config_update are ALWAYS enabled)
+    // Verificar si la acción está habilitada (audit_config_update y tax_config_update SIEMPRE están habilitadas)
     if (action !== 'audit_config_update' && action !== 'tax_config_update' && !auditConfig[action]) return;
 
     const newEntry: AuditLogEntry = {
@@ -349,13 +349,13 @@ function App() {
     logAction('audit_config_update', `Configuración cambiada: ${label} ahora está ${newValue ? 'activada' : 'desactivada'}`);
   };
 
-  // Derived state
+  // Estado derivado
   const isShiftOpen = !!currentShiftId;
 
-  // Sync state to localStorage on changes
+  // Sincronizar estado con localStorage ante cambios
   useEffect(() => { localStorage.setItem('rp_users', JSON.stringify(users)); }, [users]);
 
-  // Seed temporary users if missing (requested for testing)
+  // Poblar usuarios temporales si faltan (solicitado para pruebas)
   useEffect(() => {
     const hasGerente = users.some(u => u.username === 'Gerente');
     const hasMesero = users.some(u => u.username === 'Mesero');
@@ -388,7 +388,7 @@ function App() {
   const handleLogin = (loggedInUser: User) => {
     const today = new Date().toISOString().split('T')[0];
 
-    // Track unique login dates
+    // Registrar fechas únicas de inicio de sesión
     setUsers(prev => prev.map(u => {
       if (u.username === loggedInUser.username) {
         const dates = u.loginDates || [];
@@ -399,13 +399,13 @@ function App() {
       return u;
     }));
 
-    // Find the updated user to set as the active user
+    // Encontrar el usuario actualizado para establecerlo como activo
     const updatedUser = users.find(u => u.username === loggedInUser.username) || loggedInUser;
     setUser(updatedUser);
     setView('dashboard');
 
-    // Log Login (Directly here since we have user context)
-    // Only if enabled in config
+    // Registrar inicio de sesión (directamente aquí ya que tenemos el contexto del usuario)
+    // Solo si está habilitado en la configuración
     if (auditConfig.user_login) {
       const loginEntry: AuditLogEntry = {
         id: crypto.randomUUID(),
@@ -448,16 +448,16 @@ function App() {
       id: 'dev-001',
       username: 'Desarrollador',
       role: 'developer',
-      password: devPassword, // Set user defined password
+      password: devPassword, // Establecer contraseña definida por el usuario
       registrationDate: today,
       birthDate: '1990-01-01',
       loginDates: []
     };
 
-    // We also initialize other default users for testing as requested
+    // También inicializamos otros usuarios predeterminados para pruebas según lo solicitado
     const initialUsersWithDev = [
       newDev,
-      ...INITIAL_USERS.filter(u => u.username !== 'Desarrollador') // Add Gerente and Mesero
+      ...INITIAL_USERS.filter(u => u.username !== 'Desarrollador') // Agregar Gerente y Mesero
     ];
 
     setUsers(initialUsersWithDev);
@@ -465,7 +465,7 @@ function App() {
     localStorage.setItem('rp_users', JSON.stringify(initialUsersWithDev));
     localStorage.setItem('rp_setup_complete', 'true');
 
-    // Auto-login the dev
+    // Iniciar sesión automáticamente como desarrollador
     handleLogin(newDev);
   };
 
@@ -626,7 +626,7 @@ function App() {
           auditLog={auditLog}
           users={users}
           back={goBack}
-          uiScale={dashboardScale} // Use dashboard scale 
+          uiScale={dashboardScale} // Usar escala de panel principal
           setUiScale={setDashboardScale}
           layoutOrientation={dashboardOrientation}
           setLayoutOrientation={setDashboardOrientation}

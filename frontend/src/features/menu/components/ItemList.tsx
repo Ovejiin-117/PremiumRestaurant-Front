@@ -69,7 +69,7 @@ const ItemList: React.FC<ItemListProps> = ({
                     }}
                     onClick={showOrderingUI ? () => handleAddToOrder(item) : undefined}
                 >
-                    {/* ITEM DELETE OVERLAY */}
+                    {/* SUPERPOSICIÓN DE ELIMINACIÓN DE PRODUCTO */}
                     {deleteItemMode[cat] && canEdit && (
                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ConfirmButton
@@ -82,7 +82,7 @@ const ItemList: React.FC<ItemListProps> = ({
                         </div>
                     )}
 
-                    {/* ITEM EDIT OVERLAY */}
+                    {/* SUPERPOSICIÓN DE EDICIÓN DE PRODUCTO */}
                     {editItemMode[cat] && canEdit && (
                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <ConfirmButton
@@ -160,7 +160,7 @@ const ItemList: React.FC<ItemListProps> = ({
                         </div>
                     )}
 
-                    {/* Price Section */}
+                    {/* Sección de precio */}
                     {(!isDetailedList && !isGrid) && (() => {
                         const promoPrice = getPromotionalPrice(item, promotions);
                         if (promoPrice !== null) {
@@ -174,7 +174,7 @@ const ItemList: React.FC<ItemListProps> = ({
                         return <div style={{ fontSize: '1em', color: 'var(--primary-color)', fontWeight: 'bold', marginLeft: 'auto', marginRight: '1rem' }}>${item.price}</div>;
                     })()}
 
-                    {/* Right Side Actions/Status */}
+                    {/* Acciones/Estado del lado derecho */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: isGrid ? 'auto' : '0' }}>
                         {isDetailedList && (
                             <div style={{ fontWeight: 'bold', color: 'var(--primary-color)', marginRight: '0.5rem' }}>
@@ -193,7 +193,7 @@ const ItemList: React.FC<ItemListProps> = ({
                             </div>
                         )}
 
-                        {/* Availability Indicator (Mini) */}
+                        {/* Indicador de disponibilidad (Mini) */}
                         <div
                             title={item.available ? 'En Stock' : 'Agotado'}
                             style={{

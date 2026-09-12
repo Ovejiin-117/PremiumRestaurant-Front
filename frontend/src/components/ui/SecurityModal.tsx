@@ -5,7 +5,7 @@ interface SecurityModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    userPassword?: string; // Optional: if provided, it will validate internally. If not, it assumes external validation or just a confirmation.
+    userPassword?: string; // Opcional: si se proporciona, validará internamente. Si no, asume validación externa o solo una confirmación.
     title?: string;
     message?: string;
     confirmText?: string;
