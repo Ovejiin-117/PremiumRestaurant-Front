@@ -511,13 +511,13 @@ export default function ShiftManagement({
                             {/* 4 Tarjetas KPI Ejecutivas */}
                             <div style={{
                                 display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 150px), 1fr))",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
                                 gap: "1em"
                             }}>
                                 {/* KPI 1: Ventas Totales */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.25em",
+                                    padding: "1.1em 1.2em",
                                     borderRadius: "0.9em",
                                     border: "1px solid rgba(34, 197, 94, 0.25)",
                                     position: "relative",
@@ -527,16 +527,16 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #22c55e, #10b981)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Ventas Turno
                                         </span>
-                                        <span style={{ fontSize: "1.1em" }}>💰</span>
+                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>💰</span>
                                     </div>
-                                    <div style={{ color: "var(--text-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                    <div style={{ color: "var(--text-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         ${stats.totalSales.toFixed(2)}
                                     </div>
-                                    <div style={{ color: "var(--success-color)", fontSize: "0.75em", fontWeight: 600, marginTop: "0.3em" }}>
+                                    <div style={{ color: "var(--success-color)", fontSize: "0.75em", fontWeight: 600, marginTop: "0.3em", whiteSpace: "nowrap" }}>
                                         Recaudación activa
                                     </div>
                                 </div>
@@ -544,7 +544,7 @@ export default function ShiftManagement({
                                 {/* KPI 2: Artículos Vendidos */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.25em",
+                                    padding: "1.1em 1.2em",
                                     borderRadius: "0.9em",
                                     border: "1px solid rgba(59, 130, 246, 0.25)",
                                     position: "relative",
@@ -554,16 +554,16 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #3b82f6, #06b6d4)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Artículos
                                         </span>
-                                        <span style={{ fontSize: "1.1em" }}>📦</span>
+                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>📦</span>
                                     </div>
-                                    <div style={{ color: "var(--primary-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                    <div style={{ color: "var(--primary-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         {stats.totalItemsSold}
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
                                         {stats.itemChartData.length} productos distintos
                                     </div>
                                 </div>
@@ -571,7 +571,7 @@ export default function ShiftManagement({
                                 {/* KPI 3: Tickets / Órdenes */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.25em",
+                                    padding: "1.1em 1.2em",
                                     borderRadius: "0.9em",
                                     border: "1px solid rgba(168, 85, 247, 0.25)",
                                     position: "relative",
@@ -581,16 +581,16 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #a855f7, #6366f1)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Tickets
                                         </span>
-                                        <span style={{ fontSize: "1.1em" }}>🧾</span>
+                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>🧾</span>
                                     </div>
-                                    <div style={{ color: "var(--text-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                    <div style={{ color: "var(--text-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         {stats.totalOrders}
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
                                         Órdenes completadas
                                     </div>
                                 </div>
@@ -598,7 +598,7 @@ export default function ShiftManagement({
                                 {/* KPI 4: Ticket Promedio */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.25em",
+                                    padding: "1.1em 1.2em",
                                     borderRadius: "0.9em",
                                     border: "1px solid rgba(245, 158, 11, 0.25)",
                                     position: "relative",
@@ -608,16 +608,16 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #f59e0b, #fbbf24)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Ticket Promedio
                                         </span>
-                                        <span style={{ fontSize: "1.1em" }}>⚡</span>
+                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>⚡</span>
                                     </div>
-                                    <div style={{ color: "#fbbf24", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                                    <div style={{ color: "#fbbf24", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         ${stats.averageTicket.toFixed(2)}
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
                                         Por cada ticket
                                     </div>
                                 </div>
@@ -626,7 +626,7 @@ export default function ShiftManagement({
                             {/* Sección de Gráficos de Doble Tarjeta */}
                             <div style={{
                                 display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
                                 gap: "1.5em",
                                 alignItems: "stretch"
                             }}>
@@ -642,11 +642,11 @@ export default function ShiftManagement({
                                     justifyContent: "space-between"
                                 }}>
                                     <div>
-                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4em" }}>
-                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em" }}>
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em", marginBottom: "0.4em" }}>
+                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
                                                 <span>👥</span> VENTAS POR USUARIO
                                             </h4>
-                                            <span style={{ fontSize: "0.75em", color: "var(--text-secondary)", background: "rgba(255,255,255,0.06)", padding: "0.2em 0.5em", borderRadius: "5px" }}>
+                                            <span style={{ fontSize: "0.75em", color: "var(--text-secondary)", background: "rgba(255,255,255,0.06)", padding: "0.2em 0.55em", borderRadius: "5px", whiteSpace: "nowrap", flexShrink: 0 }}>
                                                 {stats.chartData.length} miembros
                                             </span>
                                         </div>
@@ -658,15 +658,15 @@ export default function ShiftManagement({
                                     {stats.chartData.length > 0 ? (
                                         <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
                                             {/* Gráfico Donut con métrica central */}
-                                            <div style={{ position: "relative", width: "100%", height: `${180 * textScale}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <div style={{ position: "relative", width: "100%", height: `${Math.round(200 * textScale)}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <PieChart>
                                                         <Pie
                                                             data={stats.chartData}
                                                             cx="50%"
                                                             cy="50%"
-                                                            innerRadius={52 * textScale}
-                                                            outerRadius={78 * textScale}
+                                                            innerRadius={50 * textScale}
+                                                            outerRadius={76 * textScale}
                                                             paddingAngle={4}
                                                             dataKey="value"
                                                             stroke="none"
@@ -694,7 +694,7 @@ export default function ShiftManagement({
                                                     <div style={{ fontSize: "0.65em", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                                         Total
                                                     </div>
-                                                    <div style={{ fontSize: "1.15em", fontWeight: 800, color: "var(--text-color)", lineHeight: 1.15 }}>
+                                                    <div style={{ fontSize: "1.1em", fontWeight: 800, color: "var(--text-color)", lineHeight: 1.15, whiteSpace: "nowrap" }}>
                                                         ${stats.totalSales.toFixed(2)}
                                                     </div>
                                                 </div>
@@ -705,7 +705,7 @@ export default function ShiftManagement({
                                                 display: "flex",
                                                 flexDirection: "column",
                                                 gap: "0.55em",
-                                                maxHeight: "220px",
+                                                maxHeight: "16em",
                                                 overflowY: "auto",
                                                 paddingRight: "0.2em"
                                             }}>
@@ -720,10 +720,10 @@ export default function ShiftManagement({
                                                             padding: "0.55em 0.75em",
                                                             display: "flex",
                                                             flexDirection: "column",
-                                                            gap: "0.3em"
+                                                            gap: "0.35em"
                                                         }}>
-                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em" }}>
+                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.4em" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em", minWidth: "120px", flex: "1 1 auto" }}>
                                                                     <span style={{
                                                                         width: "0.65em",
                                                                         height: "0.65em",
@@ -732,12 +732,12 @@ export default function ShiftManagement({
                                                                         boxShadow: `0 0 6px ${color}88`,
                                                                         flexShrink: 0
                                                                     }} />
-                                                                    <span style={{ fontWeight: 600, fontSize: "0.85em", color: "var(--text-color)" }}>
+                                                                    <span style={{ fontWeight: 600, fontSize: "0.85em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
                                                                         {item.name}
                                                                     </span>
                                                                 </div>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em" }}>
-                                                                    <span style={{ fontWeight: 700, fontSize: "0.85em", color: "var(--text-color)" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em", flexShrink: 0, marginLeft: "auto" }}>
+                                                                    <span style={{ fontWeight: 700, fontSize: "0.85em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
                                                                         ${item.value.toFixed(2)}
                                                                     </span>
                                                                     <span style={{
@@ -747,7 +747,8 @@ export default function ShiftManagement({
                                                                         borderRadius: "4px",
                                                                         background: `${color}20`,
                                                                         color: color,
-                                                                        border: `1px solid ${color}40`
+                                                                        border: `1px solid ${color}40`,
+                                                                        whiteSpace: "nowrap"
                                                                     }}>
                                                                         {pct}%
                                                                     </span>
@@ -797,8 +798,8 @@ export default function ShiftManagement({
                                     justifyContent: "space-between"
                                 }}>
                                     <div>
-                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4em" }}>
-                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em" }}>
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6em", marginBottom: "0.4em" }}>
+                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
                                                 <span>🔥</span> TOP PRODUCTOS
                                             </h4>
                                             {/* Selector de vista: Ranking vs Gráfico */}
@@ -807,7 +808,8 @@ export default function ShiftManagement({
                                                 background: "rgba(0, 0, 0, 0.35)",
                                                 padding: "2px",
                                                 borderRadius: "6px",
-                                                border: "1px solid var(--card-border)"
+                                                border: "1px solid var(--card-border)",
+                                                flexShrink: 0
                                             }}>
                                                 <button
                                                     onClick={() => setProductViewMode('ranking')}
@@ -855,7 +857,7 @@ export default function ShiftManagement({
                                                 display: "flex",
                                                 flexDirection: "column",
                                                 gap: "0.6em",
-                                                maxHeight: "360px",
+                                                maxHeight: "22em",
                                                 overflowY: "auto",
                                                 paddingRight: "0.2em"
                                             }}>
@@ -888,15 +890,15 @@ export default function ShiftManagement({
                                                             background: "rgba(255, 255, 255, 0.03)",
                                                             border: isTop1 ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid rgba(255, 255, 255, 0.06)",
                                                             borderRadius: "0.7em",
-                                                            padding: "0.6em 0.85em",
+                                                            padding: "0.65em 0.85em",
                                                             display: "flex",
                                                             flexDirection: "column",
-                                                            gap: "0.35em",
+                                                            gap: "0.4em",
                                                             position: "relative",
                                                             overflow: "hidden"
                                                         }}>
-                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.65em", minWidth: 0 }}>
+                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.65em", flex: "1 1 auto", minWidth: "120px" }}>
                                                                     <span style={{
                                                                         fontSize: "0.78em",
                                                                         fontWeight: 800,
@@ -912,14 +914,12 @@ export default function ShiftManagement({
                                                                         fontWeight: 700,
                                                                         fontSize: "0.88em",
                                                                         color: "var(--text-color)",
-                                                                        whiteSpace: "nowrap",
-                                                                        overflow: "hidden",
-                                                                        textOverflow: "ellipsis"
+                                                                        wordBreak: "break-word"
                                                                     }}>
                                                                         {item.name}
                                                                     </span>
                                                                 </div>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.6em", flexShrink: 0 }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.55em", flexShrink: 0, marginLeft: "auto" }}>
                                                                     <span style={{
                                                                         fontSize: "0.75em",
                                                                         fontWeight: 700,
@@ -927,11 +927,12 @@ export default function ShiftManagement({
                                                                         borderRadius: "5px",
                                                                         background: "rgba(59, 130, 246, 0.15)",
                                                                         color: "var(--primary-color)",
-                                                                        border: "1px solid rgba(59, 130, 246, 0.3)"
+                                                                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                                                                        whiteSpace: "nowrap"
                                                                     }}>
                                                                         {item.quantity} uds
                                                                     </span>
-                                                                    <span style={{ fontSize: "0.82em", fontWeight: 700, color: "var(--success-color)" }}>
+                                                                    <span style={{ fontSize: "0.85em", fontWeight: 700, color: "var(--success-color)", whiteSpace: "nowrap" }}>
                                                                         ${item.total.toFixed(2)}
                                                                     </span>
                                                                 </div>
@@ -955,7 +956,7 @@ export default function ShiftManagement({
                                             </div>
                                         ) : (
                                             /* Vista de Gráfico de Barras moderno */
-                                            <div style={{ flex: 1, minHeight: `${220 * textScale}px` }}>
+                                            <div style={{ flex: 1, minHeight: `${Math.round(220 * textScale)}px` }}>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <BarChart
                                                         data={stats.itemChartData}
@@ -972,10 +973,10 @@ export default function ShiftManagement({
                                                         <YAxis
                                                             dataKey="name"
                                                             type="category"
-                                                            width={100 * textScale}
+                                                            width={Math.round(110 * textScale)}
                                                             axisLine={false}
                                                             tickLine={false}
-                                                            tick={{ fill: 'var(--text-color)', fontSize: 11 * textScale, fontWeight: 600 }}
+                                                            tick={{ fill: 'var(--text-color)', fontSize: Math.round(11 * textScale), fontWeight: 600 }}
                                                         />
                                                         <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                                                         <Bar
@@ -983,7 +984,7 @@ export default function ShiftManagement({
                                                             name="Cantidad"
                                                             fill="url(#productBarGrad)"
                                                             radius={[0, 8, 8, 0]}
-                                                            barSize={18 * textScale}
+                                                            barSize={Math.round(18 * textScale)}
                                                             background={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }}
                                                         />
                                                     </BarChart>
