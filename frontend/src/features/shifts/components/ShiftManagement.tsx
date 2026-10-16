@@ -42,15 +42,16 @@ function CustomPieTooltip({ active, payload, totalSales }: CustomPieTooltipProps
         const percent = totalSales > 0 ? ((data.value / totalSales) * 100).toFixed(1) : '0';
         return (
             <div style={{
-                background: 'rgba(11, 18, 32, 0.95)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '0.7em 1em',
+                background: '#0d1527',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '0.75em 1.1em',
                 borderRadius: '0.75em',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.7)',
                 color: '#fff',
                 fontSize: '0.85em',
-                minWidth: '160px'
+                minWidth: '160px',
+                position: 'relative',
+                zIndex: 100
             }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.3em', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: data.payload?.fill || '#38bdf8', display: 'inline-block' }} />
@@ -78,15 +79,16 @@ function CustomBarTooltip({ active, payload }: CustomBarTooltipProps) {
         const data = payload[0].payload;
         return (
             <div style={{
-                background: 'rgba(11, 18, 32, 0.95)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '0.7em 1em',
+                background: '#0d1527',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '0.75em 1.1em',
                 borderRadius: '0.75em',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.7)',
                 color: '#fff',
                 fontSize: '0.85em',
-                minWidth: '180px'
+                minWidth: '180px',
+                position: 'relative',
+                zIndex: 100
             }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.4em', color: '#fff', fontSize: '0.95em' }}>
                     {data.name}
@@ -116,6 +118,7 @@ export default function ShiftManagement({
     const [error, setError] = useState("");
     const [productViewMode, setProductViewMode] = useState<'ranking' | 'chart'>('ranking');
     const [currentTime, setCurrentTime] = useState(() => Date.now());
+    const [hoveredSliceIndex, setHoveredSliceIndex] = useState<number | null>(null);
     const textScale = uiScale === 'small' ? 0.85 : uiScale === 'large' ? 1.25 : 1;
 
     // Actualizar reloj de duración del turno de manera pura cada minuto
@@ -755,7 +758,7 @@ export default function ShiftManagement({
                                             {/* Gráfico Donut con métrica central */}
                                             <div style={{ position: "relative", width: "100%", height: `${Math.round(210 * textScale)}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <PieChart>
+                                                    <PieChart onMouseLeave={() => setHoveredSliceIndex(null)}>
                                                         <Pie
                                                             data={stats.chartData}
                                                             cx="50%"
@@ -765,15 +768,22 @@ export default function ShiftManagement({
                                                             paddingAngle={4}
                                                             dataKey="value"
                                                             stroke="none"
+                                                            onMouseEnter={(_entry, index) => setHoveredSliceIndex(index)}
+                                                            onMouseLeave={() => setHoveredSliceIndex(null)}
                                                         >
                                                             {stats.chartData.map((_entry, index) => (
                                                                 <Cell
                                                                     key={`cell-${index}`}
                                                                     fill={USER_COLORS[index % USER_COLORS.length]}
+                                                                    opacity={hoveredSliceIndex === null || hoveredSliceIndex === index ? 1 : 0.35}
+                                                                    style={{ transition: 'opacity 0.2s ease', cursor: 'pointer' }}
                                                                 />
                                                             ))}
                                                         </Pie>
-                                                        <Tooltip content={<CustomPieTooltip totalSales={stats.totalSales} />} />
+                                                        <Tooltip
+                                                            wrapperStyle={{ zIndex: 100, pointerEvents: 'none' }}
+                                                            content={<CustomPieTooltip totalSales={stats.totalSales} />}
+                                                        />
                                                     </PieChart>
                                                 </ResponsiveContainer>
 
@@ -784,7 +794,11 @@ export default function ShiftManagement({
                                                     left: "50%",
                                                     transform: "translate(-50%, -50%)",
                                                     textAlign: "center",
-                                                    pointerEvents: "none"
+                                                    pointerEvents: "none",
+                                                    zIndex: 1,
+                                                    opacity: hoveredSliceIndex !== null ? 0 : 1,
+                                                    visibility: hoveredSliceIndex !== null ? "hidden" : "visible",
+                                                    transition: "opacity 0.15s ease, visibility 0.15s ease"
                                                 }}>
                                                     <div style={{ fontSize: "0.7em", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                                         Total
@@ -807,16 +821,24 @@ export default function ShiftManagement({
                                                 {stats.chartData.map((item, index) => {
                                                     const color = USER_COLORS[index % USER_COLORS.length];
                                                     const pct = stats.totalSales > 0 ? ((item.value / stats.totalSales) * 100).toFixed(1) : '0';
+                                                    const isHovered = hoveredSliceIndex === index;
                                                     return (
-                                                        <div key={item.name} style={{
-                                                            background: "rgba(255, 255, 255, 0.03)",
-                                                            border: "1px solid rgba(255, 255, 255, 0.06)",
-                                                            borderRadius: "0.7em",
-                                                            padding: "0.65em 0.85em",
-                                                            display: "flex",
-                                                            flexDirection: "column",
-                                                            gap: "0.35em"
-                                                        }}>
+                                                        <div
+                                                            key={item.name}
+                                                            onMouseEnter={() => setHoveredSliceIndex(index)}
+                                                            onMouseLeave={() => setHoveredSliceIndex(null)}
+                                                            style={{
+                                                                background: isHovered ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.03)",
+                                                                border: isHovered ? `1px solid ${color}88` : "1px solid rgba(255, 255, 255, 0.06)",
+                                                                borderRadius: "0.7em",
+                                                                padding: "0.65em 0.85em",
+                                                                display: "flex",
+                                                                flexDirection: "column",
+                                                                gap: "0.35em",
+                                                                transition: "all 0.2s ease",
+                                                                cursor: "pointer"
+                                                            }}
+                                                        >
                                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em" }}>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: "0.55em", minWidth: "120px", flex: "1 1 auto" }}>
                                                                     <span style={{
@@ -1073,7 +1095,11 @@ export default function ShiftManagement({
                                                             tickLine={false}
                                                             tick={{ fill: 'var(--text-color)', fontSize: Math.round(11 * textScale), fontWeight: 600 }}
                                                         />
-                                                        <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+                                                        <Tooltip
+                                                            wrapperStyle={{ zIndex: 100, pointerEvents: 'none' }}
+                                                            content={<CustomBarTooltip />}
+                                                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                                        />
                                                         <Bar
                                                             dataKey="quantity"
                                                             name="Cantidad"
