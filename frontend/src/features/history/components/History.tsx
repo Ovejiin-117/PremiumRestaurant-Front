@@ -152,8 +152,9 @@ export default function History({
                         />
 
                     </div>
-                    <h1 style={{ margin: 0 }}>Historial de Tickets</h1>
                 </div>
+
+                <h1 className="page-main-title">HISTORIAL DE TICKETS</h1>
 
                 {/* Controles superiores: Alternar filtros y filtro de turno */}
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>

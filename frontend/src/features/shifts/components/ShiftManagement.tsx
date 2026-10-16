@@ -170,7 +170,7 @@ export default function ShiftManagement({
 
                 </div>
 
-                <h1 style={{ margin: '0 0 2rem 0' }}>Gestión de Turno</h1>
+                <h1 className="page-main-title">GESTIÓN DE TURNO</h1>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "2em" }}>
 

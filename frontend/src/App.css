@@ -140,6 +140,19 @@ body {
   gap: 1.5rem;
 }
 
+.page-main-title {
+  font-family: inherit;
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
+  margin-top: 0;
+  margin-bottom: 2rem;
+  line-height: 1.15;
+  display: block;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

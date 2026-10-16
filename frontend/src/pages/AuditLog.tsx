@@ -294,20 +294,18 @@ export default function AuditLog({
             <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4em' }}>
 
                 {/* Encabezado */}
-                <div className="title-bar" style={{ marginBottom: '2em' }}>
-                    <div>
-                        <button onClick={back} className="btn-back" style={{ marginBottom: "1em" }}>
-                            ← Volver al panel
-                        </button>
-
-                        <h1 style={{ margin: 0, fontSize: '2em', fontWeight: 600 }}>Registros de auditoría</h1>
-                    </div>
+                <div className="title-bar">
+                    <button onClick={back} className="btn-back">
+                        ← Volver al panel
+                    </button>
                     <SettingsControls
                         uiScale={uiScale} setUiScale={setUiScale}
                         layoutOrientation={layoutOrientation} setLayoutOrientation={setLayoutOrientation}
                         showOrientation={false}
                     />
                 </div>
+
+                <h1 className="page-main-title">REGISTROS DE AUDITORÍA</h1>
 
                 {/* Cuadrícula de filtros */}
                 <div style={{

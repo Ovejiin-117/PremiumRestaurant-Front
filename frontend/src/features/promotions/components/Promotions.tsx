@@ -248,9 +248,9 @@ export default function Promotions({
                             showOrientation={false}
                         />
                     </div>
-
-                    <h1 className="m-0">Gestión de Promociones</h1>
                 </div>
+
+                <h1 className="page-main-title">GESTIÓN DE PROMOCIONES</h1>
 
                 {viewMode === 'list' && (
                     <div className="glass-card">

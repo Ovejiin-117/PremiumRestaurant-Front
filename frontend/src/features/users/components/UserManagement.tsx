@@ -410,7 +410,7 @@ export default function UserManagement({
                     </div>
                 </div>
 
-                <h1>Gestión de Usuarios</h1>
+                <h1 className="page-main-title">GESTIÓN DE USUARIOS</h1>
 
                 <div className="flex flex-col gap-6">
                     {[

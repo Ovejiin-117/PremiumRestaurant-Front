@@ -203,7 +203,7 @@ export default function MenuEditor(props: Props) {
                         onShowTaxonomyManager={() => state.setShowTaxonomyManager(true)}
                     />
 
-                    <h1 style={{ marginTop: "1rem", fontSize: "2em" }}>{showOrderingUI ? 'Menú' : 'Editor de Menú'}</h1>
+                    <h1 className="page-main-title">{showOrderingUI ? 'MENÚ GENERAL' : 'EDITOR DE MENÚ'}</h1>
 
                     {state.isReorderMode && (
                         <div

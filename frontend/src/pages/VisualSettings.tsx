@@ -25,19 +25,15 @@ export default function VisualSettings({
 
     return (
         <div className="page-container">
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="title-bar">
                 <button className="btn-back" onClick={back} style={{ margin: 0 }}>
                     ← VOLVER AL PANEL
                 </button>
             </div>
 
             <div style={{ marginBottom: '2.5rem', borderBottom: '2px solid var(--primary-color)', paddingBottom: '0.75rem' }}>
-                <h1 style={{
-                    margin: 0, fontSize: '1.8rem', fontWeight: '900',
-                    textTransform: 'uppercase', letterSpacing: '2px',
-                    color: 'var(--text-color)'
-                }}>
-                    Configuración de Interfaz
+                <h1 className="page-main-title" style={{ marginBottom: '0.5rem' }}>
+                    CONFIGURACIÓN DE INTERFAZ
                 </h1>
                 <div style={{ fontSize: '0.7rem', fontWeight: '700', opacity: 0.5, letterSpacing: '1px' }}>
                     SISTEMA DE CONTROL DE VISUALIZACIÓN • SYNKODE OS v0.2.0

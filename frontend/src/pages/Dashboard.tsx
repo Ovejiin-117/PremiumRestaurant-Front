@@ -64,7 +64,7 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                <h1 style={{ marginTop: "0", marginBottom: "2rem" }}>Panel Principal</h1>
+                <h1 className="page-main-title">PANEL PRINCIPAL</h1>
 
                 <div className="card-grid">
                     {canViewManagement && (

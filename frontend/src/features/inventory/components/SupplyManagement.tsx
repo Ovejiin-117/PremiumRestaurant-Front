@@ -67,20 +67,10 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
     return (
         <div className="page-container animate-fade-in" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
             {/* Encabezado */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <button onClick={back} className="btn-back">
-                        <span style={{ fontSize: '1.2em' }}>←</span> VOLVER AL PANEL
-                    </button>
-                    <div>
-                        <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.02em' }}>
-                            CONTROL DE BODEGA & INSUMOS
-                        </h1>
-                        <p style={{ margin: 0, opacity: 0.6, fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Gestión técnica de materias primas y existencias
-                        </p>
-                    </div>
-                </div>
+            <div className="title-bar">
+                <button onClick={back} className="btn-back">
+                    <span style={{ fontSize: '1.2em' }}>←</span> VOLVER AL PANEL
+                </button>
                 <button
                     onClick={() => setIsAdding(true)}
                     className="btn-primary"
@@ -89,6 +79,8 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                     + NUEVO INSUMO
                 </button>
             </div>
+
+            <h1 className="page-main-title">CONTROL DE BODEGA & INSUMOS</h1>
 
             {/* Contenido principal */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>

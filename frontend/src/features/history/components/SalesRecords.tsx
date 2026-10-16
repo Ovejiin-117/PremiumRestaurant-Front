@@ -131,8 +131,9 @@ export default function SalesRecords({
                             showOrientation={false}
                         />
                     </div>
-                    <h1 style={{ margin: 0 }}>Historial de Ventas</h1>
                 </div>
+
+                <h1 className="page-main-title">HISTORIAL DE VENTAS</h1>
 
                 {/* Controles de filtro - Igual que History.tsx */}
                 <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>

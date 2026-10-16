@@ -103,32 +103,28 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
             />
             <div className="page-container">
                 <div className="title-bar">
-                    <div>
-                        <div style={{ fontSize: "1.25em", fontWeight: 700 }}>Configuración de Impuestos</div>
-                        <div style={{ opacity: 0.8, fontSize: "0.875em" }}>Gestiona el IVA y otros cargos</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button onClick={handleBack} className="btn-back">
-                            ← Volver al panel
-                        </button>
+                    <button onClick={handleBack} className="btn-back">
+                        ← Volver al panel
+                    </button>
 
-                        <button
-                            onClick={() => setShowSaveConfirm(true)}
-                            style={{
-                                padding: "10px 30px",
-                                borderRadius: "10px",
-                                border: "none",
-                                background: "var(--success-color)",
-                                color: "white",
-                                cursor: "pointer",
-                                fontWeight: 'bold',
-                                boxShadow: '0 4px 12px var(--success-color-alpha-20)'
-                            }}
-                        >
-                            Guardar
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setShowSaveConfirm(true)}
+                        style={{
+                            padding: "10px 30px",
+                            borderRadius: "10px",
+                            border: "none",
+                            background: "var(--success-color)",
+                            color: "white",
+                            cursor: "pointer",
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 12px var(--success-color-alpha-20)'
+                        }}
+                    >
+                        Guardar
+                    </button>
                 </div>
+
+                <h1 className="page-main-title">CONFIGURACIÓN DE IMPUESTOS</h1>
 
                 <div className="glass-card" style={{ cursor: 'default', marginTop: '2rem' }}>
                     <div style={{ fontSize: "1.125em", fontWeight: 700, marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
