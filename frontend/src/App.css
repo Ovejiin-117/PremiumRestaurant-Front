@@ -486,6 +486,42 @@ select:focus {
   transform: scale(0.981);
 }
 
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  background: var(--success-color, #22c55e);
+  color: white;
+  padding: 0 1.5em;
+  border-radius: 0.75em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  font-size: 0.9em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  outline: none;
+  min-width: 8em;
+  height: 2.2em;
+  font-family: inherit;
+  margin: 0;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px var(--success-color-alpha-20, rgba(34, 197, 94, 0.25));
+}
+
+.btn-success:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px var(--success-color-alpha-20, rgba(34, 197, 94, 0.4));
+  transform: translateY(-1px);
+}
+
+.btn-success:active {
+  transform: scale(0.981);
+}
+
 @keyframes printingProgress {
   0% {
     width: 0%;

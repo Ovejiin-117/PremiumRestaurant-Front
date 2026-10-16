@@ -87,7 +87,6 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                     <button
                         onClick={() => setIsAdding(true)}
                         className="btn-primary"
-                        style={{ borderRadius: '4px', padding: '0.8rem 1.5rem', fontWeight: 'bold' }}
                     >
                         + NUEVO INSUMO
                     </button>

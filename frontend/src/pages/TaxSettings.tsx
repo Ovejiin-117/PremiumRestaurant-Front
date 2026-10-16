@@ -120,16 +120,7 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
 
                     <button
                         onClick={() => setShowSaveConfirm(true)}
-                        style={{
-                            padding: "10px 30px",
-                            borderRadius: "10px",
-                            border: "none",
-                            background: "var(--success-color)",
-                            color: "white",
-                            cursor: "pointer",
-                            fontWeight: 'bold',
-                            boxShadow: '0 4px 12px var(--success-color-alpha-20)'
-                        }}
+                        className="btn-success"
                     >
                         Guardar
                     </button>

@@ -51,12 +51,20 @@ export default function Dashboard({
                         <button
                             onClick={onLogout}
                             style={{
-                                padding: "10px 12px",
-                                borderRadius: "10px",
+                                height: "2.2em",
+                                padding: "0 1.25em",
+                                borderRadius: "0.75em",
                                 border: "1px solid var(--card-border)",
                                 background: "var(--card-hover-bg)",
                                 color: "var(--text-color)",
                                 cursor: "pointer",
+                                fontSize: "0.85em",
+                                fontWeight: 700,
+                                fontFamily: "inherit",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                             }}
                         >
                             Cerrar sesión
