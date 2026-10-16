@@ -255,9 +255,9 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                 <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
                     <div>
                         <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '800', background: 'linear-gradient(to right, #fff, #999)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Acomodar categorías
+                            Estructura del Menú
                         </h2>
-                        <p style={{ margin: '4px 0 0 0', opacity: 0.5, fontSize: '0.85rem' }}>Organiza la estructura de tu menú</p>
+                        <p style={{ margin: '4px 0 0 0', opacity: 0.5, fontSize: '0.85rem' }}>Organiza las categorías, subcategorías y secciones de tu menú</p>
                     </div>
                     <button
                         onClick={onClose}

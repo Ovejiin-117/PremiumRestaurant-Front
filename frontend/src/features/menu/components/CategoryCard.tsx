@@ -42,7 +42,7 @@ interface CategoryCardProps {
     user: User;
     // Props de reordenamiento
     isReorderMode: boolean;
-    setIsReorderMode: (b: boolean) => void;
+    setIsReorderMode?: (b: boolean) => void;
     handleReorder: (draggedCat: string, targetCat: string) => void;
     isShiftOpen: boolean;
     // Props de filtrado
@@ -89,7 +89,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         startEdit,
         handleAddToOrder, user,
         // Props de reordenamiento
-        isReorderMode, setIsReorderMode, handleReorder,
+        isReorderMode, handleReorder,
         // Filtros
         filters,
         isShiftOpen,
@@ -105,38 +105,11 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         setSelectedItemForMenu
     } = props;
 
-    const viewSuffix = showOrderingUI ? 'order' : 'edit';
-
-    const [isCollapsed, setIsCollapsed] = useState(() => {
-        const key = `rp_collapsed_cat_${user.username}_${cat}_${viewSuffix}`;
-        return localStorage.getItem(key) === 'true';
-    });
-
-    const [collapsedSubs, setCollapsedSubs] = useState<Record<string, boolean>>(() => {
-        const key = `rp_collapsed_subs_${user.username}_${cat}_${viewSuffix}`;
-        const saved = localStorage.getItem(key);
-        return saved ? JSON.parse(saved) : {};
-    });
-
-    const [collapsedSecs, setCollapsedSecs] = useState<Record<string, boolean>>(() => {
-        const key = `rp_collapsed_secs_${user.username}_${cat}_${viewSuffix}`;
-        const saved = localStorage.getItem(key);
-        return saved ? JSON.parse(saved) : {};
-    });
-
-    useEffect(() => {
-        localStorage.setItem(`rp_collapsed_cat_${user.username}_${cat}_${viewSuffix}`, isCollapsed.toString());
-    }, [isCollapsed, user.username, cat, viewSuffix]);
-
-    useEffect(() => {
-        const key = `rp_collapsed_subs_${user.username}_${cat}_${viewSuffix}`;
-        localStorage.setItem(key, JSON.stringify(collapsedSubs));
-    }, [collapsedSubs, user.username, cat, viewSuffix]);
-
-    useEffect(() => {
-        const key = `rp_collapsed_secs_${user.username}_${cat}_${viewSuffix}`;
-        localStorage.setItem(key, JSON.stringify(collapsedSecs));
-    }, [collapsedSecs, user.username, cat, viewSuffix]);
+    // Categorías inician cerradas por defecto al entrar al menú o crear una nueva
+    const [isCollapsed, setIsCollapsed] = useState(true);
+    // Subcategorías y secciones inician colapsadas por defecto
+    const [collapsedSubs, setCollapsedSubs] = useState<Record<string, boolean>>({});
+    const [collapsedSecs, setCollapsedSecs] = useState<Record<string, boolean>>({});
 
     const [prevGlobalCollapseState, setPrevGlobalCollapseState] = useState(globalCollapseState);
     // Responder al cambio de alternancia global ajustando el estado durante la renderización
@@ -164,29 +137,17 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
     }
 
     const toggleSub = (subKey: string) => {
-        setCollapsedSubs(prev => ({ ...prev, [subKey]: !prev[subKey] }));
+        setCollapsedSubs(prev => {
+            const current = prev[subKey] !== undefined ? prev[subKey] : true;
+            return { ...prev, [subKey]: !current };
+        });
     };
 
     const toggleSec = (secKey: string) => {
-        setCollapsedSecs(prev => ({ ...prev, [secKey]: !prev[secKey] }));
-    };
-
-    // Lógica de pulsación prolongada
-    const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const onPointerDown = (e: React.PointerEvent) => {
-        if (!canEdit || isReorderMode) return;
-        // No activar en botones o campos de entrada
-        if ((e.target as HTMLElement).closest('button, input, .action-menu')) return;
-
-        timerRef.current = setTimeout(() => {
-            setIsReorderMode(true);
-            if (window.navigator?.vibrate) window.navigator.vibrate(50);
-        }, 600);
-    };
-
-    const onPointerUp = () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
+        setCollapsedSecs(prev => {
+            const current = prev[secKey] !== undefined ? prev[secKey] : true;
+            return { ...prev, [secKey]: !current };
+        });
     };
 
     // Manejadores de arrastrar y soltar (Drag and Drop)
@@ -222,9 +183,6 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         <div
             className={`glass-card ${isReorderMode ? 'wiggle' : ''}`}
             draggable={isReorderMode}
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onDragOver={onDragOver}
@@ -321,11 +279,17 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                         setSelectedItemForMenu={setSelectedItemForMenu}
                     />
 
+                    {menu.filter(m => m.category === cat).length === 0 && (!subCategories[cat] || subCategories[cat].length === 0) && (
+                        <div style={{ textAlign: 'center', padding: '1.25rem 0.5rem', opacity: 0.5, fontSize: '0.85em', fontStyle: 'italic', border: '1px dashed var(--card-border)', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
+                            Sin productos todavía
+                        </div>
+                    )}
+
                     {subCategories[cat]
                         ?.filter(sub => !filters.subcategory || sub === filters.subcategory)
                         .map(sub => {
                             const subKey = `${cat}::${sub}`;
-                            const isSubCollapsed = !!collapsedSubs[subKey];
+                            const isSubCollapsed = collapsedSubs[subKey] !== undefined ? collapsedSubs[subKey] : true;
                             return (
                                 <div key={sub} style={{ marginTop: '16px', borderTop: '1px dashed var(--card-border)', paddingTop: '16px', paddingLeft: '12px', position: 'relative' }}>
 
@@ -417,7 +381,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                                 ?.filter(sec => !filters.section || sec === filters.section)
                                                 .map(sec => {
                                                     const secKey = `${cat}::${sub}::${sec}`;
-                                                    const isSecCollapsed = !!collapsedSecs[secKey];
+                                                    const isSecCollapsed = collapsedSecs[secKey] !== undefined ? collapsedSecs[secKey] : true;
                                                     return (
                                                         <div key={sec} style={{ marginTop: '0.5rem', paddingLeft: '0.75rem', borderLeft: '2px solid var(--primary-color-alpha-20)', position: 'relative' }}>
 

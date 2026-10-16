@@ -13,6 +13,7 @@ interface MenuHeaderProps {
     layoutOrientation: LayoutOrientation;
     setLayoutOrientation: (o: LayoutOrientation) => void;
     showOrientation?: boolean;
+    isReorderMode?: boolean;
     setIsReorderMode: (b: boolean) => void;
     onAddProduct: () => void;
     onShowTaxonomyManager: () => void;
@@ -28,6 +29,7 @@ export default function MenuHeader({
     layoutOrientation,
     setLayoutOrientation,
     showOrientation = true,
+    isReorderMode = false,
     setIsReorderMode,
     onAddProduct,
     onShowTaxonomyManager
@@ -52,24 +54,34 @@ export default function MenuHeader({
             </div>
 
             {canEdit && (
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
                     <button
-                        onClick={() => setIsReorderMode(true)}
-                        className="btn-primary"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsReorderMode(!isReorderMode);
+                        }}
                         style={{
-                            minWidth: '3.5rem',
+                            height: '2.2em',
+                            width: '2.4em',
+                            minWidth: '2.4em',
                             padding: 0,
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid var(--card-border)',
-                            fontSize: '1.2rem',
-                            color: 'white'
+                            background: isReorderMode ? 'var(--primary-color)' : 'rgba(255, 255, 255, 0.06)',
+                            border: isReorderMode ? '1px solid var(--primary-color)' : '1px solid var(--card-border)',
+                            borderRadius: '0.5em',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '0.95em',
+                            boxShadow: isReorderMode ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            flexShrink: 0
                         }}
-                        title="Reordenar Categorías"
+                        title={isReorderMode ? "Listo (Desactivar reordenamiento)" : "Reordenar categorías"}
+                        aria-pressed={isReorderMode}
                     >
-                        ✋&#xFE0E;
+                        <span style={{ fontSize: '1.15em', lineHeight: 1 }}>✋&#xFE0E;</span>
                     </button>
 
                     <button

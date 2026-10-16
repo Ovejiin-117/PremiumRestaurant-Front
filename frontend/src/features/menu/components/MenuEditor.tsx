@@ -197,12 +197,36 @@ export default function MenuEditor(props: Props) {
                         layoutOrientation={layoutOrientation}
                         setLayoutOrientation={setLayoutOrientation}
                         showOrientation={true}
+                        isReorderMode={state.isReorderMode}
                         setIsReorderMode={state.setIsReorderMode}
                         onAddProduct={() => state.setShowAddItemGlobal(true)}
                         onShowTaxonomyManager={() => state.setShowTaxonomyManager(true)}
                     />
 
                     <h1 style={{ marginTop: "1rem", fontSize: "2em" }}>{showOrderingUI ? 'Menú' : 'Editor de Menú'}</h1>
+
+                    {state.isReorderMode && (
+                        <div
+                            onClick={e => e.stopPropagation()}
+                            style={{
+                                background: 'rgba(59, 130, 246, 0.12)',
+                                border: '1px solid rgba(59, 130, 246, 0.35)',
+                                borderRadius: '0.75rem',
+                                padding: '0.75rem 1.25rem',
+                                marginTop: '1rem',
+                                marginBottom: '0.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.6rem',
+                                animation: 'modalFadeIn 0.2s ease-out',
+                                color: 'white',
+                                fontSize: '0.95em'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.25em', lineHeight: 1 }}>✋</span>
+                            <span><strong>Modo Reordenar Categorías:</strong> Arrastra y suelta las tarjetas para cambiar su orden.</span>
+                        </div>
+                    )}
 
                     {showOrderingUI && <PromoBanner promotions={promotions} />}
 

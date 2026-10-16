@@ -86,21 +86,15 @@ export const useMenuEditor = ({
     // Modo de reordenamiento
     const [isReorderMode, setIsReorderMode] = useState(false);
 
-    // Estado de expansión global
-    const [globalCollapseState, setGlobalCollapseState] = useState<'expanded' | 'collapsed' | null>(() => {
-        return (localStorage.getItem(`rp_global_collapse_${user.username}`) as 'expanded' | 'collapsed' | null) || null;
-    });
+    // Estado de expansión global (inicia siempre colapsado cada vez que se entra al menú)
+    const [globalCollapseState, setGlobalCollapseState] = useState<'expanded' | 'collapsed' | null>('collapsed');
 
     const [showAddItemGlobal, setShowAddItemGlobal] = useState(false);
     const [showTaxonomyManager, setShowTaxonomyManager] = useState(false);
     const [selectedItemForMenu, setSelectedItemForMenu] = useState<MenuItem | null>(null);
 
     const toggleGlobalCollapse = () => {
-        setGlobalCollapseState(prev => {
-            const next = (prev === 'collapsed') ? 'expanded' : 'collapsed';
-            localStorage.setItem(`rp_global_collapse_${user.username}`, next);
-            return next;
-        });
+        setGlobalCollapseState(prev => (prev === 'expanded' ? 'collapsed' : 'expanded'));
     };
 
     // Lógica de unicidad y limpieza
@@ -266,7 +260,6 @@ export const useMenuEditor = ({
         setEditItemMode({});
         setAddingToKey({});
         setConfirmDeleteId(null);
-        setIsReorderMode(false);
         setEditingSubKey(null);
         setEditingSecKey(null);
         setModeContext(null);
@@ -284,7 +277,6 @@ export const useMenuEditor = ({
             || Object.values(deleteSectionMode).some(v => v);
 
         if (hasActiveModes) resetMode();
-        setIsReorderMode(false);
         setShowCatMenu(false);
         setEditingSubKey(null);
         setEditingSecKey(null);
@@ -300,14 +292,20 @@ export const useMenuEditor = ({
         newCats.splice(draggedIdx, 1);
         newCats.splice(targetIdx, 0, draggedCat);
         setCategories(newCats);
-        setIsReorderMode(false);
     };
 
-    const handleAddCategory = () => {
-        if (!newCatName.trim()) return;
-        if (!isNameUnique(newCatName)) return alert("El nombre ya está en uso (categoría, subcategoría, sección o producto)");
-        setCategories([...categories, newCatName]);
-        logAction('category_create', `Categoría creada: ${newCatName}`, newCatName);
+    const handleAddCategory = (customName?: string) => {
+        const nameToAdd = (typeof customName === 'string' ? customName : newCatName).trim();
+        if (!nameToAdd) return;
+        if (!isNameUnique(nameToAdd)) return alert("El nombre ya está en uso (categoría, subcategoría, sección o producto)");
+        setCategories([...categories, nameToAdd]);
+        if (!subCategories[nameToAdd]) {
+            setSubCategories({
+                ...subCategories,
+                [nameToAdd]: []
+            });
+        }
+        logAction('category_create', `Categoría creada: ${nameToAdd}`, nameToAdd);
         setNewCatName('');
         setShowCatInput(false);
         setShowCatMenu(false);
@@ -442,7 +440,7 @@ export const useMenuEditor = ({
 
         // Actualizar secciones
         const oldKey = `${cat}::${originalSub}`;
-        const newKey = `${cat}::${editingSubNewName}`;
+        const newKey = `${cat}::${value}`;
         if (sections[oldKey]) {
             const newSecs = { ...sections };
             newSecs[newKey] = newSecs[oldKey];
@@ -453,11 +451,11 @@ export const useMenuEditor = ({
         // Actualizar elementos del menú
         setMenu(menu.map(m =>
             (m.category === cat && m.subcategory === originalSub)
-                ? { ...m, subcategory: editingSubNewName }
+                ? { ...m, subcategory: value }
                 : m
         ));
 
-        logAction('subcategory_rename', `Subcategoría renombrada: ${originalSub} -> ${editingSubNewName} (en ${cat})`, `${cat}::${originalSub}`);
+        logAction('subcategory_rename', `Subcategoría renombrada: ${originalSub} -> ${value} (en ${cat})`, `${cat}::${originalSub}`);
 
         setEditingSubKey(null);
     };
@@ -488,11 +486,11 @@ export const useMenuEditor = ({
         // Actualizar elementos del menú
         setMenu(menu.map(m =>
             (m.category === cat && m.subcategory === sub && m.section === originalSec)
-                ? { ...m, section: editingSecNewName }
+                ? { ...m, section: value }
                 : m
         ));
 
-        logAction('section_rename', `Sección renombrada: ${originalSec} -> ${editingSecNewName} (en ${cat} > ${sub})`, `${cat}::${sub}::${originalSec}`);
+        logAction('section_rename', `Sección renombrada: ${originalSec} -> ${value} (en ${cat} > ${sub})`, `${cat}::${sub}::${originalSec}`);
 
         setEditingSecKey(null);
     };
