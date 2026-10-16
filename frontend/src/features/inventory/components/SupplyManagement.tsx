@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { SupplyItem, AuditAction, UIScale } from '../../../types';
 import CustomSelect from '../../../components/ui/CustomSelect';
 import SettingsControls from '../../../components/ui/SettingsControls';
@@ -23,6 +23,14 @@ const UNITS = [
 export default function SupplyManagement({ supplies, setSupplies, logAction, back, uiScale, setUiScale }: Props) {
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    const sortedSupplies = useMemo(() => {
+        return [...supplies].sort((a, b) => {
+            const ratioA = a.minStock > 0 ? a.currentStock / a.minStock : (a.currentStock > 0 ? 999 : 0);
+            const ratioB = b.minStock > 0 ? b.currentStock / b.minStock : (b.currentStock > 0 ? 999 : 0);
+            return ratioA - ratioB;
+        });
+    }, [supplies]);
     const [formData, setFormData] = useState<Partial<SupplyItem>>({
         name: '',
         currentStock: 0,
@@ -104,7 +112,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                     </div>
                 )}
 
-                {supplies.sort((a, b) => a.currentStock / a.minStock - b.currentStock / b.minStock).map(supply => (
+                {sortedSupplies.map(supply => (
                     <div key={supply.id} className="glass-card" style={{
                         borderLeft: `4px solid ${getStatusColor(supply)}`,
                         padding: '1.5rem',

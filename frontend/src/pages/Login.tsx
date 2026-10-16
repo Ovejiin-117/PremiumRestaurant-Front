@@ -16,26 +16,30 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
     const [error, setError] = useState("");
     const [fade, setFade] = useState(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const innerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const showError = (msg: string) => {
         if (timerRef.current) clearTimeout(timerRef.current);
+        if (innerTimerRef.current) clearTimeout(innerTimerRef.current);
         setError(msg);
         setFade(true);
         timerRef.current = setTimeout(() => {
             setFade(false);
-            setTimeout(() => setError(""), 500); // Esperar a que termine el desvanecimiento
+            innerTimerRef.current = setTimeout(() => setError(""), 500); // Esperar a que termine el desvanecimiento
         }, 3000);
     };
 
     useEffect(() => {
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
+            if (innerTimerRef.current) clearTimeout(innerTimerRef.current);
         };
     }, []);
 
     const handleLogin = () => {
+        const cleanUsername = username.trim();
         // Buscar usuario por nombre de usuario (sin distinción de mayúsculas/minúsculas) y verificar si está activo
-        const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.active !== false);
+        const foundUser = users.find(u => u.username.toLowerCase() === cleanUsername.toLowerCase() && u.active !== false);
 
         if (!foundUser) {
             showError("USUARIO NO EXISTENTE");

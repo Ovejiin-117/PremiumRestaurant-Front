@@ -23,11 +23,6 @@ export interface SupplyItem {
     category: string;
 }
 
-export interface RecipeComponent {
-    supplyId: string;
-    quantity: number;
-}
-
 export type ItemType = 'alimento' | 'bebida' | 'objeto';
 
 export interface MenuItem {
@@ -41,7 +36,6 @@ export interface MenuItem {
     available: boolean;
     subcategory?: string;
     section?: string;
-    recipe?: RecipeComponent[];
 }
 
 export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'delivered';
@@ -64,6 +58,8 @@ export interface Order {
     id: string;
     items: OrderItem[];
     total: number;
+    subtotal?: number;
+    tax?: number;
     orderedBy: string; // Nombre de usuario
     createdAt: string; // Cadena en formato ISO
     shiftId: string;

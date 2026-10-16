@@ -8,8 +8,7 @@ import OrderPanel from './OrderPanel';
 import MenuFilter from './MenuFilter';
 import ItemList from './ItemList';
 import SecurityModal from '../../../components/ui/SecurityModal';
-import AddItemForm from '../../../components/ui/AddItemForm';
-import EditItemForm from './EditItemForm';
+import MenuItemModal from './MenuItemModal';
 import TaxonomyManager from './TaxonomyManager';
 
 interface Props {
@@ -658,9 +657,9 @@ export default function MenuEditor(props: Props) {
 
                 {/* Formulario global para agregar producto */}
                 {state.showAddItemGlobal && (
-                    <AddItemForm
-                        onSave={(name, price, type, desc, img, cat, sub, sec) => {
-                            handlers.saveNewItem(cat!, name, price, type, sub, sec, desc, img);
+                    <MenuItemModal
+                        onSave={(name, price, type, cat, sub, sec, desc, img) => {
+                            handlers.saveNewItem(cat, name, price, type, sub, sec, desc, img);
                             state.setShowAddItemGlobal(false);
                         }}
                         onCancel={() => state.setShowAddItemGlobal(false)}
@@ -674,7 +673,7 @@ export default function MenuEditor(props: Props) {
                     const itemToEdit = props.menu.find(i => i.id === state.editingItemId);
                     if (!itemToEdit) return null;
                     return (
-                        <EditItemForm
+                        <MenuItemModal
                             item={itemToEdit}
                             onSave={(name, price, type, cat, sub, sec, desc, img) => {
                                 handlers.saveEdit(itemToEdit.id, name, price, type, cat, sub, sec, desc, img);

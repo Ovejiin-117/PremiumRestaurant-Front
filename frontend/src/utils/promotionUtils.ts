@@ -8,7 +8,10 @@ export const isPromotionActive = (promo: Promotion, date: Date = new Date()): bo
 
     // Comprobar período de validez
     if (promo.validityMode === 'date_range') {
-        const currentDateStr = date.toISOString().split('T')[0];
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const currentDateStr = `${year}-${month}-${day}`;
         if (promo.startDate && currentDateStr < promo.startDate) return false;
         if (promo.endDate && currentDateStr > promo.endDate) return false;
     }

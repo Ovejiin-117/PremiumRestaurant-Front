@@ -3,6 +3,7 @@ import CustomSelect from "../../../components/ui/CustomSelect";
 import type { User, Role, UIScale, LayoutOrientation } from "../../../types";
 import SettingsControls from "../../../components/ui/SettingsControls";
 import SecurityModal from "../../../components/ui/SecurityModal";
+import ConfirmButton from "../../../components/ui/ConfirmButton";
 
 type Props = {
     user: User; // Usuario actualmente autenticado
@@ -18,28 +19,6 @@ type Props = {
 };
 
 type Mode = 'normal' | 'delete_selection' | 'edit_selection';
-
-// Componente interno para confirmación de eliminación (patrón copiado de MenuEditor)
-const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete }: { id: string, activeId: string | null, setActiveId: (id: string | null) => void, onDelete: () => void }) => {
-    const isConfirming = activeId === id;
-    return (
-        <button
-            onClick={(e) => {
-                e.stopPropagation();
-                if (isConfirming) {
-                    onDelete();
-                } else {
-                    setActiveId(id);
-                }
-            }}
-            className={`font-bold cursor-pointer transition-all px-[1em] py-[0.5em] text-[0.85em] rounded-[0.4em] border text-white ${
-                isConfirming ? 'bg-red-700 border-red-200' : 'bg-danger border-white'
-            }`}
-        >
-            {isConfirming ? 'CONFIRMAR' : 'ELIMINAR'}
-        </button>
-    );
-};
 
 export default function UserManagement({
     user, users, setUsers, back,
@@ -72,7 +51,7 @@ export default function UserManagement({
     const [pendingAction, setPendingAction] = useState<{ type: 'create' | 'edit' | 'delete' | 'reveal', data?: string | null } | null>(null);
     const [showSecurityModal, setShowSecurityModal] = useState(false);
 
-    // Estado de eliminación
+    // Estado de eliminación para ConfirmButton
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const [msg, setMsg] = useState("");
@@ -459,6 +438,7 @@ export default function UserManagement({
 
                 <div className="flex flex-col gap-6">
                     {[
+                        ...(user.role === 'developer' ? [{ title: 'Desarrolladores:', role: 'developer' }] : []),
                         { title: 'Gerente:', role: 'manager' },
                         { title: 'Meseros:', role: 'waiter' }
                     ].map(section => {
@@ -511,11 +491,12 @@ export default function UserManagement({
                                                 {/* Capa superpuesta del modo eliminar */}
                                                 {mode === 'delete_selection' && canManageUser(u) && (
                                                     <div className="absolute inset-0 bg-black/80 z-10 flex items-center justify-center">
-                                                        <DeleteConfirmBtn
+                                                        <ConfirmButton
                                                             id={u.username}
                                                             activeId={confirmDeleteId}
                                                             setActiveId={setConfirmDeleteId}
-                                                            onDelete={() => handleDelete(u.username)}
+                                                            onAction={() => handleDelete(u.username)}
+                                                            label="ELIMINAR"
                                                         />
                                                     </div>
                                                 )}

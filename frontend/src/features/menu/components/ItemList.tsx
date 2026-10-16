@@ -167,7 +167,7 @@ const ItemList: React.FC<ItemListProps> = ({
                             return (
                                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.9em', marginLeft: 'auto', marginRight: '1rem' }}>
                                     <span style={{ textDecoration: 'line-through', opacity: 0.5, color: 'var(--text-secondary)' }}>${item.price}</span>
-                                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${promoPrice.toFixed(0)}</span>
+                                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${promoPrice.toFixed(2)}</span>
                                 </div>
                             );
                         }
@@ -184,7 +184,7 @@ const ItemList: React.FC<ItemListProps> = ({
                                         return (
                                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                 <span style={{ textDecoration: 'line-through', opacity: 0.5, color: 'var(--text-secondary)', fontSize: '0.85em', fontWeight: 'normal' }}>${item.price}</span>
-                                                <span>${promoPrice.toFixed(0)}</span>
+                                                <span>${promoPrice.toFixed(2)}</span>
                                             </div>
                                         );
                                     }
@@ -248,4 +248,4 @@ const ItemList: React.FC<ItemListProps> = ({
     );
 };
 
-export default ItemList;
+export default React.memo(ItemList);

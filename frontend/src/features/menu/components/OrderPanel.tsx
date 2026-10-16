@@ -1,6 +1,7 @@
 import React from 'react';
 import type { MenuItem, Promotion, TaxConfig } from '../../../types';
 import { getPromotionalPrice, isPromotionActive } from '../../../utils/promotionUtils';
+import { calculateOrderTax } from '../../../utils/taxUtils';
 
 interface OrderPanelProps {
     currentOrder: { menuItem: MenuItem; quantity: number }[];
@@ -28,7 +29,6 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
     taxConfig, promotions
 }) => {
     const totalSum = calculateTotal();
-    const taxRate = taxConfig.percentage / 100;
 
     const getLineTotal = (item: { menuItem: MenuItem; quantity: number }) => {
         const now = new Date();
@@ -56,44 +56,11 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
         return bestTotal;
     };
 
-    let subtotal = 0;
-    let taxAmount = 0;
-
-    if (taxConfig.enabled) {
-        if (taxConfig.rounding === 'item') {
-            currentOrder.forEach(item => {
-                const itemPromotedTotal = getLineTotal(item);
-                let itemSub = 0;
-                let itemTax = 0;
-
-                if (taxConfig.mode === 'inclusive') {
-                    itemSub = itemPromotedTotal / (1 + taxRate);
-                    itemTax = itemPromotedTotal - itemSub;
-                } else {
-                    itemSub = itemPromotedTotal;
-                    itemTax = itemPromotedTotal * taxRate;
-                }
-
-                subtotal += Math.round(itemSub * 100) / 100;
-                taxAmount += Math.round(itemTax * 100) / 100;
-            });
-        } else {
-            // Calcular sobre la suma total (que ya incluye descuentos por combos)
-            if (taxConfig.mode === 'inclusive') {
-                subtotal = totalSum / (1 + taxRate);
-                taxAmount = totalSum - subtotal;
-            } else {
-                subtotal = totalSum;
-                taxAmount = totalSum * taxRate;
-            }
-            subtotal = Math.round(subtotal * 100) / 100;
-            taxAmount = Math.round(taxAmount * 100) / 100;
-        }
-    } else {
-        subtotal = totalSum;
-    }
-
-    const finalTotal = (taxConfig.enabled && taxConfig.mode === 'exclusive') ? subtotal + taxAmount : (taxConfig.mode === 'inclusive' ? totalSum : subtotal);
+    const { subtotal, taxAmount, finalTotal } = calculateOrderTax(
+        totalSum,
+        taxConfig,
+        currentOrder.map(item => ({ price: getLineTotal(item), quantity: 1 }))
+    );
 
     return (
         <div className="glass-card" style={{
@@ -215,7 +182,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                                         <div style={{ fontSize: '0.75em', color: 'var(--text-secondary)', opacity: 0.7 }}>
                                             x ${(() => {
                                                 const promoPrice = getPromotionalPrice(orderItem.menuItem, promotions);
-                                                return promoPrice !== null ? promoPrice.toFixed(0) : orderItem.menuItem.price;
+                                                return promoPrice !== null ? promoPrice.toFixed(2) : orderItem.menuItem.price.toFixed(2);
                                             })()}
                                         </div>
                                     </div>
@@ -228,12 +195,12 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                                                 const promoLineTotal = promoPrice * orderItem.quantity;
                                                 return (
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1' }}>
-                                                        <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.7em', fontWeight: 'normal' }}>${originalLineTotal}</span>
-                                                        <span style={{ color: 'var(--primary-color)' }}>${promoLineTotal.toFixed(0)}</span>
+                                                        <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.7em', fontWeight: 'normal' }}>${originalLineTotal.toFixed(2)}</span>
+                                                        <span style={{ color: 'var(--primary-color)' }}>${promoLineTotal.toFixed(2)}</span>
                                                     </div>
                                                 );
                                             }
-                                            return `$${originalLineTotal}`;
+                                            return `$${originalLineTotal.toFixed(2)}`;
                                         })()}
                                     </div>
                                 </div>

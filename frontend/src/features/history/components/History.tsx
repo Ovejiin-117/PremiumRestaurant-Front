@@ -1,7 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import type { Order, UIScale, LayoutOrientation, User, Shift } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
 import CustomSelect from '../../../components/ui/CustomSelect';
+import { formatDateTime, getShiftLabel } from '../../../utils/dateUtils';
+import { formatCurrency } from '../../../utils/currencyUtils';
 
 interface Props {
     user: User;
@@ -38,27 +40,6 @@ export default function History({
 
     const isAdmin = user.role === 'developer' || user.role === 'manager';
 
-    const getShiftLabel = useCallback((shift: Shift) => {
-        const start = new Date(shift.startTime);
-        const startStr = start.toLocaleString('es-ES', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-
-        if (shift.id === currentShiftId) return `Turno Actual (Iniciado: ${startStr})`;
-
-        if (shift.endTime) {
-            const end = new Date(shift.endTime);
-            const endStr = end.toLocaleString('es-ES', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            return `Turno: ${startStr} — ${endStr}`;
-        }
-
-        return `Turno (Iniciado: ${startStr})`;
-    }, [currentShiftId]);
-
     // 1. Organizar turnos
     const organizedShifts = useMemo(() => {
         let relevantShifts: Shift[] = [];
@@ -89,10 +70,10 @@ export default function History({
             return {
                 shift,
                 orders: shiftOrders,
-                label: getShiftLabel(shift)
+                label: getShiftLabel(shift, shift.id === currentShiftId)
             };
         });
-    }, [shifts, currentShiftId, history, shiftFilterDate, getShiftLabel]);
+    }, [shifts, currentShiftId, history, shiftFilterDate]);
 
 
     const [reprintingOrder, setReprintingOrder] = useState<string | null>(null);
@@ -267,7 +248,10 @@ export default function History({
                                 if (!isAdmin && order.orderedBy !== user.username) return false;
                                 if (filterMinPrice && order.total < Number(filterMinPrice)) return false;
                                 if (filterMaxPrice && order.total > Number(filterMaxPrice)) return false;
-                                if (filterTime && !order.createdAt.includes(filterTime)) return false;
+                                if (filterTime) {
+                                    const formattedTimeStr = formatDateTime(order.createdAt).full;
+                                    if (!formattedTimeStr.includes(filterTime) && !order.createdAt.includes(filterTime)) return false;
+                                }
                                 if (isAdmin && filterUser && order.orderedBy.toLowerCase() !== filterUser.toLowerCase()) return false;
                                 return true;
                             });
@@ -349,7 +333,7 @@ export default function History({
                                                                 <div style={{ textAlign: 'center', marginBottom: '1rem', borderBottom: '1px dashed #94a3b8', paddingBottom: '0.75rem' }}>
                                                                     <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>RESTAURANT PRO</div>
                                                                     <div style={{ fontSize: '0.85em' }}>Ticket de Venta</div>
-                                                                    <div style={{ fontSize: '10px', marginTop: '0.25rem', opacity: 0.8 }}>{order.createdAt}</div>
+                                                                    <div style={{ fontSize: '10px', marginTop: '0.25rem', opacity: 0.8 }}>{formatDateTime(order.createdAt).full}</div>
                                                                 </div>
 
                                                                 {/* Información del ticket */}
@@ -373,7 +357,7 @@ export default function History({
                                                                                 <tr key={idx}>
                                                                                     <td style={{ padding: '0.25rem 0' }}>{item.quantity}</td>
                                                                                     <td style={{ padding: '0.25rem 0' }}>{item.name}</td>
-                                                                                    <td style={{ padding: '0.25rem 0', textAlign: 'right' }}>${(item.price * item.quantity).toFixed(0)}</td>
+                                                                                    <td style={{ padding: '0.25rem 0', textAlign: 'right' }}>{formatCurrency(item.price * item.quantity)}</td>
                                                                                 </tr>
                                                                             ))}
                                                                         </tbody>
@@ -404,7 +388,7 @@ export default function History({
                                                                 {/* Total */}
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2em', marginBottom: '1.5rem' }}>
                                                                     <span>TOTAL:</span>
-                                                                    <span>${order.total.toFixed(2)}</span>
+                                                                    <span>{formatCurrency(order.total)}</span>
                                                                 </div>
 
                                                                 {/* Botón de reimpresión */}

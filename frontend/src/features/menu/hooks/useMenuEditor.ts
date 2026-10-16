@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { MenuItem, User, Order } from '../../../types';
 import { isPromotionActive } from '../../../utils/promotionUtils';
+import { calculateOrderTax } from '../../../utils/taxUtils';
 
 type Mode = 'normal' | 'delete_selection' | 'edit_cat_selection' | 'edit_sub_selection' | 'edit_sec_selection';
 
@@ -19,10 +20,11 @@ interface UseMenuEditorProps {
     currentShiftId: string | null;
     logAction: (action: import('../../../types').AuditAction, details: string, entityId?: string) => void;
     promotions: import('../../../types').Promotion[];
+    taxConfig?: import('../../../types').TaxConfig;
 }
 
 export const useMenuEditor = ({
-    user, menu, setMenu, categories, setCategories, subCategories, setSubCategories, sections, setSections, history, setHistory, currentShiftId, logAction, promotions
+    user, menu, setMenu, categories, setCategories, subCategories, setSubCategories, sections, setSections, history, setHistory, currentShiftId, logAction, promotions, taxConfig
 }: UseMenuEditorProps) => {
     // Modo global (Nivel de categoría)
     const [showCatMenu, setShowCatMenu] = useState(false);
@@ -749,24 +751,22 @@ export const useMenuEditor = ({
         }
 
         const now = new Date();
-        const finalTotal = calculateTotal();
-        const formattedDate = now.toLocaleDateString();
-        const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const baseTotal = calculateTotal();
 
         // Calcular precios de artículos individuales tras promociones porcentuales/LxM (excluyendo combos)
         const itemsWithPromos = currentOrder.map(o => {
-            const baseTotal = o.menuItem.price * o.quantity;
+            const lineBaseTotal = o.menuItem.price * o.quantity;
             const applicablePromos = promotions.filter(p =>
                 p.targetItemIds.includes(o.menuItem.id) &&
                 p.type !== 'combo' &&
                 isPromotionActive(p, now)
             );
 
-            let bestTotal = baseTotal;
+            let bestTotal = lineBaseTotal;
             applicablePromos.forEach(p => {
-                let promoTotal = baseTotal;
+                let promoTotal = lineBaseTotal;
                 if (p.type === 'percentage' && p.value) {
-                    promoTotal = baseTotal * (1 - p.value / 100);
+                    promoTotal = lineBaseTotal * (1 - p.value / 100);
                 } else if (p.type === 'quantity_offer' && p.pay && p.take) {
                     const sets = Math.floor(o.quantity / p.take);
                     const remainder = o.quantity % p.take;
@@ -786,7 +786,7 @@ export const useMenuEditor = ({
 
         // Verificar si hay un descuento restante (de combos)
         const itemsSum = itemsWithPromos.reduce((a, b) => a + (b.price * b.quantity), 0);
-        const comboDiscount = itemsSum - finalTotal;
+        const comboDiscount = itemsSum - baseTotal;
 
         if (comboDiscount > 0.01) {
             itemsWithPromos.push({
@@ -798,11 +798,31 @@ export const useMenuEditor = ({
             });
         }
 
+        // Calcular impuestos consistentes con OrderPanel
+        const { subtotal, taxAmount, finalTotal } = calculateOrderTax(
+            baseTotal,
+            taxConfig,
+            itemsWithPromos.map(item => ({ price: item.price * item.quantity, quantity: 1 }))
+        );
+
+        // Si el impuesto es exclusivo, agregarlo como línea en el ticket para visualización contable
+        if (taxConfig?.enabled && taxConfig.mode === 'exclusive' && taxAmount > 0.009) {
+            itemsWithPromos.push({
+                menuItemId: 'tax-line',
+                name: `${taxConfig.name || 'Impuesto'} (${taxConfig.percentage}%)`,
+                price: taxAmount,
+                quantity: 1,
+                notes: 'Impuesto aplicado'
+            });
+        }
+
         const newOrder: Order = {
             id: crypto.randomUUID(),
             orderedBy: user.username,
             total: finalTotal,
-            createdAt: `${formattedDate} ${formattedTime}`,
+            subtotal,
+            tax: taxAmount,
+            createdAt: now.toISOString(),
             items: itemsWithPromos,
             shiftId: currentShiftId || 'no-shift'
         };

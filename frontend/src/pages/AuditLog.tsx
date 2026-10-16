@@ -44,7 +44,11 @@ const ACTION_OPTIONS: { value: AuditAction | "all", label: string }[] = [
     { value: 'promotion_create', label: 'Crear Promoción' },
     { value: 'promotion_update', label: 'Editar Promoción' },
     { value: 'promotion_delete', label: 'Eliminar Promoción' },
-    { value: 'promotion_toggle', label: 'Estado de la Promoción' }
+    { value: 'promotion_toggle', label: 'Estado de la Promoción' },
+    { value: 'supply_create', label: 'Crear Insumo' },
+    { value: 'supply_update', label: 'Editar Insumo' },
+    { value: 'supply_delete', label: 'Eliminar Insumo' },
+    { value: 'supply_stock_adjust', label: 'Ajuste de Stock (Insumo)' }
 ];
 
 // --- Subcomponente: Menú desplegable con búsqueda ---
@@ -281,6 +285,11 @@ export default function AuditLog({
             case 'promotion_update': return { color: '#f97316', icon: '🏷️✎', label: 'Editar Promoción' };
             case 'promotion_delete': return { color: '#ef4444', icon: '🏷️-', label: 'Eliminar Promoción' };
             case 'promotion_toggle': return { color: '#f97316', icon: '🏷️⚡', label: 'Estado de la Promoción' };
+
+            case 'supply_create': return { color: '#10b981', icon: '📦+', label: 'Nuevo Insumo' };
+            case 'supply_update': return { color: '#3b82f6', icon: '📦✎', label: 'Editar Insumo' };
+            case 'supply_delete': return { color: '#ef4444', icon: '📦-', label: 'Eliminar Insumo' };
+            case 'supply_stock_adjust': return { color: '#f59e0b', icon: '📦⚡', label: 'Ajuste Insumo' };
 
             default: return { color: '#94a3b8', icon: '📝', label: 'Evento' };
         }

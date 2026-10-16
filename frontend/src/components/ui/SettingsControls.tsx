@@ -34,8 +34,8 @@ const SettingsControls: React.FC<SettingsControlsProps> = ({
                     value={layoutOrientation}
                     onChange={setLayoutOrientation}
                     options={[
-                        { value: 'horizontal', label: 'Vertical' },
-                        { value: 'vertical', label: 'Horizontal' }
+                        { value: 'vertical', label: 'Vertical' },
+                        { value: 'horizontal', label: 'Horizontal' }
                     ]}
                 />
             )}

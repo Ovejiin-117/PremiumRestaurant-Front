@@ -46,41 +46,38 @@ const CustomSelect = <T extends string>({
     return (
         <div ref={containerRef} style={{ position: 'relative', width: width, display: 'flex', flexDirection: 'column', gap: label ? '6px' : '0' }}>
             <div
+                className="custom-select-trigger"
+                role="combobox"
+                aria-expanded={isOpen}
+                aria-haspopup="listbox"
+                aria-disabled={disabled}
+                tabIndex={disabled ? -1 : 0}
+                onKeyDown={(e) => {
+                    if (disabled) return;
+                    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setIsOpen(prev => !prev);
+                    } else if (e.key === 'Escape') {
+                        setIsOpen(false);
+                    }
+                }}
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.6em',
-                    background: disabled ? 'rgba(255,255,255,0.03)' : 'var(--card-border)',
-                    padding: '0 1.25em',
                     height: height,
-                    borderRadius: '4px',
-                    border: '1px solid var(--card-border)',
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    userSelect: 'none',
+                    width: width,
                     opacity: disabled ? 0.5 : 1,
                     boxShadow: isOpen ? '0 0 0 2px var(--primary-color-alpha-20)' : 'none',
-                    minWidth: '8em',
-                    flexShrink: 0,
-                    flexGrow: 0,
                     ...customStyle
                 }}
-
-                onMouseEnter={e => !disabled && (e.currentTarget.style.background = 'var(--card-hover-bg)')}
-                onMouseLeave={e => !disabled && !isOpen && (e.currentTarget.style.background = 'var(--card-border)')}
             >
                 <span style={{
-                    fontSize: '0.85em',
-                    fontWeight: '700',
-                    color: 'var(--text-color)',
-                    whiteSpace: 'nowrap',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.03em',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35em',
                     lineHeight: '1'
                 }}>
-                    {label || (selectedOption ? selectedOption.label : placeholder)}
+                    {label && <span style={{ opacity: 0.6, fontWeight: '700' }}>{label}:</span>}
+                    <span>{selectedOption ? selectedOption.label : placeholder}</span>
                 </span>
                 <span style={{
                     fontSize: '0.7em',
@@ -93,40 +90,53 @@ const CustomSelect = <T extends string>({
             </div>
 
             {isOpen && !disabled && (
-                <div style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 8px)',
-                    left: 0,
-                    right: 0,
-                    minWidth: 'max-content',
-                    background: 'var(--card-bg)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '4px',
-                    padding: '4px',
-                    zIndex: 2000,
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-                    animation: 'selectSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                    scrollbarWidth: 'none',
-                    border: '1px solid var(--primary-color-alpha-50)'
-                }}>
+                <div
+                    role="listbox"
+                    style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        right: 0,
+                        minWidth: 'max-content',
+                        background: 'var(--card-bg)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '0.75em',
+                        padding: '6px',
+                        zIndex: 2000,
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+                        animation: 'selectSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        maxHeight: '300px',
+                        overflowY: 'auto',
+                        scrollbarWidth: 'none',
+                        border: '1px solid var(--card-border)'
+                    }}
+                >
                     {options.length > 0 ? options.map(opt => (
                         <div
                             key={opt.value}
+                            role="option"
+                            aria-selected={opt.value === value}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    onChange(opt.value);
+                                    setIsOpen(false);
+                                }
+                            }}
                             onClick={() => {
                                 onChange(opt.value);
                                 setIsOpen(false);
                             }}
                             style={{
-                                padding: '8px 12px',
-                                borderRadius: '2px',
+                                padding: '8px 14px',
+                                borderRadius: '0.5em',
                                 cursor: 'pointer',
                                 fontSize: '0.85em',
-                                fontWeight: opt.value === value ? 'bold' : '600',
+                                fontWeight: opt.value === value ? '800' : '600',
                                 color: opt.value === value ? 'white' : 'var(--text-color)',
                                 background: opt.value === value ? 'var(--primary-color)' : 'transparent',
-                                transition: 'all 0.1s ease',
+                                transition: 'all 0.15s ease',
                                 marginBottom: '2px',
                                 display: 'flex',
                                 alignItems: 'center',

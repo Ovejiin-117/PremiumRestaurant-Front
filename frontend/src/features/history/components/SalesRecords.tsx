@@ -1,6 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import type { Order, UIScale, Shift, LayoutOrientation } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
+import { formatDateTime, getShiftLabel } from '../../../utils/dateUtils';
+import { formatCurrency } from '../../../utils/currencyUtils';
 
 interface Props {
     history: Order[];
@@ -36,27 +38,6 @@ export default function SalesRecords({
     const [shiftFilterDate, setShiftFilterDate] = useState("");
     const [showShiftPicker, setShowShiftPicker] = useState(false);
     const [expandedShifts, setExpandedShifts] = useState<Set<string>>(new Set([currentShiftId || '']));
-
-    const getShiftLabel = useCallback((shift: Shift) => {
-        const start = new Date(shift.startTime);
-        const startStr = start.toLocaleString('es-ES', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-
-        if (shift.id === currentShiftId) return `Turno Actual (Iniciado: ${startStr})`;
-
-        if (shift.endTime) {
-            const end = new Date(shift.endTime);
-            const endStr = end.toLocaleString('es-ES', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-            return `Turno: ${startStr} — ${endStr}`;
-        }
-
-        return `Turno (Iniciado: ${startStr})`;
-    }, [currentShiftId]);
 
     // Organizar turnos como en History.tsx
     const organizedShifts = useMemo(() => {
@@ -102,12 +83,12 @@ export default function SalesRecords({
             return {
                 shift,
                 sales: salesData,
-                label: getShiftLabel(shift),
+                label: getShiftLabel(shift, shift.id === currentShiftId),
                 totalAmount: salesData.reduce((acc, s) => acc + s.total, 0),
                 totalCount: salesData.length
             };
         });
-    }, [shifts, currentShiftId, history, shiftFilterDate, getShiftLabel]);
+    }, [shifts, currentShiftId, history, shiftFilterDate]);
 
     const toggleShift = (shiftId: string) => {
         const next = new Set(expandedShifts);
@@ -229,7 +210,7 @@ export default function SalesRecords({
                                                         {totalCount} artículos vendidos
                                                     </span>
                                                     <span style={{ fontSize: '0.85em', color: 'var(--success-color)', fontWeight: 'bold' }}>
-                                                        ${totalAmount.toFixed(2)} total ganado
+                                                        {formatCurrency(totalAmount)} total ganado
                                                     </span>
                                                 </div>
                                             </div>
@@ -269,9 +250,14 @@ export default function SalesRecords({
                                                                 <tr key={i} style={{ borderBottom: i === sales.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)' }}>
                                                                     <td style={{ padding: '0.85rem 1rem', fontWeight: 'bold', color: 'var(--text-color)' }}>{sale.productName}</td>
                                                                     <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>{sale.quantity}</td>
-                                                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.9em' }}>${sale.unitPrice.toFixed(2)}</td>
-                                                                    <td style={{ padding: '0.85rem 1rem', fontWeight: 'bold', color: 'var(--success-color)' }}>${sale.total.toFixed(2)}</td>
-                                                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.75em', opacity: 0.6 }}>{sale.fecha.split(', ')[1]} ({sale.fecha.split(', ')[0]})</td>
+                                                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.9em' }}>{formatCurrency(sale.unitPrice)}</td>
+                                                                    <td style={{ padding: '0.85rem 1rem', fontWeight: 'bold', color: 'var(--success-color)' }}>{formatCurrency(sale.total)}</td>
+                                                                    <td style={{ padding: '0.85rem 1rem', fontSize: '0.75em', opacity: 0.6 }}>
+                                                                        {(() => {
+                                                                            const dt = formatDateTime(sale.fecha);
+                                                                            return dt.time ? `${dt.time} (${dt.date})` : dt.full;
+                                                                        })()}
+                                                                    </td>
                                                                 </tr>
                                                             ))
                                                         )}

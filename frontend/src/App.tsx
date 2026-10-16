@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo, useCallback } from 'react';
+import { SettingsProvider } from './context/SettingsContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MenuEditor from './features/menu/components/MenuEditor';
@@ -191,26 +192,39 @@ function App() {
     }
   }, [theme, animationsEnabled, performanceMode, globalScale]);
 
-  // Guardar ajustes de interfaz solo cuando el usuario ha iniciado sesión
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_dashboard_${user.username}`, dashboardScale); }, [dashboardScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_gestion_${user.username}`, gestionScale); }, [gestionScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_menu_editor_${user.username}`, menuEditorScale); }, [menuEditorScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_menu_ordering_${user.username}`, menuOrderingScale); }, [menuOrderingScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_history_${user.username}`, historyScale); }, [historyScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_turno_${user.username}`, turnoScale); }, [turnoScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`uiScale_promotions_${user.username}`, promotionsScale); }, [promotionsScale, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_dashboard_${user.username}`, dashboardOrientation); }, [dashboardOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_gestion_${user.username}`, gestionOrientation); }, [gestionOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_menu_editor_${user.username}`, menuEditorOrientation); }, [menuEditorOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_menu_ordering_${user.username}`, menuOrderingOrientation); }, [menuOrderingOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_history_${user.username}`, historyOrientation); }, [historyOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_turno_${user.username}`, turnoOrientation); }, [turnoOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`layoutOrientation_promotions_${user.username}`, promotionsOrientation); }, [promotionsOrientation, user]);
-  useEffect(() => { if (user) localStorage.setItem(`ticketWidth_${user.username}`, ticketWidth.toString()); }, [ticketWidth, user]);
-  useEffect(() => { if (user) localStorage.setItem(`animations_${user.username}`, animationsEnabled.toString()); }, [animationsEnabled, user]);
-  useEffect(() => { localStorage.setItem('rp_global_scale', globalScale.toString()); }, [globalScale]);
-  useEffect(() => { localStorage.setItem('rp_performance_mode', performanceMode.toString()); }, [performanceMode]);
-  useEffect(() => { localStorage.setItem('rp_show_images', showImages.toString()); }, [showImages]);
+  // Guardar preferencias de interfaz del usuario activo
+  useEffect(() => {
+    if (!user) return;
+    const u = user.username;
+    localStorage.setItem(`uiScale_dashboard_${u}`, dashboardScale);
+    localStorage.setItem(`uiScale_gestion_${u}`, gestionScale);
+    localStorage.setItem(`uiScale_menu_editor_${u}`, menuEditorScale);
+    localStorage.setItem(`uiScale_menu_ordering_${u}`, menuOrderingScale);
+    localStorage.setItem(`uiScale_history_${u}`, historyScale);
+    localStorage.setItem(`uiScale_turno_${u}`, turnoScale);
+    localStorage.setItem(`uiScale_promotions_${u}`, promotionsScale);
+    localStorage.setItem(`layoutOrientation_dashboard_${u}`, dashboardOrientation);
+    localStorage.setItem(`layoutOrientation_gestion_${u}`, gestionOrientation);
+    localStorage.setItem(`layoutOrientation_menu_editor_${u}`, menuEditorOrientation);
+    localStorage.setItem(`layoutOrientation_menu_ordering_${u}`, menuOrderingOrientation);
+    localStorage.setItem(`layoutOrientation_history_${u}`, historyOrientation);
+    localStorage.setItem(`layoutOrientation_turno_${u}`, turnoOrientation);
+    localStorage.setItem(`layoutOrientation_promotions_${u}`, promotionsOrientation);
+    localStorage.setItem(`ticketWidth_${u}`, ticketWidth.toString());
+    localStorage.setItem(`animations_${u}`, animationsEnabled.toString());
+  }, [
+    user, dashboardScale, gestionScale, menuEditorScale, menuOrderingScale, historyScale,
+    turnoScale, promotionsScale, dashboardOrientation, gestionOrientation, menuEditorOrientation,
+    menuOrderingOrientation, historyOrientation, turnoOrientation, promotionsOrientation,
+    ticketWidth, animationsEnabled
+  ]);
+
+  // Guardar ajustes globales del sistema
+  useEffect(() => {
+    localStorage.setItem('rp_global_scale', globalScale.toString());
+    localStorage.setItem('rp_performance_mode', performanceMode.toString());
+    localStorage.setItem('rp_show_images', showImages.toString());
+  }, [globalScale, performanceMode, showImages]);
 
   // Desplazar hacia arriba al cambiar de vista
   useEffect(() => {
@@ -218,7 +232,7 @@ function App() {
   }, [view]);
 
   // Manejar actualizaciones de tema manualmente para evitar condiciones de carrera durante inicio/cierre de sesión
-  const updateTheme = (newTheme: Theme) => {
+  const updateTheme = useCallback((newTheme: Theme) => {
     setTheme(newTheme);
     if (user) {
       localStorage.setItem(`theme_${user.username}`, newTheme);
@@ -226,7 +240,7 @@ function App() {
       setLoginTheme(newTheme);
       localStorage.setItem('rp_login_theme', newTheme);
     }
-  };
+  }, [user]);
 
   // Lógica de persistencia: inicializar estados con localStorage si está disponible
   const [isSetupComplete, setIsSetupComplete] = useState<boolean>(() => {
@@ -348,7 +362,11 @@ function App() {
       promotion_create: 'Crear Promoción',
       promotion_update: 'Editar Promoción',
       promotion_delete: 'Eliminar Promoción',
-      promotion_toggle: 'Estado de la Promoción'
+      promotion_toggle: 'Estado de la Promoción',
+      supply_create: 'Crear Insumo',
+      supply_update: 'Editar Insumo',
+      supply_delete: 'Eliminar Insumo',
+      supply_stock_adjust: 'Ajuste de Stock (Insumo)'
     };
 
     const newValue = !auditConfig[action];
@@ -465,59 +483,66 @@ function App() {
     handleLogin(newDev);
   };
 
-  return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-color)' }}>
-      <div className="watermark">Synkode®<br /><span style={{ fontSize: '12px', opacity: 0.8 }}>Version 0.2.0</span></div>
+  const settingsContextValue = useMemo(() => ({
+    theme,
+    setTheme,
+    updateTheme,
+    globalScale,
+    setGlobalScale,
+    animationsEnabled,
+    setAnimationsEnabled,
+    performanceMode,
+    setPerformanceMode,
+    showImages,
+    setShowImages,
+    ticketWidth,
+    setTicketWidth
+  }), [theme, updateTheme, globalScale, animationsEnabled, performanceMode, showImages, ticketWidth]);
 
-      <Suspense fallback={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--primary-color)' }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 'bold', opacity: 0.8 }}>Cargando módulo...</div>
-        </div>
-      }>
-        {(!isSetupComplete || isPreviewingSetup) ? (
-          <SetupWizard
-            onComplete={isPreviewingSetup ? () => setIsPreviewingSetup(false) : handleSetupComplete}
-            theme={theme}
-            setTheme={updateTheme}
-          />
-        ) : (!user) ? (
-          <Login
-            users={users}
-            onLogin={handleLogin}
-            isShiftOpen={isShiftOpen}
-            onShowSetup={() => setIsPreviewingSetup(true)}
-            theme={theme}
-            setTheme={updateTheme}
-          />
-        ) : view === 'dashboard' ? (
-          <Dashboard
-            user={user}
-            goTo={(page) => setView(page)}
-            onLogout={handleLogout}
-            uiScale={dashboardScale}
-            setUiScale={setDashboardScale}
-            layoutOrientation={dashboardOrientation}
-            setLayoutOrientation={setDashboardOrientation}
-            isShiftOpen={isShiftOpen}
-            taxConfig={taxConfig}
-          />
-        ) : view === 'visual_settings' ? (
-          <VisualSettings
-            theme={theme}
-            setTheme={updateTheme}
-            animationsEnabled={animationsEnabled}
-            setAnimationsEnabled={setAnimationsEnabled}
-            globalScale={globalScale}
-            setGlobalScale={setGlobalScale}
-            performanceMode={performanceMode}
-            setPerformanceMode={setPerformanceMode}
-            showImages={showImages}
-            setShowImages={setShowImages}
-            back={goBack}
-            user={user}
-            uiScale={dashboardScale}
-          />
-        ) : view === 'gestion' ? (
+  return (
+    <SettingsProvider value={settingsContextValue}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-color)' }}>
+        <div className="watermark">Synkode®<br /><span style={{ fontSize: '12px', opacity: 0.8 }}>Version 0.2.0</span></div>
+
+        <Suspense fallback={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--primary-color)' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', opacity: 0.8 }}>Cargando módulo...</div>
+          </div>
+        }>
+          {(!isSetupComplete || isPreviewingSetup) ? (
+            <SetupWizard
+              onComplete={isPreviewingSetup ? () => setIsPreviewingSetup(false) : handleSetupComplete}
+              theme={theme}
+              setTheme={updateTheme}
+            />
+          ) : (!user) ? (
+            <Login
+              users={users}
+              onLogin={handleLogin}
+              isShiftOpen={isShiftOpen}
+              onShowSetup={() => setIsPreviewingSetup(true)}
+              theme={theme}
+              setTheme={updateTheme}
+            />
+          ) : view === 'dashboard' ? (
+            <Dashboard
+              user={user}
+              goTo={(page) => setView(page)}
+              onLogout={handleLogout}
+              uiScale={dashboardScale}
+              setUiScale={setDashboardScale}
+              layoutOrientation={dashboardOrientation}
+              setLayoutOrientation={setDashboardOrientation}
+              isShiftOpen={isShiftOpen}
+              taxConfig={taxConfig}
+            />
+          ) : view === 'visual_settings' ? (
+            <VisualSettings
+              back={goBack}
+              user={user}
+              uiScale={dashboardScale}
+            />
+          ) : view === 'gestion' ? (
           <UserManagement
             user={user}
             users={users}
@@ -655,7 +680,8 @@ function App() {
           </div>
         )}
       </Suspense>
-    </div>
+      </div>
+    </SettingsProvider>
   );
 }
 

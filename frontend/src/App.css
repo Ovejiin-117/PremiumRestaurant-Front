@@ -459,8 +459,9 @@ select:focus {
   }
 }
 
-/* Estilo global del botón Atrás (coincide con CustomSelect) */
-.btn-back {
+/* Estilo unificado para botón Atrás y selectores en barra de control */
+.btn-back,
+.custom-select-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -484,14 +485,17 @@ select:focus {
   font-family: inherit;
   margin: 0;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
-.btn-back:hover {
+.btn-back:hover,
+.custom-select-trigger:hover {
   background: var(--card-hover-bg);
   border-color: var(--primary-color-alpha-20);
 }
 
-.btn-back:active {
+.btn-back:active,
+.custom-select-trigger:active {
   transform: scale(0.981);
 }
 

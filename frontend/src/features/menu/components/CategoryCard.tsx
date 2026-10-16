@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { MenuItem, User } from '../../../types';
 import ItemList from './ItemList';
 import ConfirmButton from '../../../components/ui/ConfirmButton';
@@ -105,23 +105,29 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         setSelectedItemForMenu
     } = props;
 
-    // Categorías inician cerradas por defecto al entrar al menú o crear una nueva
-    const [isCollapsed, setIsCollapsed] = useState(true);
-    // Subcategorías y secciones inician colapsadas por defecto
-    const [collapsedSubs, setCollapsedSubs] = useState<Record<string, boolean>>({});
-    const [collapsedSecs, setCollapsedSecs] = useState<Record<string, boolean>>({});
+    // Estado de colapso consolidado para evitar múltiples re-renderizados en cascada
+    const [collapseState, setCollapseState] = useState<{
+        isCollapsed: boolean;
+        collapsedSubs: Record<string, boolean>;
+        collapsedSecs: Record<string, boolean>;
+        prevGlobal: 'expanded' | 'collapsed' | null;
+    }>({
+        isCollapsed: true,
+        collapsedSubs: {},
+        collapsedSecs: {},
+        prevGlobal: globalCollapseState || null,
+    });
 
-    const [prevGlobalCollapseState, setPrevGlobalCollapseState] = useState(globalCollapseState);
-    // Responder al cambio de alternancia global ajustando el estado durante la renderización
-    if (globalCollapseState && prevGlobalCollapseState !== globalCollapseState) {
-        setPrevGlobalCollapseState(globalCollapseState);
-
+    // Sincronización limpia con el estado de alternancia global
+    if (globalCollapseState && collapseState.prevGlobal !== globalCollapseState) {
         if (globalCollapseState === 'expanded') {
-            setIsCollapsed(false);
-            setCollapsedSubs({});
-            setCollapsedSecs({});
+            setCollapseState({
+                isCollapsed: false,
+                collapsedSubs: {},
+                collapsedSecs: {},
+                prevGlobal: globalCollapseState,
+            });
         } else if (globalCollapseState === 'collapsed') {
-            setIsCollapsed(true);
             const allSubs: Record<string, boolean> = {};
             const allSecs: Record<string, boolean> = {};
             (subCategories[cat] || []).forEach(sub => {
@@ -131,24 +137,56 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                     allSecs[`${subKey}::${sec}`] = true;
                 });
             });
-            setCollapsedSubs(allSubs);
-            setCollapsedSecs(allSecs);
+            setCollapseState({
+                isCollapsed: true,
+                collapsedSubs: allSubs,
+                collapsedSecs: allSecs,
+                prevGlobal: globalCollapseState,
+            });
         }
     }
 
+    const isCollapsed = collapseState.isCollapsed;
+    const collapsedSubs = collapseState.collapsedSubs;
+    const collapsedSecs = collapseState.collapsedSecs;
+
+    const setIsCollapsed = (collapsed: boolean | ((prev: boolean) => boolean)) => {
+        setCollapseState(prev => ({
+            ...prev,
+            isCollapsed: typeof collapsed === 'function' ? collapsed(prev.isCollapsed) : collapsed
+        }));
+    };
+
     const toggleSub = (subKey: string) => {
-        setCollapsedSubs(prev => {
-            const current = prev[subKey] !== undefined ? prev[subKey] : true;
-            return { ...prev, [subKey]: !current };
+        setCollapseState(prev => {
+            const current = prev.collapsedSubs[subKey] !== undefined ? prev.collapsedSubs[subKey] : true;
+            return {
+                ...prev,
+                collapsedSubs: { ...prev.collapsedSubs, [subKey]: !current }
+            };
         });
     };
 
     const toggleSec = (secKey: string) => {
-        setCollapsedSecs(prev => {
-            const current = prev[secKey] !== undefined ? prev[secKey] : true;
-            return { ...prev, [secKey]: !current };
+        setCollapseState(prev => {
+            const current = prev.collapsedSecs[secKey] !== undefined ? prev.collapsedSecs[secKey] : true;
+            return {
+                ...prev,
+                collapsedSecs: { ...prev.collapsedSecs, [secKey]: !current }
+            };
         });
     };
+
+    // Memoizar los items filtrados de la categoría para evitar iterar el menú completo en cada nivel
+    const categoryMenuItems = useMemo(() => {
+        return menu.filter((m: MenuItem) => {
+            if (m.category !== cat) return false;
+            if (filters.name && !m.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
+            if (filters.minPrice && m.price < Number(filters.minPrice)) return false;
+            if (filters.maxPrice && m.price > Number(filters.maxPrice)) return false;
+            return true;
+        });
+    }, [menu, cat, filters.name, filters.minPrice, filters.maxPrice]);
 
     // Manejadores de arrastrar y soltar (Drag and Drop)
     const onDragStart = (e: React.DragEvent) => {
@@ -230,7 +268,20 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                     </div>
                 ) : (
                     <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIsCollapsed(!isCollapsed)}>
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            aria-expanded={!isCollapsed}
+                            aria-label={`Alternar categoría ${cat}`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setIsCollapsed(prev => !prev);
+                                }
+                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                            onClick={() => setIsCollapsed(prev => !prev)}
+                        >
                             <h3 style={{ margin: 0, fontSize: '1.25em' }}>{cat}</h3>
                             <span style={{
                                 display: 'inline-block',
@@ -265,13 +316,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                     )}
 
                     <ItemList
-                        items={menu.filter((m: MenuItem) => {
-                            if (m.category !== cat || m.subcategory || m.section) return false;
-                            if (filters.name && !m.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-                            if (filters.minPrice && m.price < Number(filters.minPrice)) return false;
-                            if (filters.maxPrice && m.price > Number(filters.maxPrice)) return false;
-                            return true;
-                        })}
+                        items={categoryMenuItems.filter(m => !m.subcategory && !m.section)}
                         cat={cat} canEdit={canEdit} showOrderingUI={showOrderingUI} deleteItemMode={deleteItemMode} editItemMode={editItemMode} confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} handleDeleteItem={handleDeleteItem} startEdit={startEdit} handleAddToOrder={handleAddToOrder}
                         isShiftOpen={isShiftOpen}
                         promotions={promotions}
@@ -279,7 +324,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                         setSelectedItemForMenu={setSelectedItemForMenu}
                     />
 
-                    {menu.filter(m => m.category === cat).length === 0 && (!subCategories[cat] || subCategories[cat].length === 0) && (
+                    {categoryMenuItems.length === 0 && (!subCategories[cat] || subCategories[cat].length === 0) && (
                         <div style={{ textAlign: 'center', padding: '1.25rem 0.5rem', opacity: 0.5, fontSize: '0.85em', fontStyle: 'italic', border: '1px dashed var(--card-border)', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
                             Sin productos todavía
                         </div>
@@ -314,7 +359,20 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                     )}
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => toggleSub(subKey)}>
+                                        <div
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-expanded={!isSubCollapsed}
+                                            aria-label={`Alternar subcategoría ${sub}`}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    toggleSub(subKey);
+                                                }
+                                            }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                                            onClick={() => toggleSub(subKey)}
+                                        >
                                             {editingSubKey === subKey ? (
                                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
                                                     <input
@@ -362,13 +420,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
 
 
                                             <ItemList
-                                                items={menu.filter((m: MenuItem) => {
-                                                    if (m.category !== cat || m.subcategory !== sub || m.section) return false;
-                                                    if (filters.name && !m.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-                                                    if (filters.minPrice && m.price < Number(filters.minPrice)) return false;
-                                                    if (filters.maxPrice && m.price > Number(filters.maxPrice)) return false;
-                                                    return true;
-                                                })}
+                                                items={categoryMenuItems.filter(m => m.subcategory === sub && !m.section)}
                                                 cat={cat} canEdit={canEdit} showOrderingUI={showOrderingUI} deleteItemMode={deleteItemMode} editItemMode={editItemMode} confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} handleDeleteItem={handleDeleteItem} startEdit={startEdit} handleAddToOrder={handleAddToOrder}
                                                 isShiftOpen={isShiftOpen}
                                                 promotions={promotions}
@@ -406,7 +458,20 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                                             )}
 
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => toggleSec(secKey)}>
+                                                                <div
+                                                                    role="button"
+                                                                    tabIndex={0}
+                                                                    aria-expanded={!isSecCollapsed}
+                                                                    aria-label={`Alternar sección ${sec}`}
+                                                                    onKeyDown={(e) => {
+                                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                                            e.preventDefault();
+                                                                            toggleSec(secKey);
+                                                                        }
+                                                                    }}
+                                                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                                                                    onClick={() => toggleSec(secKey)}
+                                                                >
                                                                     {editingSecKey === secKey ? (
                                                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
                                                                             <input
@@ -439,13 +504,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
                                                                 <>
 
                                                                     <ItemList
-                                                                        items={menu.filter((m: MenuItem) => {
-                                                                            if (m.category !== cat || m.subcategory !== sub || m.section !== sec) return false;
-                                                                            if (filters.name && !m.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-                                                                            if (filters.minPrice && m.price < Number(filters.minPrice)) return false;
-                                                                            if (filters.maxPrice && m.price > Number(filters.maxPrice)) return false;
-                                                                            return true;
-                                                                        })}
+                                                                        items={categoryMenuItems.filter(m => m.subcategory === sub && m.section === sec)}
                                                                         cat={cat} canEdit={canEdit} showOrderingUI={showOrderingUI} deleteItemMode={deleteItemMode} editItemMode={editItemMode} confirmDeleteId={confirmDeleteId} setConfirmDeleteId={setConfirmDeleteId} handleDeleteItem={handleDeleteItem} startEdit={startEdit} handleAddToOrder={handleAddToOrder}
                                                                         isShiftOpen={isShiftOpen}
                                                                         promotions={promotions}
@@ -468,4 +527,4 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
     );
 };
 
-export default CategoryCard;
+export default React.memo(CategoryCard);
