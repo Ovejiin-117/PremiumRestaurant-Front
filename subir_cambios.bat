@@ -4,8 +4,13 @@ echo ========================================================
 echo          Enviando cambios a GitHub...
 echo ========================================================
 
-set "GIT_PATH=C:\Users\Ovejiin\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd"
-set "PATH=%GIT_PATH%;%PATH%"
+:: Si git no esta en el PATH de esta ventana, buscarlo en la ruta de instalacion estandar
+where git >nul 2>nul || set "PATH=%ProgramFiles%\Git\cmd;%PATH%"
+where git >nul 2>nul || (
+    echo  [ERROR] Git no esta instalado. Ejecuta instalar.bat primero.
+    pause
+    exit /b 1
+)
 
 cd /d "%~dp0"
 
