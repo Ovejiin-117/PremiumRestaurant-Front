@@ -2,6 +2,7 @@ import React from 'react';
 import type { User, TaxConfig, UIScale, LayoutOrientation, AuditAction } from '../types';
 import SecurityModal from '../components/ui/SecurityModal';
 import ConfirmDiscardModal from '../components/ui/ConfirmDiscardModal';
+import SettingsControls from '../components/ui/SettingsControls';
 
 interface Props {
     user: User;
@@ -9,11 +10,12 @@ interface Props {
     setTaxConfig: (c: TaxConfig) => void;
     back: () => void;
     uiScale: UIScale;
+    setUiScale?: (scale: UIScale) => void;
     layoutOrientation: LayoutOrientation;
     logAction: (action: AuditAction, details: string, entityId?: string) => void;
 }
 
-const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTaxConfig, back, uiScale, logAction }) => {
+const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTaxConfig, back, uiScale, setUiScale, logAction }) => {
     const isAdmin = user.role === 'developer';
     const isManager = user.role === 'manager';
 
@@ -103,9 +105,18 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
             />
             <div className="page-container">
                 <div className="title-bar">
-                    <button onClick={handleBack} className="btn-back">
-                        ← Volver al panel
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <button onClick={handleBack} className="btn-back">
+                            ← Volver al panel
+                        </button>
+                        {setUiScale && (
+                            <SettingsControls
+                                uiScale={uiScale}
+                                setUiScale={setUiScale}
+                                showOrientation={false}
+                            />
+                        )}
+                    </div>
 
                     <button
                         onClick={() => setShowSaveConfirm(true)}

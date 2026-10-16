@@ -515,6 +515,7 @@ function App() {
             setShowImages={setShowImages}
             back={goBack}
             user={user}
+            uiScale={dashboardScale}
           />
         ) : view === 'gestion' ? (
           <UserManagement
@@ -604,6 +605,8 @@ function App() {
             setSupplies={setSupplies}
             back={goBack}
             logAction={logAction}
+            uiScale={dashboardScale}
+            setUiScale={setDashboardScale}
           />
         ) : view === 'turno_gestion' && user ? (
           <ShiftManagement
@@ -641,6 +644,7 @@ function App() {
             setTaxConfig={setTaxConfig}
             back={goBack}
             uiScale={dashboardScale}
+            setUiScale={setDashboardScale}
             layoutOrientation={dashboardOrientation}
             logAction={logAction}
           />

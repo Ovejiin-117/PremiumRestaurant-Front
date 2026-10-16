@@ -1,4 +1,4 @@
-import type { Theme, User } from '../types';
+import type { Theme, User, UIScale } from '../types';
 import CustomSelect from '../components/ui/CustomSelect';
 
 type Props = {
@@ -14,17 +14,19 @@ type Props = {
     setShowImages: (e: boolean) => void;
     back: () => void;
     user: User | null;
+    uiScale?: UIScale;
 };
 
 export default function VisualSettings({
     theme, setTheme, animationsEnabled, setAnimationsEnabled,
     globalScale, setGlobalScale, performanceMode, setPerformanceMode,
-    showImages, setShowImages, back, user
+    showImages, setShowImages, back, user, uiScale
 }: Props) {
     const isAdmin = user?.role === 'developer';
 
     return (
-        <div className="page-container">
+        <div className={`scale-${uiScale || 'medium'}`}>
+            <div className="page-container">
             <div className="title-bar">
                 <button className="btn-back" onClick={back} style={{ margin: 0 }}>
                     ← VOLVER AL PANEL
@@ -214,6 +216,7 @@ export default function VisualSettings({
                 letterSpacing: '0.2em'
             }}>
                 SYNKODE INDUSTRIAL SOLUTIONS • © 2024 • TODOS LOS DERECHOS RESERVADOS
+            </div>
             </div>
         </div>
     );

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import type { SupplyItem, AuditAction } from '../../../types';
+import type { SupplyItem, AuditAction, UIScale } from '../../../types';
 import CustomSelect from '../../../components/ui/CustomSelect';
+import SettingsControls from '../../../components/ui/SettingsControls';
 
 interface Props {
     supplies: SupplyItem[];
     setSupplies: React.Dispatch<React.SetStateAction<SupplyItem[]>>;
     logAction: (action: AuditAction, details: string, entityId?: string) => void;
     back: () => void;
+    uiScale?: UIScale;
+    setUiScale?: (scale: UIScale) => void;
 }
 
 const UNITS = [
@@ -17,7 +20,7 @@ const UNITS = [
     { value: 'lt', label: 'Litros (lt)' }
 ];
 
-export default function SupplyManagement({ supplies, setSupplies, logAction, back }: Props) {
+export default function SupplyManagement({ supplies, setSupplies, logAction, back, uiScale, setUiScale }: Props) {
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<SupplyItem>>({
@@ -65,22 +68,32 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
     };
 
     return (
-        <div className="page-container animate-fade-in" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
-            {/* Encabezado */}
-            <div className="title-bar">
-                <button onClick={back} className="btn-back">
-                    <span style={{ fontSize: '1.2em' }}>←</span> VOLVER AL PANEL
-                </button>
-                <button
-                    onClick={() => setIsAdding(true)}
-                    className="btn-primary"
-                    style={{ borderRadius: '4px', padding: '0.8rem 1.5rem', fontWeight: 'bold' }}
-                >
-                    + NUEVO INSUMO
-                </button>
-            </div>
+        <div className={`scale-${uiScale || 'medium'}`}>
+            <div className="page-container animate-fade-in" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
+                {/* Encabezado */}
+                <div className="title-bar">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <button onClick={back} className="btn-back">
+                            <span style={{ fontSize: '1.2em' }}>←</span> VOLVER AL PANEL
+                        </button>
+                        {uiScale && setUiScale && (
+                            <SettingsControls
+                                uiScale={uiScale}
+                                setUiScale={setUiScale}
+                                showOrientation={false}
+                            />
+                        )}
+                    </div>
+                    <button
+                        onClick={() => setIsAdding(true)}
+                        className="btn-primary"
+                        style={{ borderRadius: '4px', padding: '0.8rem 1.5rem', fontWeight: 'bold' }}
+                    >
+                        + NUEVO INSUMO
+                    </button>
+                </div>
 
-            <h1 className="page-main-title">CONTROL DE BODEGA & INSUMOS</h1>
+                <h1 className="page-main-title">CONTROL DE BODEGA & INSUMOS</h1>
 
             {/* Contenido principal */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -225,6 +238,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

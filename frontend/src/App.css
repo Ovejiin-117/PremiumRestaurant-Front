@@ -142,15 +142,38 @@ body {
 
 .page-main-title {
   font-family: inherit;
-  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-size: calc(clamp(1.85rem, 3.2vw, 2.6rem) * var(--scale-multiplier, 1));
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   color: var(--text-color);
   margin-top: 0;
-  margin-bottom: 2rem;
+  margin-bottom: calc(1.85rem * var(--scale-multiplier, 1));
   line-height: 1.15;
   display: block;
+  transition: font-size 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.25s ease;
+}
+
+/* Escalamiento adaptativo para títulos según el selector de tamaño (Pequeño / Mediano / Grande) */
+.scale-small .page-main-title,
+.scale-small.page-main-title,
+[class*="scale-small"] .page-main-title {
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  margin-bottom: 1.25rem;
+}
+
+.scale-medium .page-main-title,
+.scale-medium.page-main-title,
+[class*="scale-medium"] .page-main-title {
+  font-size: clamp(1.85rem, 3.2vw, 2.6rem);
+  margin-bottom: 1.85rem;
+}
+
+.scale-large .page-main-title,
+.scale-large.page-main-title,
+[class*="scale-large"] .page-main-title {
+  font-size: clamp(2.45rem, 4.4vw, 3.5rem);
+  margin-bottom: 2.6rem;
 }
 
 .card-grid {
