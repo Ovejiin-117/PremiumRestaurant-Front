@@ -32,7 +32,7 @@ const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete }: { id: string,
                     setActiveId(id);
                 }
             }}
-            className={`font-bold cursor-pointer transition-all px-4 py-2 text-sm rounded-md border text-white ${
+            className={`font-bold cursor-pointer transition-all px-[1em] py-[0.5em] text-[0.85em] rounded-[0.4em] border text-white ${
                 isConfirming ? 'bg-red-700 border-red-200' : 'bg-danger border-white'
             }`}
         >
@@ -303,7 +303,15 @@ export default function UserManagement({
                                     setShowCreateInput(false);
                                 }
                             }}
-                            className="bg-primary text-white border-none rounded-lg px-4 py-2 font-bold cursor-pointer text-base hover:brightness-110 active:scale-95 transition-all"
+                            className={`btn-primary ${
+                                mode === 'delete_selection' ? '!bg-danger' : mode === 'edit_selection' ? '!bg-warning !text-black' : ''
+                            }`}
+                            style={{
+                                height: '2.2em',
+                                fontSize: '0.85em',
+                                padding: '0 1.25em',
+                                borderRadius: '0.75em'
+                            }}
                         >
                             {mode === 'delete_selection' ? 'MODO ELIMINAR' : mode === 'edit_selection' ? 'MODO EDITAR' : 'Opciones de Usuario ▼'}
                         </button>
@@ -433,7 +441,7 @@ export default function UserManagement({
 
                         return (
                             <div key={section.role}>
-                                <h2 className="text-base text-text-secondary mb-4 uppercase tracking-wider font-semibold">
+                                <h2 className="text-[0.9em] text-text-secondary mb-3 uppercase tracking-wider font-semibold">
                                     {section.title}
                                 </h2>
                                 <div className="card-grid">
@@ -457,7 +465,7 @@ export default function UserManagement({
                                                 {editingUsername !== u.username && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setInfoUser(u) }}
-                                                        className="absolute bottom-2 right-2 w-6 h-6 rounded border border-card-border bg-card-hover text-text-main cursor-pointer text-xs flex items-center justify-center z-[5] hover:bg-primary/20 hover:text-primary transition-all"
+                                                        className="absolute bottom-2 right-2 w-[1.75em] h-[1.75em] rounded-[0.4em] border border-card-border bg-card-hover text-text-main cursor-pointer text-[0.75em] flex items-center justify-center z-[5] hover:bg-primary/20 hover:text-primary transition-all font-bold"
                                                     >
                                                         i
                                                     </button>
@@ -480,7 +488,7 @@ export default function UserManagement({
                                                     <div className="absolute inset-0 bg-black/80 z-10 flex items-center justify-center">
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); startEdit(u); }}
-                                                            className="bg-primary text-white border-2 border-white px-5 py-2 text-base font-bold cursor-pointer rounded-md hover:brightness-110 active:scale-95 transition-all"
+                                                            className="bg-primary text-white border-2 border-white px-[1.25em] py-[0.5em] text-[0.9em] font-bold cursor-pointer rounded-[0.5em] hover:brightness-110 active:scale-95 transition-all"
                                                         >
                                                             EDITAR
                                                         </button>
@@ -575,10 +583,10 @@ export default function UserManagement({
                                                 ) : (
                                                     <>
                                                         <div className="flex justify-between items-start">
-                                                            <div className={`font-bold text-lg ${isEffectivelyActive ? 'text-text-main' : 'text-text-muted'}`}>
+                                                            <div className={`font-bold text-[1.15em] ${isEffectivelyActive ? 'text-text-main' : 'text-text-muted'}`}>
                                                                 {u.username}
                                                             </div>
-                                                            <div className={`text-[0.65em] px-2 py-0.5 rounded border ${
+                                                            <div className={`text-[0.65em] px-[0.6em] py-[0.2em] rounded-[0.4em] border ${
                                                                 isEffectivelyActive
                                                                     ? 'bg-success/15 border-success/30 text-success font-bold'
                                                                     : (!isManuallyActive
@@ -588,7 +596,7 @@ export default function UserManagement({
                                                                 {statusText}
                                                             </div>
                                                         </div>
-                                                        <div className="opacity-70 text-sm mt-1 capitalize">
+                                                        <div className="opacity-70 text-[0.85em] mt-[0.3em] capitalize">
                                                             {u.role === 'manager' ? 'Gerente' : u.role === 'waiter' ? 'Mesero' : u.role}
                                                         </div>
                                                     </>

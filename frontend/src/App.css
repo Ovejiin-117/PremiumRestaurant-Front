@@ -178,8 +178,30 @@ body {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(280px * var(--scale-multiplier, 1)), 1fr));
+  gap: calc(1.5rem * var(--scale-multiplier, 1));
+  transition: gap 0.25s ease;
+}
+
+.scale-small .card-grid,
+.scale-small.card-grid,
+[class*="scale-small"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.95rem;
+}
+
+.scale-medium .card-grid,
+.scale-medium.card-grid,
+[class*="scale-medium"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
+}
+
+.scale-large .card-grid,
+.scale-large.card-grid,
+[class*="scale-large"] .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+  gap: 2rem;
 }
 
 @media (max-width: 720px) {
@@ -191,11 +213,32 @@ body {
 .glass-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border-radius: calc(1rem * var(--scale-multiplier, 1));
+  padding: calc(1.5rem * var(--scale-multiplier, 1));
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   color: var(--text-color);
+}
+
+.scale-small .glass-card,
+.scale-small.glass-card,
+[class*="scale-small"] .glass-card {
+  padding: 0.95rem 1.15rem;
+  border-radius: 0.75rem;
+}
+
+.scale-medium .glass-card,
+.scale-medium.glass-card,
+[class*="scale-medium"] .glass-card {
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+
+.scale-large .glass-card,
+.scale-large.glass-card,
+[class*="scale-large"] .glass-card {
+  padding: 2.1rem;
+  border-radius: 1.35rem;
 }
 
 .glass-card:hover {
