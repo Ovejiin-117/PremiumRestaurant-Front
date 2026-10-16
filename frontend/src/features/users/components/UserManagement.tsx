@@ -318,54 +318,85 @@ export default function UserManagement({
 
                         {/* Menú desplegable */}
                         {showUserMenu && mode === 'normal' && (
-                            <div className="glass-card absolute top-full right-0 mt-3 w-[clamp(280px,45vw,450px)] max-w-[calc(100vw-2rem)] z-50 shadow-2xl border border-card-border p-0 overflow-hidden">
+                            <div
+                                className="glass-card absolute top-full right-0 mt-2 z-50 shadow-2xl border border-card-border p-0 overflow-hidden"
+                                style={{
+                                    width: 'min(92vw, 22em)',
+                                    borderRadius: '0.75em'
+                                }}
+                            >
                                 {!showCreateInput ? (
                                     <>
                                         <div
                                             onClick={() => setShowCreateInput(true)}
-                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 hover:bg-card-hover transition-colors"
+                                            className="cursor-pointer border-b border-card-border flex items-center hover:bg-card-hover transition-colors"
+                                            style={{
+                                                padding: '1em 1.25em',
+                                                fontSize: '0.9em',
+                                                gap: '0.75em'
+                                            }}
                                         >
-                                            <span className="text-lg">👤+</span> Crear Nuevo Usuario
+                                            <span style={{ fontSize: '1.25em' }}>👤+</span>
+                                            <span style={{ fontWeight: 600 }}>Crear Nuevo Usuario</span>
                                         </div>
                                         <div
                                             onClick={() => { setMode('edit_selection'); setShowUserMenu(false); }}
-                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 hover:bg-card-hover transition-colors"
+                                            className="cursor-pointer border-b border-card-border flex items-center hover:bg-card-hover transition-colors"
+                                            style={{
+                                                padding: '1em 1.25em',
+                                                fontSize: '0.9em',
+                                                gap: '0.75em'
+                                            }}
                                         >
-                                            <span className="text-lg">✎</span> Editar Usuario
+                                            <span style={{ fontSize: '1.25em' }}>✎</span>
+                                            <span style={{ fontWeight: 600 }}>Editar Usuario</span>
                                         </div>
                                         <div
                                             onClick={() => { setMode('delete_selection'); setShowUserMenu(false); }}
-                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 text-danger hover:bg-card-hover transition-colors"
+                                            className="cursor-pointer border-b border-card-border flex items-center text-danger hover:bg-card-hover transition-colors"
+                                            style={{
+                                                padding: '1em 1.25em',
+                                                fontSize: '0.9em',
+                                                gap: '0.75em'
+                                            }}
                                         >
-                                            <span className="text-lg">🗑</span> Eliminar Usuario
+                                            <span style={{ fontSize: '1.25em' }}>🗑</span>
+                                            <span style={{ fontWeight: 600 }}>Eliminar Usuario</span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="p-8 cursor-default" onClick={e => e.stopPropagation()}>
-                                        <h4 className="m-0 mb-6 text-base font-extrabold border-b border-card-border pb-3 tracking-tight">NUEVO USUARIO</h4>
+                                    <div style={{ padding: '1.5em' }} className="cursor-default" onClick={e => e.stopPropagation()}>
+                                        <h4
+                                            className="m-0 font-extrabold border-b border-card-border tracking-tight"
+                                            style={{ fontSize: '1em', marginBottom: '1.25em', paddingBottom: '0.6em' }}
+                                        >
+                                            NUEVO USUARIO
+                                        </h4>
 
-                                        <div className="form-group mb-4">
-                                            <label className="form-label text-[0.7em]">NOMBRE</label>
+                                        <div className="form-group" style={{ marginBottom: '1em' }}>
+                                            <label className="form-label" style={{ fontSize: '0.75em' }}>NOMBRE</label>
                                             <input
                                                 value={newName}
                                                 onChange={e => setNewName(e.target.value)}
                                                 placeholder="Ej: Juan Pérez"
-                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                                className="w-full bg-input-bg border border-input-border text-text-main box-border outline-none focus:border-primary"
+                                                style={{ padding: '0.65em 0.85em', fontSize: '0.85em', borderRadius: '0.5em' }}
                                             />
                                         </div>
 
-                                        <div className="form-group mb-4">
-                                            <label className="form-label text-[0.7em]">CONTRASEÑA</label>
+                                        <div className="form-group" style={{ marginBottom: '1em' }}>
+                                            <label className="form-label" style={{ fontSize: '0.75em' }}>CONTRASEÑA</label>
                                             <input
                                                 value={newPass}
                                                 onChange={e => setNewPass(e.target.value)}
                                                 placeholder="****"
                                                 type="password"
-                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                                className="w-full bg-input-bg border border-input-border text-text-main box-border outline-none focus:border-primary"
+                                                style={{ padding: '0.65em 0.85em', fontSize: '0.85em', borderRadius: '0.5em' }}
                                             />
                                         </div>
 
-                                        <div className="form-group mb-4">
+                                        <div className="form-group" style={{ marginBottom: '1em' }}>
                                             <CustomSelect
                                                 label="ROL"
                                                 value={newRole}
@@ -378,36 +409,42 @@ export default function UserManagement({
                                             />
                                         </div>
 
-                                        <div className="form-group mb-6">
-                                            <label className="form-label text-[0.7em]">FECHA DE NACIMIENTO</label>
+                                        <div className="form-group" style={{ marginBottom: '1.5em' }}>
+                                            <label className="form-label" style={{ fontSize: '0.75em' }}>FECHA DE NACIMIENTO</label>
                                             <input
                                                 type="date"
                                                 value={newBirthDate}
                                                 onChange={e => setNewBirthDate(e.target.value)}
-                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                                className="w-full bg-input-bg border border-input-border text-text-main box-border outline-none focus:border-primary"
+                                                style={{ padding: '0.65em 0.85em', fontSize: '0.85em', borderRadius: '0.5em' }}
                                             />
                                         </div>
 
-                                        <div className="flex gap-3">
+                                        <div style={{ display: 'flex', gap: '0.75em' }}>
                                             <button
                                                 onClick={handleAddUser}
-                                                className="flex-1 bg-success text-white border-none p-3.5 rounded-lg cursor-pointer font-bold text-sm hover:brightness-110 active:scale-95 transition-all"
+                                                className="bg-success text-white border-none cursor-pointer font-bold hover:brightness-110 active:scale-95 transition-all"
+                                                style={{ flex: 1, padding: '0.75em 1em', fontSize: '0.85em', borderRadius: '0.5em' }}
                                             >
                                                 CREAR USUARIO
                                             </button>
                                             <button
                                                 onClick={() => { setShowCreateInput(false); setMsg(""); }}
-                                                className="w-14 bg-card-hover text-text-main border border-card-border p-3.5 rounded-lg cursor-pointer hover:brightness-110 active:scale-95 transition-all flex items-center justify-center"
+                                                className="bg-card-hover text-text-main border border-card-border cursor-pointer hover:brightness-110 active:scale-95 transition-all flex items-center justify-center"
+                                                style={{ width: '3em', padding: '0.75em 0', fontSize: '0.85em', borderRadius: '0.5em' }}
                                             >
                                                 ✕
                                             </button>
                                         </div>
                                         {msg && (
-                                            <div className={`mt-4 text-sm text-center p-3 rounded-lg ${
-                                                msg.includes("exitosamente")
-                                                    ? "bg-success/10 text-success"
-                                                    : "bg-danger/10 text-danger"
-                                            }`}>
+                                            <div
+                                                className={`text-center ${
+                                                    msg.includes("exitosamente")
+                                                        ? "bg-success/10 text-success"
+                                                        : "bg-danger/10 text-danger"
+                                                }`}
+                                                style={{ marginTop: '1em', fontSize: '0.85em', padding: '0.75em', borderRadius: '0.5em' }}
+                                            >
                                                 {msg}
                                             </div>
                                         )}
