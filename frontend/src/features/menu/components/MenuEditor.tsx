@@ -119,7 +119,7 @@ export default function MenuEditor(props: Props) {
     });
 
     // Estados del modal de seguridad personalizado
-    const [pendingAction, setPendingAction] = React.useState<{ type: string, data?: any, callback: () => void } | null>(null);
+    const [pendingAction, setPendingAction] = React.useState<{ type: string, data?: unknown, callback: () => void } | null>(null);
     const [showSecurityModal, setShowSecurityModal] = React.useState(false);
     const [showExitConfirm, setShowExitConfirm] = React.useState(false);
     const [selectedItemForDetails, setSelectedItemForDetails] = React.useState<MenuItem | null>(null);
@@ -132,7 +132,7 @@ export default function MenuEditor(props: Props) {
         }
     };
 
-    const requestSecureAction = (actionType: string, callback: () => void, data?: any) => {
+    const requestSecureAction = (actionType: string, callback: () => void, data?: unknown) => {
         setPendingAction({ type: actionType, callback, data });
         setShowSecurityModal(true);
     };
@@ -144,29 +144,31 @@ export default function MenuEditor(props: Props) {
     // Lógica de filtrado
     const isFiltering = !!(filters.name || filters.minPrice || filters.maxPrice || filters.category || filters.subcategory || filters.section);
 
-    const getFilterScore = (item: MenuItem) => {
+    const getFilterScore = React.useCallback((item: MenuItem) => {
         if (!filters.name) return 0;
         const name = item.name.toLowerCase();
         const search = filters.name.toLowerCase();
         if (name === search) return 100;
         if (name.startsWith(search)) return 50;
-        if (name.includes(search)) return 10;
-        return 0;
-    };
+        return 10;
+    }, [filters.name]);
 
-    const filteredAndSortedItems = props.menu
-        .filter(m => {
-            if (filters.category && m.category !== filters.category) return false;
-            if (filters.subcategory && m.subcategory !== filters.subcategory) return false;
-            if (filters.section && m.section !== filters.section) return false;
-            if (filters.name && !m.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
-            if (filters.minPrice && m.price < Number(filters.minPrice)) return false;
-            if (filters.maxPrice && m.price > Number(filters.maxPrice)) return false;
-            if (filters.type && m.type !== filters.type) return false;
-            return true;
-        })
-        .sort((a, b) => getFilterScore(b) - getFilterScore(a))
-        .slice(0, 20);
+    const filteredAndSortedItems = React.useMemo(() => {
+        if (!isFiltering) return [];
+
+        return menu
+            .filter(item => {
+                if (filters.name && !item.name.toLowerCase().includes(filters.name.toLowerCase())) return false;
+                if (filters.minPrice && item.price < Number(filters.minPrice)) return false;
+                if (filters.maxPrice && item.price > Number(filters.maxPrice)) return false;
+                if (filters.type && item.type !== filters.type) return false;
+                if (filters.category && item.category !== filters.category) return false;
+                if (filters.subcategory && item.subcategory !== filters.subcategory) return false;
+                if (filters.section && item.section !== filters.section) return false;
+                return true;
+            })
+            .sort((a, b) => getFilterScore(b) - getFilterScore(a));
+    }, [menu, filters, isFiltering, getFilterScore]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -189,13 +191,6 @@ export default function MenuEditor(props: Props) {
                         back={handleBack}
                         canEdit={canEdit}
                         mode={state.mode}
-                        showCatMenu={state.showCatMenu}
-                        setShowCatMenu={state.setShowCatMenu}
-                        showCatInput={state.showCatInput}
-                        setShowCatInput={state.setShowCatInput}
-                        newCatName={state.newCatName}
-                        setNewCatName={state.setNewCatName}
-                        handleAddCategory={handlers.handleAddCategory}
                         setMode={state.setMode}
                         uiScale={uiScale}
                         setUiScale={setUiScale}
@@ -203,7 +198,6 @@ export default function MenuEditor(props: Props) {
                         setLayoutOrientation={setLayoutOrientation}
                         showOrientation={true}
                         setIsReorderMode={state.setIsReorderMode}
-                        requestSecureAction={requestSecureAction}
                         onAddProduct={() => state.setShowAddItemGlobal(true)}
                         onShowTaxonomyManager={() => state.setShowTaxonomyManager(true)}
                     />

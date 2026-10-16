@@ -40,7 +40,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                 id: Date.now().toString(),
                 name: formData.name!,
                 currentStock: formData.currentStock || 0,
-                unit: (formData.unit as any) || 'unit',
+                unit: (formData.unit as SupplyItem['unit']) || 'unit',
                 minStock: formData.minStock || 0,
                 category: formData.category || 'Insumos General'
             };
@@ -189,7 +189,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                                 <label className="form-label" style={{ fontSize: '0.7rem' }}>UNIDAD</label>
                                 <CustomSelect
                                     value={formData.unit || 'unit'}
-                                    onChange={val => setFormData({ ...formData, unit: val as any })}
+                                    onChange={val => setFormData({ ...formData, unit: val as SupplyItem['unit'] })}
                                     options={UNITS}
                                     width="100%"
                                 />

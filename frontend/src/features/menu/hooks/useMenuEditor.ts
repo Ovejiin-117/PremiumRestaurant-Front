@@ -71,12 +71,14 @@ export const useMenuEditor = ({
     const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
     const [orderNote, setOrderNote] = useState("");
 
-    // Limpiar automáticamente el contexto cuando el modo es normal
-    useEffect(() => {
-        if (mode === 'normal') {
-            setModeContext(null);
-        }
-    }, [mode]);
+    const setModeSafe = (newMode: Mode | ((prev: Mode) => Mode)) => {
+        setMode(prev => {
+            const next = typeof newMode === 'function' ? newMode(prev) : newMode;
+            if (next === 'normal') setModeContext(null);
+            return next;
+        });
+    };
+
     const [showNoteInput, setShowNoteInput] = useState(false);
     const [isConfirmingOrder, setIsConfirmingOrder] = useState(false);
     const [showShiftModal, setShowShiftModal] = useState(false);
@@ -86,7 +88,7 @@ export const useMenuEditor = ({
 
     // Estado de expansión global
     const [globalCollapseState, setGlobalCollapseState] = useState<'expanded' | 'collapsed' | null>(() => {
-        return localStorage.getItem(`rp_global_collapse_${user.username}`) as any || null;
+        return (localStorage.getItem(`rp_global_collapse_${user.username}`) as 'expanded' | 'collapsed' | null) || null;
     });
 
     const [showAddItemGlobal, setShowAddItemGlobal] = useState(false);
@@ -203,7 +205,7 @@ export const useMenuEditor = ({
 
         // 4. Recuperación de huérfanos (Corrección para limpiezas incompletas previas)
         finalMenu = finalMenu.map(m => {
-            let item = { ...m };
+            const item = { ...m };
 
             // Corregir huérfanos de categoría
             if (item.category && !finalCategories.includes(item.category)) {
@@ -696,7 +698,7 @@ export const useMenuEditor = ({
 
         Object.keys(remainingItemsById).forEach(id => {
             const { menuItem, quantity } = remainingItemsById[id];
-            let itemPrice = menuItem.price;
+            const itemPrice = menuItem.price;
             let itemTotal = itemPrice * quantity;
 
             const applicablePromos = promotions.filter(p =>
@@ -846,7 +848,7 @@ export const useMenuEditor = ({
     return {
         state: {
             showCatMenu, setShowCatMenu, showCatInput, setShowCatInput, newCatName, setNewCatName,
-            mode, setMode, editingCatOriginalName, editingCatNewName, setEditingCatNewName,
+            mode, setMode: setModeSafe, editingCatOriginalName, editingCatNewName, setEditingCatNewName,
             openActionMenuCat, setOpenActionMenuCat, openActionMenuSub, setOpenActionMenuSub,
             deleteSubCatMode, deleteSectionMode, deleteItemMode, editItemMode, confirmDeleteId, setConfirmDeleteId,
             addingToKey,

@@ -66,40 +66,33 @@ const FilterDropdown = ({
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [isTyping, setIsTyping] = useState(false);
 
+    const currentLabel = options.find(o => o.value === value)?.label || "";
+    const displayValue = isTyping ? searchTerm : currentLabel;
+
     // Cerrar al hacer clic afuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
-                // Restablecer término de búsqueda al valor seleccionado si no se eligió uno nuevo al cerrar
                 setIsTyping(false);
+                setSearchTerm("");
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Sincronizar campo de entrada con el valor cuando no se está escribiendo
-    useEffect(() => {
-        if (!isTyping) {
-            const current = options.find(o => o.value === value);
-            setSearchTerm(current ? current.label : "");
-        }
-    }, [value, isTyping, options]);
-
     // Opciones filtradas derivadas
     const filtered = useMemo(() => {
-        // Mostrar todas si el término de búsqueda coincide exactamente con la etiqueta seleccionada actualmente (el usuario aún no ha escrito una nueva búsqueda)
-        const current = options.find(o => o.value === value);
-        if (current && searchTerm === current.label && !isTyping) return options;
-
+        if (!isTyping) return options;
         return options.filter(o => o.label.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [options, searchTerm, value, isTyping]);
+    }, [options, searchTerm, isTyping]);
 
     const handleSelect = (val: string) => {
         onChange(val);
         setIsOpen(false);
         setIsTyping(false);
+        setSearchTerm("");
     };
 
     return (
@@ -109,7 +102,7 @@ const FilterDropdown = ({
             <div style={{ position: 'relative' }}>
                 <input
                     type="text"
-                    value={searchTerm}
+                    value={displayValue}
                     placeholder={placeholder}
                     onClick={() => setIsOpen(true)}
                     onFocus={(e) => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { Order, UIScale, Shift, LayoutOrientation } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
 
@@ -13,14 +13,31 @@ interface Props {
     setLayoutOrientation: (o: LayoutOrientation) => void;
 }
 
+interface SaleItemRecord {
+    orderId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+    vendedor: string;
+    fecha: string;
+}
+
 export default function SalesRecords({
-    history, shifts, currentShiftId, back, uiScale, setUiScale, layoutOrientation, setLayoutOrientation
+    history,
+    shifts,
+    currentShiftId,
+    back,
+    uiScale,
+    setUiScale,
+    layoutOrientation,
+    setLayoutOrientation
 }: Props) {
     const [shiftFilterDate, setShiftFilterDate] = useState("");
     const [showShiftPicker, setShowShiftPicker] = useState(false);
     const [expandedShifts, setExpandedShifts] = useState<Set<string>>(new Set([currentShiftId || '']));
 
-    const getShiftLabel = (shift: Shift) => {
+    const getShiftLabel = useCallback((shift: Shift) => {
         const start = new Date(shift.startTime);
         const startStr = start.toLocaleString('es-ES', {
             day: '2-digit', month: '2-digit', year: 'numeric',
@@ -39,7 +56,7 @@ export default function SalesRecords({
         }
 
         return `Turno (Iniciado: ${startStr})`;
-    };
+    }, [currentShiftId]);
 
     // Organizar turnos como en History.tsx
     const organizedShifts = useMemo(() => {
@@ -67,7 +84,7 @@ export default function SalesRecords({
             const shiftOrders = history.filter(o => o.shiftId === shift.id);
 
             // Aplanar pedidos del turno en ventas individuales de artículos
-            const salesData: any[] = [];
+            const salesData: SaleItemRecord[] = [];
             shiftOrders.forEach(order => {
                 order.items.forEach(item => {
                     salesData.push({
@@ -90,7 +107,7 @@ export default function SalesRecords({
                 totalCount: salesData.length
             };
         });
-    }, [shifts, currentShiftId, history, shiftFilterDate]);
+    }, [shifts, currentShiftId, history, shiftFilterDate, getShiftLabel]);
 
     const toggleShift = (shiftId: string) => {
         const next = new Set(expandedShifts);

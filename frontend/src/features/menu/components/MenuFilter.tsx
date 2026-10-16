@@ -38,7 +38,7 @@ const MenuFilter: React.FC<MenuFilterProps> = ({
     const [section, setSection] = useState("");
     const [itemType, setItemType] = useState("");
 
-    const handleFilterChange = (updates: any) => {
+    const handleFilterChange = (updates: Record<string, string>) => {
         const newFilters = {
             name,
             minPrice,

@@ -16,7 +16,7 @@ const SettingsControls: React.FC<SettingsControlsProps> = ({
     uiScale, setUiScale, layoutOrientation, setLayoutOrientation, showOrientation = false
 }) => {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="flex items-center gap-3">
             <CustomSelect
                 label="TAMAÑO"
                 value={uiScale}

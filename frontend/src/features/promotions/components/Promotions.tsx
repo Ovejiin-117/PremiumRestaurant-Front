@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import MenuFilter from '../../menu/components/MenuFilter';
 import SecurityModal from '../../../components/ui/SecurityModal';
 import SettingsControls from '../../../components/ui/SettingsControls';
@@ -109,7 +109,7 @@ export default function Promotions({
     });
 
     // --- Lógica de filtrado ---
-    const getFilterScore = (item: MenuItem) => {
+    const getFilterScore = useCallback((item: MenuItem) => {
         if (!filters.name) return 0;
         const name = item.name.toLowerCase();
         const search = filters.name.toLowerCase();
@@ -117,7 +117,7 @@ export default function Promotions({
         if (name.startsWith(search)) return 50;
         if (name.includes(search)) return 10;
         return 0;
-    };
+    }, [filters.name]);
 
     const filteredItems = useMemo(() => {
         return menu
@@ -131,7 +131,7 @@ export default function Promotions({
                 return true;
             })
             .sort((a, b) => getFilterScore(b) - getFilterScore(a));
-    }, [menu, filters]);
+    }, [menu, filters, getFilterScore]);
 
     // Validaciones y manejadores
     const resetForm = () => {
@@ -222,24 +222,21 @@ export default function Promotions({
         return days.map(d => dayNames[d]).join(", ");
     };
 
-    const actionButtonStyle = (color: string) => ({
-        background: color,
-        color: 'white',
-        border: '1px solid rgba(255,255,255,0.3)',
-        fontWeight: 'bold' as const,
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        padding: '0.625em 1.25em',
-        fontSize: '0.875em',
-        borderRadius: '0.5em',
-    });
-
+    const getActionButtonClass = (variant: 'warning' | 'success' | 'primary' | 'danger') => {
+        const colors = {
+            warning: 'bg-warning',
+            success: 'bg-success',
+            primary: 'bg-primary',
+            danger: 'bg-danger',
+        };
+        return `text-white border border-white/30 font-bold cursor-pointer transition-all px-5 py-2.5 text-sm rounded-lg hover:brightness-110 active:scale-95 ${colors[variant]}`;
+    };
 
     return (
         <div className={`scale-${uiScale}`}>
             <div className="page-container">
                 <div className="title-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75em' }}>
+                    <div className="flex items-center gap-3">
                         <button onClick={() => handleExitAttempt(back)} className="btn-back">
                             ← Volver al panel
                         </button>
@@ -252,102 +249,89 @@ export default function Promotions({
                         />
                     </div>
 
-                    <h1 style={{ margin: 0 }}>Gestión de Promociones</h1>
+                    <h1 className="m-0">Gestión de Promociones</h1>
                 </div>
 
                 {viewMode === 'list' && (
                     <div className="glass-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ margin: 0 }}>Promociones Activas</h2>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="m-0">Promociones Activas</h2>
                             <button
                                 onClick={() => {
                                     setPendingAction({ type: 'create' });
                                     setShowSecurityModal(true);
                                 }}
-                                style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                                className="bg-primary text-white border-none px-5 py-2.5 rounded-lg cursor-pointer font-bold hover:brightness-110 active:scale-95 transition-all"
                             >
                                 + Nueva Promoción
                             </button>
                         </div>
 
                         {promotions.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                            <div className="text-center py-12 text-text-secondary italic">
                                 No hay promociones creadas.
                             </div>
                         ) : (
-                            <div style={{ display: 'grid', gap: '1rem' }}>
+                            <div className="grid gap-4">
                                 {promotions.map(promo => (
-                                    <div key={promo.id} style={{
-                                        background: 'var(--card-bg)',
-                                        border: '1px solid var(--card-border)',
-                                        borderRadius: '16px',
-                                        padding: '1.25rem',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        transition: 'all 0.3s ease',
-                                        position: 'relative',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
-                                    }}>
+                                    <div
+                                        key={promo.id}
+                                        className="relative flex justify-between items-center p-5 rounded-2xl bg-card border border-card-border overflow-hidden shadow-sm transition-all duration-300"
+                                    >
                                         {/* Línea indicadora de estado */}
-                                        <div style={{
-                                            position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px',
-                                            background: promo.active ? 'var(--primary-color)' : 'var(--text-secondary)',
-                                            opacity: 0.6
-                                        }} />
+                                        <div
+                                            className={`absolute left-0 top-0 bottom-0 w-1 opacity-60 ${
+                                                promo.active ? 'bg-primary' : 'bg-text-secondary'
+                                            }`}
+                                        />
 
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                        <div className="flex items-center gap-5">
                                             {/* Ícono de tipo */}
-                                            <div style={{
-                                                width: '50px', height: '50px', borderRadius: '12px',
-                                                background: promo.active ? 'var(--primary-color-alpha-10)' : 'var(--card-hover-bg)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '1.2rem', fontWeight: '900', flexShrink: 0,
-                                                border: '1px solid var(--card-border)',
-                                                color: promo.active ? 'var(--primary-color)' : 'var(--text-secondary)'
-                                            }}>
+                                            <div
+                                                className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black shrink-0 border border-card-border ${
+                                                    promo.active ? 'bg-primary/10 text-primary' : 'bg-card-hover text-text-secondary'
+                                                }`}
+                                            >
                                                 {promo.type === 'percentage' ? '%' : promo.type === 'quantity_offer' ? 'NxM' : 'CBO'}
                                             </div>
 
-
                                             <div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <h3 style={{ margin: 0, color: 'var(--text-color)', fontWeight: '600' }}>{promo.name}</h3>
-                                                    <span style={{
-                                                        background: promo.active ? 'var(--success-color-alpha-10)' : 'var(--danger-color-alpha-10)',
-                                                        color: promo.active ? 'var(--success-color)' : 'var(--danger-color)',
-                                                        fontSize: '0.65rem', padding: '3px 10px', borderRadius: '20px',
-                                                        fontWeight: 'bold', border: `1px solid ${promo.active ? 'var(--success-color-alpha-20)' : 'var(--danger-color-alpha-20)'}`,
-                                                        textTransform: 'uppercase', letterSpacing: '0.05em'
-                                                    }}>
+                                                <div className="flex items-center gap-3">
+                                                    <h3 className="m-0 text-text-main font-semibold">{promo.name}</h3>
+                                                    <span
+                                                        className={`text-[0.65rem] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border ${
+                                                            promo.active
+                                                                ? 'bg-success/10 text-success border-success/20'
+                                                                : 'bg-danger/10 text-danger border-danger/20'
+                                                        }`}
+                                                    >
                                                         {promo.active ? 'Activa' : 'Inactiva'}
                                                     </span>
                                                 </div>
-                                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.85em', marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <span style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>
+                                                <div className="text-text-secondary text-sm mt-1.5 flex items-center gap-2">
+                                                    <span className="text-primary font-bold">
                                                         {promo.type === 'percentage' ? `${promo.value}% Descuento` :
                                                             promo.type === 'quantity_offer' ? `Oferta ${promo.take}x${promo.pay}` :
                                                                 `Combo por $${promo.value}`}
                                                     </span>
-                                                    <span style={{ opacity: 0.3 }}>•</span>
+                                                    <span className="opacity-30">•</span>
                                                     <span>{promo.validityMode === 'permanent' ? 'Permanente' : `${promo.startDate} a ${promo.endDate}`}</span>
-                                                    <span style={{ opacity: 0.3 }}>•</span>
+                                                    <span className="opacity-30">•</span>
                                                     <span>{getDaysLabel(promo.daysOfWeek)}</span>
                                                 </div>
-                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem', opacity: 0.7 }}>
+                                                <div className="text-xs text-text-secondary mt-1 opacity-70">
                                                     Aplicada a <b>{new Set(promo.targetItemIds).size}</b> productos del menú
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
+                                        <div className="flex gap-3 items-center" onClick={e => e.stopPropagation()}>
                                             <button
                                                 onClick={() => {
                                                     setPendingAction({ type: 'toggle', promo });
                                                     setShowSecurityModal(true);
                                                 }}
-                                                style={actionButtonStyle(promo.active ? "var(--warning-color)" : "var(--success-color)")}
+                                                className={getActionButtonClass(promo.active ? "warning" : "success")}
                                             >
                                                 {promo.active ? "DESACTIVAR" : "ACTIVAR"}
                                             </button>
@@ -357,7 +341,7 @@ export default function Promotions({
                                                     setPendingAction({ type: 'edit', promo });
                                                     setShowSecurityModal(true);
                                                 }}
-                                                style={actionButtonStyle("var(--primary-color)")}
+                                                className={getActionButtonClass("primary")}
                                             >
                                                 EDITAR
                                             </button>
@@ -367,7 +351,7 @@ export default function Promotions({
                                                     setPendingAction({ type: 'delete', promo });
                                                     setShowSecurityModal(true);
                                                 }}
-                                                style={actionButtonStyle("var(--danger-color)")}
+                                                className={getActionButtonClass("danger")}
                                             >
                                                 ELIMINAR
                                             </button>
@@ -380,28 +364,21 @@ export default function Promotions({
                 )}
 
                 {viewMode === 'select_type' && (
-                    <div style={{
-                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)'
-                    }}>
-                        <div className="glass-card" style={{ maxWidth: '400px', width: '90%', textAlign: 'center', padding: '2rem' }}>
-                            <h2 style={{ marginTop: 0 }}>Tipo de Promoción</h2>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>¿Qué tipo de oferta deseas crear?</p>
+                    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm">
+                        <div className="glass-card max-w-[400px] w-[90%] text-center p-8">
+                            <h2 className="mt-0">Tipo de Promoción</h2>
+                            <p className="text-text-secondary mb-8">¿Qué tipo de oferta deseas crear?</p>
 
-                            <div style={{ display: 'grid', gap: '1rem' }}>
+                            <div className="grid gap-4">
                                 <button
                                     onClick={() => {
                                         setFormData(prev => ({ ...prev, type: 'percentage', targetItemIds: [] }));
                                         setViewMode('create');
                                     }}
-                                    style={{
-                                        padding: '1.5rem', borderRadius: '12px', background: 'var(--primary-color-alpha-20)',
-                                        border: '1px solid var(--primary-color)', color: 'var(--primary-color)', cursor: 'pointer',
-                                        display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center'
-                                    }}
+                                    className="p-6 rounded-xl bg-primary/20 border border-primary text-primary cursor-pointer flex flex-col gap-2 items-center hover:brightness-110 active:scale-95 transition-all"
                                 >
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>%</span>
-                                    <span style={{ fontWeight: 'bold' }}>Porcentaje de Descuento</span>
+                                    <span className="text-2xl font-bold">%</span>
+                                    <span className="font-bold">Porcentaje de Descuento</span>
                                 </button>
 
                                 <button
@@ -409,14 +386,10 @@ export default function Promotions({
                                         setFormData(prev => ({ ...prev, type: 'quantity_offer', targetItemIds: [] }));
                                         setViewMode('create');
                                     }}
-                                    style={{
-                                        padding: '1.5rem', borderRadius: '12px', background: 'var(--success-color-alpha-20)',
-                                        border: '1px solid var(--success-color)', color: 'var(--success-color)', cursor: 'pointer',
-                                        display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center'
-                                    }}
+                                    className="p-6 rounded-xl bg-success/20 border border-success text-success cursor-pointer flex flex-col gap-2 items-center hover:brightness-110 active:scale-95 transition-all"
                                 >
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>NxM</span>
-                                    <span style={{ fontWeight: 'bold' }}>Cantidad (Oferta NxM)</span>
+                                    <span className="text-2xl font-bold">NxM</span>
+                                    <span className="font-bold">Cantidad (Oferta NxM)</span>
                                 </button>
 
                                 <button
@@ -424,20 +397,16 @@ export default function Promotions({
                                         setFormData(prev => ({ ...prev, type: 'combo', targetItemIds: [] }));
                                         setViewMode('create');
                                     }}
-                                    style={{
-                                        padding: '1.5rem', borderRadius: '12px', background: 'var(--warning-color-alpha-20)',
-                                        border: '1px solid var(--warning-color)', color: 'var(--warning-color)', cursor: 'pointer',
-                                        display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center'
-                                    }}
+                                    className="p-6 rounded-xl bg-warning/20 border border-warning text-warning cursor-pointer flex flex-col gap-2 items-center hover:brightness-110 active:scale-95 transition-all"
                                 >
-                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>CBO</span>
-                                    <span style={{ fontWeight: 'bold' }}>Combo (Precio Fijo)</span>
+                                    <span className="text-xl font-bold">CBO</span>
+                                    <span className="font-bold">Combo (Precio Fijo)</span>
                                 </button>
                             </div>
 
                             <button
                                 onClick={() => { setViewMode('list'); resetForm(); }}
-                                style={{ marginTop: '2rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                                className="mt-8 bg-transparent border-none text-text-secondary hover:text-text-main cursor-pointer"
                             >
                                 Cancelar
                             </button>
@@ -447,50 +416,48 @@ export default function Promotions({
 
                 {(viewMode === 'create' || viewMode === 'edit') && (
                     <div className="glass-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                        <div className="flex justify-between items-start mb-8">
                             <div>
-                                <h2 style={{ margin: 0 }}>{viewMode === 'create' ? 'Nueva Promoción' : 'Editar Promoción'}</h2>
-                                <div style={{
-                                    display: 'inline-block', marginTop: '0.5rem', padding: '4px 10px', borderRadius: '6px',
-                                    background: formData.type === 'percentage' ? 'var(--primary-color-alpha-20)' :
-                                        formData.type === 'quantity_offer' ? 'var(--success-color-alpha-20)' : 'var(--warning-color-alpha-20)',
-                                    color: formData.type === 'percentage' ? 'var(--primary-color)' :
-                                        formData.type === 'quantity_offer' ? 'var(--success-color)' : 'var(--warning-color)',
-                                    fontSize: '0.85em', fontWeight: 'bold'
-                                }}>
+                                <h2 className="m-0">{viewMode === 'create' ? 'Nueva Promoción' : 'Editar Promoción'}</h2>
+                                <div className={`inline-block mt-2 px-2.5 py-1 rounded-md text-sm font-bold ${
+                                    formData.type === 'percentage'
+                                        ? 'bg-primary/20 text-primary'
+                                        : formData.type === 'quantity_offer'
+                                            ? 'bg-success/20 text-success'
+                                            : 'bg-warning/20 text-warning'
+                                }`}>
                                     {formData.type === 'percentage' ? 'DESCUENTO POR PORCENTAJE' :
                                         formData.type === 'quantity_offer' ? 'OFERTA POR CANTIDAD (NxM)' : 'COMBO DE PRODUCTOS'}
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <div className="flex gap-3">
                                 <button
                                     onClick={() => handleExitAttempt(() => { setViewMode('list'); resetForm(); })}
-                                    className="btn-back"
-                                    style={{ height: '42px', minWidth: '140px', fontSize: '0.95rem', fontWeight: 900 }}
+                                    className="btn-back h-[42px] min-w-[140px] text-[0.95rem] font-black"
                                 >
                                     ← Volver
                                 </button>
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gap: '1.5rem', width: '100%' }}>
+                        <div className="grid gap-6 w-full">
                             {/* Común: Nombre */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Nombre de la Promoción</label>
+                                <label className="block mb-2 text-text-secondary">Nombre de la Promoción</label>
                                 <input
                                     type="text"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Ej. Martes de Hamburguesas"
-                                    style={{ width: '100%', maxWidth: '600px', padding: '10px', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', borderRadius: '6px', boxSizing: 'border-box' }}
+                                    className="w-full max-w-[600px] p-2.5 bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                 />
                             </div>
 
                             {/* Campos específicos del tipo */}
                             {formData.type === 'percentage' && (
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Porcentaje de Descuento (%)</label>
-                                    <div style={{ position: 'relative', width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', boxSizing: 'border-box' }}>
+                                    <label className="block mb-2 text-text-secondary">Porcentaje de Descuento (%)</label>
+                                    <div className="relative w-full max-w-[600px] flex items-center box-border">
                                         <input
                                             type="number"
                                             min="1" max="100"
@@ -507,39 +474,39 @@ export default function Promotions({
                                                 else setFormData({ ...formData, value: val });
                                             }}
                                             placeholder="0"
-                                            style={{ width: '100%', padding: '10px', paddingRight: '40px', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', borderRadius: '6px', boxSizing: 'border-box' }}
+                                            className="w-full p-2.5 pr-10 bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                         />
-                                        <span style={{ position: 'absolute', right: '15px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>%</span>
+                                        <span className="absolute right-4 text-text-secondary font-bold">%</span>
                                     </div>
                                 </div>
                             )}
 
                             {formData.type === 'quantity_offer' && (
-                                <div className="glass-card" style={{ background: 'var(--success-color-alpha-05)', borderStyle: 'dashed', display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                                <div className="glass-card bg-success/5 border-dashed flex gap-8 items-center p-6">
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Lleva (M)</label>
+                                        <label className="block mb-2 text-text-secondary">Lleva (M)</label>
                                         <input
                                             type="number"
                                             min="2"
                                             value={formData.take}
                                             onChange={e => setFormData({ ...formData, take: e.target.value })}
                                             placeholder="2"
-                                            style={{ width: '100px', padding: '12px', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', borderRadius: '6px', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                            className="w-[100px] p-3 bg-input-bg border border-input-border text-text-main rounded-md text-xl font-bold outline-none focus:border-primary"
                                         />
                                     </div>
-                                    <div style={{ fontSize: '2rem', color: 'var(--text-secondary)', fontWeight: '300' }}>/</div>
+                                    <div className="text-3xl text-text-secondary font-light">/</div>
                                     <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Paga (N)</label>
+                                        <label className="block mb-2 text-text-secondary">Paga (N)</label>
                                         <input
                                             type="number"
                                             min="1"
                                             value={formData.pay}
                                             onChange={e => setFormData({ ...formData, pay: e.target.value })}
                                             placeholder="1"
-                                            style={{ width: '100px', padding: '12px', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', borderRadius: '6px', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                            className="w-[100px] p-3 bg-input-bg border border-input-border text-text-main rounded-md text-xl font-bold outline-none focus:border-primary"
                                         />
                                     </div>
-                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.9em' }}>
+                                    <div className="text-text-secondary text-sm">
                                         Ej: 2x1, 3x2, etc.
                                     </div>
                                 </div>
@@ -547,19 +514,19 @@ export default function Promotions({
 
                             {formData.type === 'combo' && (
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Precio Fijo del Combo ($)</label>
-                                    <div style={{ position: 'relative', width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center', boxSizing: 'border-box' }}>
+                                    <label className="block mb-2 text-text-secondary">Precio Fijo del Combo ($)</label>
+                                    <div className="relative w-full max-w-[600px] flex items-center box-border">
                                         <input
                                             type="number"
                                             min="0"
                                             value={formData.value}
                                             onChange={e => setFormData({ ...formData, value: e.target.value })}
                                             placeholder="Ej. 150"
-                                            style={{ width: '100%', padding: '10px', paddingRight: '40px', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', borderRadius: '6px', boxSizing: 'border-box' }}
+                                            className="w-full p-2.5 pr-10 bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                         />
-                                        <span style={{ position: 'absolute', right: '15px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>$</span>
+                                        <span className="absolute right-4 text-text-secondary font-bold">$</span>
                                     </div>
-                                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.85em', marginTop: '0.4rem' }}>
+                                    <div className="text-text-secondary text-sm mt-1.5">
                                         Este será el precio total a pagar al llevar todos los productos seleccionados.
                                     </div>
                                 </div>
@@ -567,11 +534,11 @@ export default function Promotions({
 
                             {/* Común: Artículos objetivo */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+                                <label className="block mb-2 text-text-secondary">
                                     {formData.type === 'percentage' ? "Productos a Descontar" :
                                         formData.type === 'combo' ? "Productos del Combo" : "Productos de la Oferta"}
                                 </label>
-                                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                                <div className="text-sm text-text-secondary mb-4">
                                     {formData.type === 'percentage' && "Selecciona uno o varios productos a los que se aplicará este descuento."}
                                     {formData.type === 'quantity_offer' && "Selecciona uno o varios productos a los que se aplicará esta oferta."}
                                     {formData.type === 'combo' && "Selecciona el grupo de productos que conformarán este combo a precio fijo."}
@@ -587,23 +554,19 @@ export default function Promotions({
                                     hideToggle={true}
                                 />
 
-                                <div className="glass-card" style={{ marginTop: '1.5rem', maxHeight: '600px', display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', gap: '1rem' }}>
-                                            <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                Catálogo de Productos
-                                                <span style={{ fontSize: '0.8rem', opacity: 0.5, fontWeight: 'normal' }}>({filteredItems.length} items)</span>
-                                            </h3>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        </div>
+                                <div className="glass-card mt-6 max-h-[600px] flex flex-col">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="m-0 text-base text-text-main flex items-center gap-2">
+                                            Catálogo de Productos
+                                            <span className="text-sm opacity-50 font-normal">({filteredItems.length} items)</span>
+                                        </h3>
                                     </div>
 
-                                    <div style={{ overflowY: 'auto', paddingRight: '0.5rem', maxHeight: '500px' }}>
+                                    <div className="overflow-y-auto pr-2 max-h-[500px]">
                                         {filteredItems.length === 0 ? (
-                                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', opacity: 0.5 }}>No hay resultados</div>
+                                            <div className="p-8 text-center text-text-secondary opacity-50">No hay resultados</div>
                                         ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <div className="flex flex-col gap-2">
                                                 {filteredItems.map(item => {
                                                     const isSelected = formData.targetItemIds.includes(item.id);
                                                     const comboQty = formData.type === 'combo' ? formData.targetItemIds.filter(id => id === item.id).length : 0;
@@ -627,48 +590,34 @@ export default function Promotions({
                                                                 }
                                                                 setFormData({ ...formData, targetItemIds: newIds });
                                                             }}
-                                                            style={{
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                                padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer',
-                                                                background: isSelected ? 'var(--primary-color-alpha-10)' : 'var(--card-hover-bg)',
-                                                                border: isSelected ? '1px solid var(--primary-color)' : '1px solid var(--card-border)',
-                                                                transition: 'all 0.2s',
-                                                                gap: '1rem',
-                                                                userSelect: 'none'
-                                                            }}
+                                                            className={`flex items-center justify-between p-3 px-4 rounded-xl cursor-pointer select-none transition-all duration-200 gap-4 border ${
+                                                                isSelected
+                                                                    ? 'bg-primary/10 border-primary'
+                                                                    : 'bg-card-hover border-card-border'
+                                                            }`}
                                                         >
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flex: 1 }}>
-                                                                <div style={{
-                                                                    width: '32px', height: '32px', borderRadius: '8px',
-                                                                    background: isSelected ? 'var(--primary-color)' : 'rgba(128, 128, 128, 0.1)',
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    color: isSelected ? 'white' : 'var(--text-secondary)',
-                                                                    fontSize: '12px', fontWeight: 'bold', transition: 'all 0.2s',
-                                                                    border: isSelected ? '1px solid var(--primary-color)' : '1px solid rgba(128, 128, 128, 0.2)'
-                                                                }}>
-                                                                    {formData.type !== 'combo' && isSelected ? '' : ''}
+                                                            <div className="flex items-center gap-3 flex-1">
+                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all border ${
+                                                                    isSelected
+                                                                        ? 'bg-primary text-white border-primary'
+                                                                        : 'bg-white/10 text-text-secondary border-white/20'
+                                                                }`}>
+                                                                    {formData.type !== 'combo' && isSelected ? '✓' : ''}
                                                                 </div>
-                                                                <div style={{ textAlign: 'left' }}>
-                                                                    <div style={{
-                                                                        fontWeight: 'bold',
-                                                                        color: isSelected ? 'var(--primary-color)' : 'var(--text-color)',
-                                                                        fontSize: '0.95rem'
-                                                                    }}>{item.name}</div>
-                                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', opacity: 0.6 }}>
+                                                                <div className="text-left">
+                                                                    <div className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-text-main'}`}>
+                                                                        {item.name}
+                                                                    </div>
+                                                                    <div className="text-xs text-text-secondary opacity-60">
                                                                         {item.category} {item.subcategory ? `> ${item.subcategory}` : ''}
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                                                            <div className="flex items-center gap-2 shrink-0">
                                                                 {/* El contador de combo aparece antes del precio para que el precio y puntos nunca se muevan */}
                                                                 {formData.type === 'combo' && isSelected && (
                                                                     <div
-                                                                        style={{
-                                                                            display: 'flex', alignItems: 'center',
-                                                                            background: 'var(--card-bg)',
-                                                                            borderRadius: '8px',
-                                                                            border: '1px solid var(--card-border)',
-                                                                        }}
+                                                                        className="flex items-center bg-card rounded-lg border border-card-border"
                                                                         onClick={e => e.stopPropagation()}
                                                                     >
                                                                         <button
@@ -678,48 +627,23 @@ export default function Promotions({
                                                                                 if (idx !== -1) newIds.splice(idx, 1);
                                                                                 setFormData({ ...formData, targetItemIds: newIds });
                                                                             }}
-                                                                            style={{
-                                                                                width: '28px', height: '28px',
-                                                                                background: 'transparent',
-                                                                                border: 'none', outline: 'none',
-                                                                                color: 'var(--text-secondary)',
-                                                                                cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold',
-                                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                            }}
+                                                                            className="w-7 h-7 bg-transparent border-none outline-none text-text-secondary cursor-pointer text-base font-bold flex items-center justify-center hover:text-text-main"
                                                                         >−</button>
-                                                                        <span style={{
-                                                                            width: '26px', textAlign: 'center',
-                                                                            fontWeight: 'bold', fontSize: '0.9rem',
-                                                                            color: 'var(--text-color)',
-                                                                        }}>{comboQty}</span>
+                                                                        <span className="w-6 text-center font-bold text-sm text-text-main">{comboQty}</span>
                                                                         <button
                                                                             onClick={() => {
                                                                                 setFormData({ ...formData, targetItemIds: [...formData.targetItemIds, item.id] });
                                                                             }}
-                                                                            style={{
-                                                                                width: '28px', height: '28px',
-                                                                                background: 'transparent',
-                                                                                border: 'none', outline: 'none',
-                                                                                color: 'var(--text-secondary)',
-                                                                                cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold',
-                                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                            }}
+                                                                            className="w-7 h-7 bg-transparent border-none outline-none text-text-secondary cursor-pointer text-base font-bold flex items-center justify-center hover:text-text-main"
                                                                         >+</button>
                                                                     </div>
                                                                 )}
 
-                                                                <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>${item.price}</div>
+                                                                <div className="font-bold text-primary">${item.price}</div>
 
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); setSelectedItemForDetails(item); }}
-                                                                    style={{
-                                                                        background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-secondary)',
-                                                                        cursor: 'pointer', fontSize: '1.1rem', width: '28px', height: '28px',
-                                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px',
-                                                                        transition: 'all 0.2s'
-                                                                    }}
-                                                                    onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-color-alpha-20)'}
-                                                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                                                    className="bg-white/5 border-none text-text-secondary cursor-pointer text-lg w-7 h-7 flex items-center justify-center rounded-md hover:bg-primary/20 hover:text-primary transition-all"
                                                                 >
                                                                     ⋮
                                                                 </button>
@@ -730,52 +654,50 @@ export default function Promotions({
                                             </div>
                                         )}
                                     </div>
-
                                 </div>
                             </div>
 
                             {/* Común: Vigencia */}
-                            <div className="glass-card" style={{ background: 'var(--card-hover-bg)' }}>
-                                <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>Vigencia y Horarios</label>
+                            <div className="glass-card bg-card-hover">
+                                <label className="block mb-4 font-bold">Vigencia y Horarios</label>
 
-                                <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                <div className="flex gap-8 mb-6">
+                                    <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" checked={formData.validityMode === 'permanent'} onChange={() => setFormData({ ...formData, validityMode: 'permanent' })} />
                                         Permanente
                                     </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                                    <label className="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" checked={formData.validityMode === 'date_range'} onChange={() => setFormData({ ...formData, validityMode: 'date_range' })} />
                                         Rango de Fechas
                                     </label>
                                 </div>
 
                                 {formData.validityMode === 'date_range' && (
-                                    <div style={{ display: 'flex', gap: '3rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ width: '200px' }}>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8em', color: 'var(--text-secondary)' }}>Fecha Inicio</label>
-                                            <input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text-color)', boxSizing: 'border-box' }} />
+                                    <div className="flex gap-12 mb-6">
+                                        <div className="w-[200px]">
+                                            <label className="block mb-2 text-xs text-text-secondary">Fecha Inicio</label>
+                                            <input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} className="w-full p-2.5 rounded-md border border-input-border bg-input-bg text-text-main box-border outline-none focus:border-primary" />
                                         </div>
-                                        <div style={{ width: '200px' }}>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8em', color: 'var(--text-secondary)' }}>Fecha Fin</label>
-                                            <input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--input-border)', background: 'var(--input-bg)', color: 'var(--text-color)', boxSizing: 'border-box' }} />
+                                        <div className="w-[200px]">
+                                            <label className="block mb-2 text-xs text-text-secondary">Fecha Fin</label>
+                                            <input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} className="w-full p-2.5 rounded-md border border-input-border bg-input-bg text-text-main box-border outline-none focus:border-primary" />
                                         </div>
                                     </div>
                                 )}
 
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8em' }}>Días de la Semana</label>
-                                    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                                    <label className="block mb-2 text-xs">Días de la Semana</label>
+                                    <div className="flex gap-1 flex-wrap">
                                         {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day, index) => (
-                                            <label key={index} style={{
-                                                padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--card-border)',
-                                                background: formData.daysOfWeek.includes(index) ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)',
-                                                color: formData.daysOfWeek.includes(index) ? 'white' : 'var(--text-secondary)',
-                                                cursor: 'pointer', fontSize: '0.85em', fontWeight: 'bold'
-                                            }}>
+                                            <label key={index} className={`px-3 py-2 rounded-lg border text-sm font-bold cursor-pointer transition-all ${
+                                                formData.daysOfWeek.includes(index)
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : 'bg-white/5 text-text-secondary border-card-border hover:bg-white/10'
+                                            }`}>
                                                 <input type="checkbox" checked={formData.daysOfWeek.includes(index)} onChange={() => {
                                                     const newDays = formData.daysOfWeek.includes(index) ? formData.daysOfWeek.filter(d => d !== index) : [...formData.daysOfWeek, index].sort();
                                                     setFormData({ ...formData, daysOfWeek: newDays });
-                                                }} style={{ display: 'none' }} />
+                                                }} className="hidden" />
                                                 {day}
                                             </label>
                                         ))}
@@ -784,20 +706,14 @@ export default function Promotions({
                             </div>
 
                             {/* Acciones */}
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                            <div className="flex gap-4 mt-4">
                                 <button
                                     onClick={handleSave}
-                                    style={{
-                                        flex: 1,
-                                        background: viewMode === 'create' ? 'var(--primary-color)' : (isConfirmingEdit ? 'var(--warning-color)' : 'var(--success-color)'),
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '14px',
-                                        borderRadius: '10px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        fontSize: '1.1rem'
-                                    }}
+                                    className={`flex-1 p-3.5 rounded-xl font-bold cursor-pointer text-lg text-white border-none transition-all shadow-md ${
+                                        viewMode === 'create'
+                                            ? 'bg-primary hover:brightness-110'
+                                            : (isConfirmingEdit ? 'bg-warning hover:brightness-110' : 'bg-success hover:brightness-110')
+                                    }`}
                                 >
                                     {viewMode === 'create' ? 'Crear Promoción' : (isConfirmingEdit ? 'Confirmar' : 'Actualizar')}
                                 </button>
@@ -809,67 +725,51 @@ export default function Promotions({
 
             {/* Modal de detalles del producto */}
             {selectedItemForDetails && (
-                <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 2000,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
-                }} onClick={() => setSelectedItemForDetails(null)}>
-                    <div className="glass-card" style={{
-                        maxWidth: '400px', width: '90%', padding: '2rem', textAlign: 'center',
-                        position: 'relative', border: '1px solid var(--primary-color-alpha-50)'
-                    }} onClick={e => e.stopPropagation()}>
+                <div
+                    className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center backdrop-blur-md"
+                    onClick={() => setSelectedItemForDetails(null)}
+                >
+                    <div
+                        className="glass-card max-w-[400px] w-[90%] p-8 text-center relative border border-primary/50"
+                        onClick={e => e.stopPropagation()}
+                    >
                         <button
                             onClick={() => setSelectedItemForDetails(null)}
-                            style={{
-                                position: 'absolute', top: '15px', right: '15px', background: 'none',
-                                border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.5rem'
-                            }}
+                            className="absolute top-4 right-4 bg-transparent border-none text-text-secondary hover:text-text-main cursor-pointer text-2xl"
                         >
                             ✕
                         </button>
 
-                        <div style={{
-                            width: '100%', aspectRatio: '16/9', borderRadius: '12px',
-                            background: 'var(--card-hover-bg)', marginBottom: '1.5rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            overflow: 'hidden', border: '1px solid var(--card-border)'
-                        }}>
+                        <div className="w-full aspect-video rounded-xl bg-card-hover mb-6 flex items-center justify-center overflow-hidden border border-card-border">
                             {selectedItemForDetails.image ? (
                                 <img
                                     src={selectedItemForDetails.image}
                                     alt={selectedItemForDetails.name}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div style={{ color: 'var(--text-secondary)', opacity: 0.5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ fontSize: '3rem' }}>🖼️</span>
+                                <div className="text-text-secondary opacity-50 flex flex-col items-center gap-2.5">
+                                    <span className="text-5xl">🖼️</span>
                                     <span>No hay imagen disponible</span>
                                 </div>
                             )}
                         </div>
 
-                        <h2 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-color)' }}>{selectedItemForDetails.name}</h2>
-                        <div style={{ color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1rem' }}>
+                        <h2 className="m-0 mb-2 text-text-main">{selectedItemForDetails.name}</h2>
+                        <div className="text-primary font-bold text-xl mb-4">
                             ${selectedItemForDetails.price}
                         </div>
 
-                        <div style={{
-                            textAlign: 'left', background: 'rgba(255,255,255,0.05)',
-                            padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem',
-                            maxHeight: '150px', overflowY: 'auto'
-                        }}>
-                            <label style={{ display: 'block', fontSize: '0.75em', color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase' }}>Descripción</label>
-                            <p style={{ margin: 0, color: 'var(--text-color)', lineHeight: '1.4', fontSize: '0.9em' }}>
+                        <div className="text-left bg-white/5 p-4 rounded-lg mb-6 max-h-[150px] overflow-y-auto">
+                            <label className="block text-xs text-text-secondary mb-1 uppercase">Descripción</label>
+                            <p className="m-0 text-text-main leading-relaxed text-sm">
                                 {selectedItemForDetails.description || "Sin descripción disponible para este producto."}
                             </p>
                         </div>
 
                         <button
                             onClick={() => setSelectedItemForDetails(null)}
-                            style={{
-                                width: '100%', padding: '12px', borderRadius: '8px',
-                                background: 'var(--primary-color)', color: 'white',
-                                border: 'none', fontWeight: 'bold', cursor: 'pointer'
-                            }}
+                            className="w-full p-3 rounded-lg bg-primary text-white border-none font-bold cursor-pointer hover:brightness-110 active:scale-98 transition-all"
                         >
                             Cerrar
                         </button>
@@ -929,49 +829,24 @@ export default function Promotions({
             )}
 
             {showExitConfirm && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 10000, padding: '2rem'
-                }}>
-                    <div className="glass-card" style={{
-                        maxWidth: '450px', width: '100%', padding: '3.5rem 2.5rem',
-                        textAlign: 'center', display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', gap: '1.5rem', boxShadow: '0 0 50px rgba(0,0,0,0.5)'
-                    }}>
-                        <div style={{
-                            width: '80px', height: '80px', borderRadius: '50%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '2.5rem', background: 'rgba(255,255,255,0.05)',
-                            border: '2px dashed rgba(255,255,255,0.3)', marginBottom: '0.5rem',
-                            boxShadow: '0 0 20px rgba(255,255,255,0.05)'
-                        }}>
+                <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[10000] p-8">
+                    <div className="glass-card max-w-[450px] w-full p-10 text-center flex flex-col items-center gap-6 shadow-2xl">
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl bg-white/5 border-2 border-dashed border-white/30 mb-2 shadow-sm">
                             📢
                         </div>
 
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0 }}>
+                        <h2 className="text-3xl font-extrabold m-0">
                             Promoción en Curso
                         </h2>
 
-                        <p style={{
-                            fontSize: '1rem', opacity: 0.8, lineHeight: '1.5',
-                            margin: 0, maxWidth: '320px'
-                        }}>
+                        <p className="text-base opacity-80 leading-relaxed m-0 max-w-[320px]">
                             Tienes cambios sin guardar en esta promoción. Si sales ahora, se perderán estos cambios. ¿Estás seguro de que deseas salir?
                         </p>
 
-                        <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '1rem' }}>
+                        <div className="flex gap-4 w-full mt-4">
                             <button
                                 onClick={() => setShowExitConfirm(null)}
-                                style={{
-                                    flex: 1, padding: '1rem', borderRadius: '12px',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    background: 'rgba(255,255,255,0.05)', color: 'white',
-                                    fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                                onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                className="flex-1 p-4 rounded-xl border border-white/10 bg-white/5 text-white font-bold cursor-pointer hover:bg-white/10 active:scale-98 transition-all"
                             >
                                 Seguir Editando
                             </button>
@@ -980,14 +855,7 @@ export default function Promotions({
                                     showExitConfirm.onConfirm();
                                     setShowExitConfirm(null);
                                 }}
-                                style={{
-                                    flex: 1, padding: '1rem', borderRadius: '12px',
-                                    border: 'none', background: '#ef4444', color: 'white',
-                                    fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 10px 20px rgba(239, 68, 68, 0.2)',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                className="flex-1 p-4 rounded-xl border-none bg-danger text-white font-bold cursor-pointer shadow-lg shadow-danger/20 hover:-translate-y-0.5 active:scale-98 transition-all"
                             >
                                 Salir y Borrar
                             </button>

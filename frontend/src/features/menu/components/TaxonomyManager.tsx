@@ -24,6 +24,38 @@ interface TaxonomyManagerProps {
 
 type ModalType = 'CREATE_CAT' | 'CREATE_SUB' | 'CREATE_SEC' | 'EDIT_CAT' | 'EDIT_SUB' | 'EDIT_SEC' | null;
 
+const ActionButton: React.FC<{
+    icon: string;
+    label: string;
+    color: string;
+    onClick: () => void;
+}> = ({ icon, label, color, onClick }) => (
+    <button
+        onClick={onClick}
+        className="glass-card"
+        style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+            padding: '1.5rem 1rem', background: `linear-gradient(135deg, ${color}15, ${color}05)`,
+            border: `1px solid ${color}30`, borderRadius: '1rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            cursor: 'pointer', outline: 'none'
+        }}
+        onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+            e.currentTarget.style.borderColor = color;
+            e.currentTarget.style.boxShadow = `0 10px 20px -10px ${color}30`;
+        }}
+        onMouseLeave={e => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.borderColor = `${color}30`;
+            e.currentTarget.style.boxShadow = 'none';
+        }}
+    >
+        <span style={{ fontSize: '2rem', filter: `drop-shadow(0 2px 4px ${color}40)` }}>{icon}</span>
+        <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-color)', textAlign: 'center' }}>{label}</span>
+        <div style={{ fontSize: '0.65rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gestionar</div>
+    </button>
+);
+
 const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
     categories, subCategories, sections, onClose, handlers, uiScale
 }) => {
@@ -206,33 +238,6 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
         );
     };
 
-    const ActionButton = ({ type, icon, label, color }: { type: ModalType, icon: string, label: string, color: string }) => (
-        <button
-            onClick={() => setActiveModal(type)}
-            className="glass-card"
-            style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                padding: '1.5rem 1rem', background: `linear-gradient(135deg, ${color}15, ${color}05)`,
-                border: `1px solid ${color}30`, borderRadius: '1rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer', outline: 'none'
-            }}
-            onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-                e.currentTarget.style.borderColor = color;
-                e.currentTarget.style.boxShadow = `0 10px 20px -10px ${color}30`;
-            }}
-            onMouseLeave={e => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.borderColor = `${color}30`;
-                e.currentTarget.style.boxShadow = 'none';
-            }}
-        >
-            <span style={{ fontSize: '2rem', filter: `drop-shadow(0 2px 4px ${color}40)` }}>{icon}</span>
-            <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-color)', textAlign: 'center' }}>{label}</span>
-            <div style={{ fontSize: '0.65rem', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gestionar</div>
-        </button>
-    );
-
     return (
         <div style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(16px)',
@@ -272,12 +277,12 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                     flex: 1,
                     overflowY: 'auto'
                 }}>
-                    <ActionButton type="CREATE_CAT" icon="📁" label="Crear Categoría" color="#3b82f6" />
-                    <ActionButton type="CREATE_SUB" icon="📂" label="Crear Subcategoría" color="#22c55e" />
-                    <ActionButton type="CREATE_SEC" icon="📄" label="Crear Sección" color="#f59e0b" />
-                    <ActionButton type="EDIT_CAT" icon="✏️" label="Editar Categoría" color="#3b82f6" />
-                    <ActionButton type="EDIT_SUB" icon="📝" label="Editar Subcategoría" color="#22c55e" />
-                    <ActionButton type="EDIT_SEC" icon="⚙️" label="Editar Sección" color="#f59e0b" />
+                    <ActionButton onClick={() => setActiveModal('CREATE_CAT')} icon="📁" label="Crear Categoría" color="#3b82f6" />
+                    <ActionButton onClick={() => setActiveModal('CREATE_SUB')} icon="📂" label="Crear Subcategoría" color="#22c55e" />
+                    <ActionButton onClick={() => setActiveModal('CREATE_SEC')} icon="📄" label="Crear Sección" color="#f59e0b" />
+                    <ActionButton onClick={() => setActiveModal('EDIT_CAT')} icon="✏️" label="Editar Categoría" color="#3b82f6" />
+                    <ActionButton onClick={() => setActiveModal('EDIT_SUB')} icon="📝" label="Editar Subcategoría" color="#22c55e" />
+                    <ActionButton onClick={() => setActiveModal('EDIT_SEC')} icon="⚙️" label="Editar Sección" color="#f59e0b" />
                 </div>
 
                 {/* Pie de página */}

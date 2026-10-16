@@ -1,25 +1,19 @@
 import type { UIScale, LayoutOrientation } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
 
+export type MenuMode = 'normal' | 'delete_selection' | 'edit_cat_selection' | 'edit_sub_selection' | 'edit_sec_selection';
+
 interface MenuHeaderProps {
     back: () => void;
     canEdit: boolean;
-    mode: string;
-    showCatMenu: boolean;
-    setShowCatMenu: (show: boolean) => void;
-    showCatInput: boolean;
-    setShowCatInput: (show: boolean) => void;
-    newCatName: string;
-    setNewCatName: (name: string) => void;
-    handleAddCategory: () => void;
-    setMode: (mode: any) => void;
+    mode: MenuMode;
+    setMode: (mode: MenuMode) => void;
     uiScale: UIScale;
     setUiScale: (s: UIScale) => void;
     layoutOrientation: LayoutOrientation;
     setLayoutOrientation: (o: LayoutOrientation) => void;
     showOrientation?: boolean;
     setIsReorderMode: (b: boolean) => void;
-    requestSecureAction: (actionType: string, callback: () => void, data?: any) => void;
     onAddProduct: () => void;
     onShowTaxonomyManager: () => void;
 }
@@ -28,13 +22,6 @@ export default function MenuHeader({
     back,
     canEdit,
     mode,
-    showCatMenu,
-    setShowCatMenu,
-    showCatInput,
-    setShowCatInput,
-    newCatName,
-    setNewCatName,
-    handleAddCategory,
     setMode,
     uiScale,
     setUiScale,
@@ -42,7 +29,6 @@ export default function MenuHeader({
     setLayoutOrientation,
     showOrientation = true,
     setIsReorderMode,
-    requestSecureAction,
     onAddProduct,
     onShowTaxonomyManager
 }: MenuHeaderProps) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { User, TaxConfig, UIScale, LayoutOrientation, AuditAction } from '../types';
 import SecurityModal from '../components/ui/SecurityModal';
+import ConfirmDiscardModal from '../components/ui/ConfirmDiscardModal';
 
 interface Props {
     user: User;
@@ -20,10 +21,29 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
     const [inputValue, setInputValue] = React.useState(globalTaxConfig.percentage.toString());
     const [isVerified, setIsVerified] = React.useState(false);
     const [showSaveConfirm, setShowSaveConfirm] = React.useState(false);
+    const [showDiscardConfirm, setShowDiscardConfirm] = React.useState(false);
 
     React.useEffect(() => {
         setInputValue(localTaxConfig.percentage.toString());
     }, [localTaxConfig.percentage]);
+
+    const hasUnsavedChanges = React.useMemo(() => {
+        return (
+            globalTaxConfig.enabled !== localTaxConfig.enabled ||
+            globalTaxConfig.name.trim() !== localTaxConfig.name.trim() ||
+            globalTaxConfig.percentage !== localTaxConfig.percentage ||
+            globalTaxConfig.mode !== localTaxConfig.mode ||
+            globalTaxConfig.rounding !== localTaxConfig.rounding
+        );
+    }, [globalTaxConfig, localTaxConfig]);
+
+    const handleBack = () => {
+        if (hasUnsavedChanges) {
+            setShowDiscardConfirm(true);
+        } else {
+            back();
+        }
+    };
 
     if (!isAdmin && !isManager) return null;
 
@@ -69,6 +89,18 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
                 message="Ingrese su contraseña para guardar la nueva configuración"
                 confirmText="Guardar Cambios"
             />
+            <ConfirmDiscardModal
+                isOpen={showDiscardConfirm}
+                onClose={() => setShowDiscardConfirm(false)}
+                onDiscard={() => {
+                    setShowDiscardConfirm(false);
+                    back();
+                }}
+                title="¿Descartar cambios?"
+                message="Tienes cambios sin guardar en la configuración de impuestos. Si sales ahora, se perderán las modificaciones realizadas. ¿Estás seguro de que deseas salir sin guardar?"
+                discardText="Salir sin Guardar"
+                cancelText="Seguir Editando"
+            />
             <div className="page-container">
                 <div className="title-bar">
                     <div>
@@ -76,7 +108,7 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
                         <div style={{ opacity: 0.8, fontSize: "0.875em" }}>Gestiona el IVA y otros cargos</div>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button onClick={back} className="btn-back">
+                        <button onClick={handleBack} className="btn-back">
                             ← Volver al panel
                         </button>
 
@@ -226,39 +258,86 @@ const TaxSettings: React.FC<Props> = ({ user, taxConfig: globalTaxConfig, setTax
                     </div>
 
                     {/* Sección de vista previa */}
-                    <div style={{ marginTop: '2.5rem', padding: '2rem', background: 'var(--card-hover-bg)', borderRadius: '1rem', border: '1px solid var(--card-border)' }}>
-                        <div style={{ fontSize: '0.85em', fontWeight: 700, opacity: 0.7, marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>VISTA PREVIA DE EJEMPLO</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-                            <div style={{ textAlign: 'center', flex: 1 }}>
-                                <div style={{ fontSize: '0.8em', opacity: 0.6, marginBottom: '0.5rem' }}>Precio Venta (Ejemplo)</div>
-                                <div style={{ fontSize: '1.5em', fontWeight: 700 }}>$100.00</div>
-                            </div>
-                            <div style={{ fontSize: '2em', opacity: 0.3 }}>→</div>
-                            <div style={{ textAlign: 'center', flex: 1 }}>
-                                <div style={{ fontSize: '0.8em', opacity: 0.6, marginBottom: '0.5rem' }}>{localTaxConfig.name} ({localTaxConfig.percentage}%)</div>
-                                <div style={{ fontSize: '1.5em', fontWeight: 700, color: 'var(--danger-color)' }}>
-                                    -${localTaxConfig.mode === 'exclusive' ? (100 * (localTaxConfig.percentage / 100)).toFixed(2) : (100 - (100 / (1 + localTaxConfig.percentage / 100))).toFixed(2)}
+                    {(() => {
+                        const isExclusive = localTaxConfig.mode === 'exclusive';
+                        const taxPercentage = Math.max(0, localTaxConfig.percentage || 0);
+                        const taxRate = taxPercentage / 100;
+                        const taxName = (localTaxConfig.name || '').trim() || 'IVA';
+
+                        // Cálculo considerando el precio de venta como subtotal base de $100.00
+                        const exampleBase = 100;
+                        const previewSubtotal = isExclusive
+                            ? exampleBase
+                            : (taxRate > 0 ? exampleBase / (1 + taxRate) : exampleBase);
+
+                        const previewTaxAmount = isExclusive
+                            ? exampleBase * taxRate
+                            : (exampleBase - previewSubtotal);
+
+                        const previewTotal = isExclusive
+                            ? previewSubtotal + previewTaxAmount
+                            : exampleBase;
+
+                        return (
+                            <div className="tax-preview-panel">
+                                <div className="tax-preview-header">
+                                    <div className="tax-preview-title">
+                                        <span>Vista previa de ejemplo</span>
+                                    </div>
+                                    <div className={`tax-preview-badge ${isExclusive ? 'tax-preview-badge-exclusive' : 'tax-preview-badge-inclusive'}`}>
+                                        {isExclusive ? 'Modo: Impuesto agregado al subtotal' : 'Modo: Impuesto incluido en el precio'}
+                                    </div>
+                                </div>
+
+                                <div className="tax-preview-grid">
+                                    {/* 1. Subtotal */}
+                                    <div className="tax-preview-card">
+                                        <div className="tax-preview-label">Subtotal</div>
+                                        <div className="tax-preview-amount">${previewSubtotal.toFixed(2)}</div>
+                                        <div className="tax-preview-subtext">
+                                            {isExclusive ? 'Base antes de impuesto' : 'Base gravable desglosada'}
+                                        </div>
+                                    </div>
+
+                                    {/* Separador + */}
+                                    <div className="tax-preview-operator" title="Suma de impuesto" aria-label="Más">
+                                        +
+                                    </div>
+
+                                    {/* 2. IVA */}
+                                    <div className="tax-preview-card tax-preview-card-tax">
+                                        <div className="tax-preview-label tax-preview-label-tax">
+                                            {taxName} ({taxPercentage}%)
+                                        </div>
+                                        <div className="tax-preview-amount tax-preview-amount-tax">
+                                            +${previewTaxAmount.toFixed(2)}
+                                        </div>
+                                        <div className="tax-preview-subtext">
+                                            {isExclusive ? 'Importe agregado' : 'Impuesto incluido'}
+                                        </div>
+                                    </div>
+
+                                    {/* Separador = */}
+                                    <div className="tax-preview-operator" title="Total a pagar" aria-label="Igual">
+                                        =
+                                    </div>
+
+                                    {/* 3. Total a pagar por el cliente */}
+                                    <div className="tax-preview-card tax-preview-card-total">
+                                        <div className="tax-preview-label tax-preview-label-total">
+                                            Total a pagar por el cliente
+                                        </div>
+                                        <div className="tax-preview-amount tax-preview-amount-total">
+                                            ${previewTotal.toFixed(2)}
+                                        </div>
+                                        <div className="tax-preview-subtext" style={{ color: 'rgba(74, 222, 128, 0.8)' }}>
+                                            {isExclusive ? 'Subtotal + Impuesto' : 'Precio final al comensal'}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div style={{ fontSize: '2em', opacity: 0.3 }}>→</div>
-                            <div style={{ textAlign: 'center', flex: 1 }}>
-                                <div style={{ fontSize: '0.8em', opacity: 0.6, marginBottom: '0.5rem' }}>Ganancia Real (Neto)</div>
-                                <div style={{ fontSize: '1.5em', fontWeight: 700, color: 'var(--success-color)' }}>
-                                    ${localTaxConfig.mode === 'exclusive' ? '100.00' : (100 / (1 + localTaxConfig.percentage / 100)).toFixed(2)}
-                                </div>
-                            </div>
-                        </div>
-                        <div style={{ marginTop: '1.5rem', fontSize: '1.1em', fontWeight: 700, textAlign: 'center', color: 'var(--text-color)' }}>
-                            {localTaxConfig.mode === 'exclusive'
-                                ? `Total a pagar por el cliente: $${(100 * (1 + localTaxConfig.percentage / 100)).toFixed(2)}`
-                                : `Total pagado por el cliente: $100.00`}
-                        </div>
-                        <div style={{ marginTop: '1.5rem', fontSize: '0.9em', opacity: 0.6, textAlign: 'center', background: 'var(--primary-color-alpha-10)', padding: '1rem', borderRadius: '0.5rem', color: 'var(--primary-color)' }}>
-                            {localTaxConfig.mode === 'inclusive'
-                                ? `Ejemplo: Subtotal 100.00 → El precio YA incluye impuesto.`
-                                : `Ejemplo: Subtotal 100.00 → Impuesto ${(100 * (localTaxConfig.percentage / 100)).toFixed(2)} → Total ${(100 * (1 + localTaxConfig.percentage / 100)).toFixed(2)}`}
-                        </div>
-                    </div>
+                        );
+                    })()}
                 </div>
             </div>
         </div>

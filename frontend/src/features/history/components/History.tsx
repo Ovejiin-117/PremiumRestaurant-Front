@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { Order, UIScale, LayoutOrientation, User, Shift } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
 import CustomSelect from '../../../components/ui/CustomSelect';
@@ -38,7 +38,7 @@ export default function History({
 
     const isAdmin = user.role === 'developer' || user.role === 'manager';
 
-    const getShiftLabel = (shift: Shift) => {
+    const getShiftLabel = useCallback((shift: Shift) => {
         const start = new Date(shift.startTime);
         const startStr = start.toLocaleString('es-ES', {
             day: '2-digit', month: '2-digit', year: 'numeric',
@@ -57,7 +57,7 @@ export default function History({
         }
 
         return `Turno (Iniciado: ${startStr})`;
-    };
+    }, [currentShiftId]);
 
     // 1. Organizar turnos
     const organizedShifts = useMemo(() => {
@@ -92,7 +92,7 @@ export default function History({
                 label: getShiftLabel(shift)
             };
         });
-    }, [shifts, currentShiftId, history, shiftFilterDate]);
+    }, [shifts, currentShiftId, history, shiftFilterDate, getShiftLabel]);
 
 
     const [reprintingOrder, setReprintingOrder] = useState<string | null>(null);

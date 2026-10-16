@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { User } from "../types";
 
 type Props = {
@@ -15,34 +15,40 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [fade, setFade] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showError = (msg: string) => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setError(msg);
+        setFade(true);
+        timerRef.current = setTimeout(() => {
+            setFade(false);
+            setTimeout(() => setError(""), 500); // Esperar a que termine el desvanecimiento
+        }, 3000);
+    };
 
     useEffect(() => {
-        if (error) {
-            setFade(true);
-            const timer = setTimeout(() => {
-                setFade(false);
-                setTimeout(() => setError(""), 500); // Esperar a que termine el desvanecimiento
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [error]);
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
 
     const handleLogin = () => {
         // Buscar usuario por nombre de usuario (sin distinción de mayúsculas/minúsculas) y verificar si está activo
         const foundUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.active !== false);
 
         if (!foundUser) {
-            setError("USUARIO NO EXISTENTE");
+            showError("USUARIO NO EXISTENTE");
             return;
         }
 
         if (foundUser.role === 'waiter' && !isShiftOpen) {
-            setError("TURNO CERRADO - MESEROS NO PUEDEN ACCEDER");
+            showError("TURNO CERRADO - MESEROS NO PUEDEN ACCEDER");
             return;
         }
 
         if (foundUser.password !== password) {
-            setError("CONTRASEÑA INCORRECTA");
+            showError("CONTRASEÑA INCORRECTA");
             return;
         }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CustomSelect from "../../../components/ui/CustomSelect";
 import type { User, Role, UIScale, LayoutOrientation } from "../../../types";
 import SettingsControls from "../../../components/ui/SettingsControls";
@@ -20,7 +20,7 @@ type Props = {
 type Mode = 'normal' | 'delete_selection' | 'edit_selection';
 
 // Componente interno para confirmación de eliminación (patrón copiado de MenuEditor)
-const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete, style = {} }: { id: string, activeId: string | null, setActiveId: (id: string | null) => void, onDelete: () => void, style?: React.CSSProperties }) => {
+const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete }: { id: string, activeId: string | null, setActiveId: (id: string | null) => void, onDelete: () => void }) => {
     const isConfirming = activeId === id;
     return (
         <button
@@ -32,15 +32,9 @@ const DeleteConfirmBtn = ({ id, activeId, setActiveId, onDelete, style = {} }: {
                     setActiveId(id);
                 }
             }}
-            style={{
-                background: isConfirming ? '#b91c1c' : '#dc2626',
-                color: 'white',
-                border: isConfirming ? '2px solid #fecaca' : '1px solid white',
-                ...style,
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-            }}
+            className={`font-bold cursor-pointer transition-all px-4 py-2 text-sm rounded-md border text-white ${
+                isConfirming ? 'bg-red-700 border-red-200' : 'bg-danger border-white'
+            }`}
         >
             {isConfirming ? 'CONFIRMAR' : 'ELIMINAR'}
         </button>
@@ -75,13 +69,22 @@ export default function UserManagement({
     const [revealPassword, setRevealPassword] = useState(false);
 
     // Estados del modal de seguridad personalizado
-    const [pendingAction, setPendingAction] = useState<{ type: 'create' | 'edit' | 'delete' | 'reveal', data: any } | null>(null);
+    const [pendingAction, setPendingAction] = useState<{ type: 'create' | 'edit' | 'delete' | 'reveal', data?: string | null } | null>(null);
     const [showSecurityModal, setShowSecurityModal] = useState(false);
 
     // Estado de eliminación
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const [msg, setMsg] = useState("");
+
+    const resetMode = useCallback(() => {
+        setMode('normal');
+        setEditingUsername(null);
+        setShowUserMenu(false);
+        setShowCreateInput(false);
+        setConfirmDeleteId(null);
+        setMsg("");
+    }, []);
 
     // Cerrar menús al hacer clic afuera
     useEffect(() => {
@@ -104,20 +107,11 @@ export default function UserManagement({
             window.removeEventListener('click', handleClickOutside);
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [mode]);
-
-    const resetMode = () => {
-        setMode('normal');
-        setEditingUsername(null);
-        setShowUserMenu(false);
-        setShowCreateInput(false);
-        setConfirmDeleteId(null);
-        setMsg("");
-    };
+    }, [mode, resetMode]);
 
     // Verificación de permisos: Solo Desarrollador y Gerente pueden acceder
     if (user.role === "waiter") {
-        return <div style={{ color: "var(--text-color)", padding: 20 }}>Acceso denegado</div>;
+        return <div className="text-text-main p-5">Acceso denegado</div>;
     }
 
     const handleAddUser = (e?: React.MouseEvent) => {
@@ -284,7 +278,7 @@ export default function UserManagement({
         <div className={`scale-${uiScale}`}>
             <div className="page-container" onClick={handleBackgroundClick}>
                 <div className="title-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75em' }}>
+                    <div className="flex items-center gap-3">
                         <button onClick={back} className="btn-back">
                             ← Volver al panel
                         </button>
@@ -299,7 +293,7 @@ export default function UserManagement({
                     </div>
 
                     {/* Botón del menú principal */}
-                    <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                    <div className="relative" onClick={e => e.stopPropagation()}>
                         <button
                             onClick={() => {
                                 if (mode !== 'normal') {
@@ -309,41 +303,61 @@ export default function UserManagement({
                                     setShowCreateInput(false);
                                 }
                             }}
-                            style={{ background: '#3b82f6', color: 'white', border: 'none', borderRadius: '0.5em', padding: '0.5em 1em', fontWeight: 'bold', cursor: 'pointer', fontSize: '1em' }}
+                            className="bg-primary text-white border-none rounded-lg px-4 py-2 font-bold cursor-pointer text-base hover:brightness-110 active:scale-95 transition-all"
                         >
                             {mode === 'delete_selection' ? 'MODO ELIMINAR' : mode === 'edit_selection' ? 'MODO EDITAR' : 'Opciones de Usuario ▼'}
                         </button>
 
                         {/* Menú desplegable */}
                         {showUserMenu && mode === 'normal' && (
-                            <div className="glass-card" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.75rem', width: 'clamp(300px, 45vw, 450px)', zIndex: 50, boxShadow: '0 20px 40px rgba(0,0,0,0.6)', border: '1px solid var(--card-border)', padding: 0, overflow: 'hidden' }}>
+                            <div className="glass-card absolute top-full right-0 mt-3 w-[clamp(300px,45vw,450px)] z-50 shadow-2xl border border-card-border p-0 overflow-hidden">
                                 {!showCreateInput ? (
                                     <>
-                                        <div onClick={() => setShowCreateInput(true)} style={{ padding: '1.25rem', cursor: 'pointer', borderBottom: '1px solid var(--card-border)', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '0.75rem', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--card-hover-bg)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                                            <span style={{ fontSize: '1.2em' }}>👤+</span> Crear Nuevo Usuario
+                                        <div
+                                            onClick={() => setShowCreateInput(true)}
+                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 hover:bg-card-hover transition-colors"
+                                        >
+                                            <span className="text-lg">👤+</span> Crear Nuevo Usuario
                                         </div>
-                                        <div onClick={() => { setMode('edit_selection'); setShowUserMenu(false); }} style={{ padding: '1.25rem', cursor: 'pointer', borderBottom: '1px solid var(--card-border)', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '0.75rem', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--card-hover-bg)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                                            <span style={{ fontSize: '1.2em' }}>✎</span> Editar Usuario
+                                        <div
+                                            onClick={() => { setMode('edit_selection'); setShowUserMenu(false); }}
+                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 hover:bg-card-hover transition-colors"
+                                        >
+                                            <span className="text-lg">✎</span> Editar Usuario
                                         </div>
-                                        <div onClick={() => { setMode('delete_selection'); setShowUserMenu(false); }} style={{ padding: '1.25rem', cursor: 'pointer', color: 'var(--danger-color)', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '0.75rem', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--card-hover-bg)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                                            <span style={{ fontSize: '1.2em' }}>🗑</span> Eliminar Usuario
+                                        <div
+                                            onClick={() => { setMode('delete_selection'); setShowUserMenu(false); }}
+                                            className="p-5 cursor-pointer border-b border-card-border text-sm flex items-center gap-3 text-danger hover:bg-card-hover transition-colors"
+                                        >
+                                            <span className="text-lg">🗑</span> Eliminar Usuario
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ padding: '2rem', cursor: 'default' }} onClick={e => e.stopPropagation()}>
-                                        <h4 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1em', fontWeight: '800', borderBottom: '1px solid var(--card-border)', paddingBottom: '0.75rem', letterSpacing: '-0.02em' }}>NUEVO USUARIO</h4>
+                                    <div className="p-8 cursor-default" onClick={e => e.stopPropagation()}>
+                                        <h4 className="m-0 mb-6 text-base font-extrabold border-b border-card-border pb-3 tracking-tight">NUEVO USUARIO</h4>
 
-                                        <div className="form-group" style={{ marginBottom: '1rem' }}>
-                                            <label className="form-label" style={{ fontSize: '0.7em' }}>NOMBRE</label>
-                                            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ej: Juan Pérez" style={{ padding: '0.75rem', fontSize: '0.95em' }} />
+                                        <div className="form-group mb-4">
+                                            <label className="form-label text-[0.7em]">NOMBRE</label>
+                                            <input
+                                                value={newName}
+                                                onChange={e => setNewName(e.target.value)}
+                                                placeholder="Ej: Juan Pérez"
+                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                            />
                                         </div>
 
-                                        <div className="form-group" style={{ marginBottom: '1rem' }}>
-                                            <label className="form-label" style={{ fontSize: '0.7em' }}>CONTRASEÑA</label>
-                                            <input value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="****" type="password" style={{ padding: '0.75rem', fontSize: '0.95em' }} />
+                                        <div className="form-group mb-4">
+                                            <label className="form-label text-[0.7em]">CONTRASEÑA</label>
+                                            <input
+                                                value={newPass}
+                                                onChange={e => setNewPass(e.target.value)}
+                                                placeholder="****"
+                                                type="password"
+                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                            />
                                         </div>
 
-                                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                                        <div className="form-group mb-4">
                                             <CustomSelect
                                                 label="ROL"
                                                 value={newRole}
@@ -356,16 +370,39 @@ export default function UserManagement({
                                             />
                                         </div>
 
-                                        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                                            <label className="form-label" style={{ fontSize: '0.7em' }}>FECHA DE NACIMIENTO</label>
-                                            <input type="date" value={newBirthDate} onChange={e => setNewBirthDate(e.target.value)} style={{ padding: '0.75rem', fontSize: '0.95em' }} />
+                                        <div className="form-group mb-6">
+                                            <label className="form-label text-[0.7em]">FECHA DE NACIMIENTO</label>
+                                            <input
+                                                type="date"
+                                                value={newBirthDate}
+                                                onChange={e => setNewBirthDate(e.target.value)}
+                                                className="w-full p-3 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
+                                            />
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                            <button onClick={handleAddUser} style={{ flex: 1, background: 'var(--success-color)', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9em' }}>CREAR USUARIO</button>
-                                            <button onClick={() => { setShowCreateInput(false); setMsg(""); }} style={{ width: '3.5rem', background: 'var(--card-hover-bg)', color: 'var(--text-color)', border: '1px solid var(--card-border)', padding: '0.85rem', borderRadius: '0.5rem', cursor: 'pointer' }}>✕</button>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={handleAddUser}
+                                                className="flex-1 bg-success text-white border-none p-3.5 rounded-lg cursor-pointer font-bold text-sm hover:brightness-110 active:scale-95 transition-all"
+                                            >
+                                                CREAR USUARIO
+                                            </button>
+                                            <button
+                                                onClick={() => { setShowCreateInput(false); setMsg(""); }}
+                                                className="w-14 bg-card-hover text-text-main border border-card-border p-3.5 rounded-lg cursor-pointer hover:brightness-110 active:scale-95 transition-all flex items-center justify-center"
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
-                                        {msg && <div style={{ marginTop: "1rem", fontSize: '0.85em', textAlign: 'center', padding: '0.75rem', borderRadius: '0.5rem', background: msg.includes("exitosamente") ? "rgba(34, 197, 94, 0.1)" : "rgba(239, 68, 68, 0.1)", color: msg.includes("exitosamente") ? "#4ade80" : "#f87171" }}>{msg}</div>}
+                                        {msg && (
+                                            <div className={`mt-4 text-sm text-center p-3 rounded-lg ${
+                                                msg.includes("exitosamente")
+                                                    ? "bg-success/10 text-success"
+                                                    : "bg-danger/10 text-danger"
+                                            }`}>
+                                                {msg}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -375,7 +412,7 @@ export default function UserManagement({
 
                 <h1>Gestión de Usuarios</h1>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="flex flex-col gap-6">
                     {[
                         { title: 'Gerente:', role: 'manager' },
                         { title: 'Meseros:', role: 'waiter' }
@@ -396,45 +433,31 @@ export default function UserManagement({
 
                         return (
                             <div key={section.role}>
-                                <h2 style={{ fontSize: '1em', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{section.title}</h2>
+                                <h2 className="text-base text-text-secondary mb-4 uppercase tracking-wider font-semibold">
+                                    {section.title}
+                                </h2>
                                 <div className="card-grid">
                                     {filteredUsers.map(u => {
                                         const isWaitress = u.role === 'waiter';
                                         const isManuallyActive = u.active !== false;
                                         const isEffectivelyActive = isWaitress ? (isManuallyActive && isShiftOpen) : isManuallyActive;
-                                        const statusColor = isEffectivelyActive ? '#4ade80' : (!isManuallyActive ? '#f87171' : '#94a3b8');
                                         const statusText = isEffectivelyActive ? 'ACTIVO' : (!isManuallyActive ? 'INACTIVO' : 'TURNO CERRADO');
 
                                         return (
-                                            <div key={u.username} className="glass-card" style={{
-                                                border: `1px solid ${isEffectivelyActive ? 'var(--success-color)' : (!isManuallyActive ? 'var(--danger-color)' : 'var(--card-border)')}`,
-                                                boxShadow: isEffectivelyActive ? '0 8px 24px -8px var(--primary-color-alpha-20)' : 'none',
-                                                position: 'relative',
-                                                overflow: 'hidden',
-                                                opacity: isEffectivelyActive ? 1 : 0.8
-                                            }} onClick={e => e.stopPropagation()}>
-
+                                            <div
+                                                key={u.username}
+                                                className={`glass-card relative overflow-hidden transition-all border ${
+                                                    isEffectivelyActive
+                                                        ? 'border-success shadow-lg shadow-primary/20 opacity-100'
+                                                        : (!isManuallyActive ? 'border-danger opacity-80' : 'border-card-border opacity-80')
+                                                }`}
+                                                onClick={e => e.stopPropagation()}
+                                            >
                                                 {/* Botón de información */}
                                                 {editingUsername !== u.username && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setInfoUser(u) }}
-                                                        style={{
-                                                            position: 'absolute',
-                                                            bottom: '8px',
-                                                            right: '8px',
-                                                            width: '24px',
-                                                            height: '24px',
-                                                            borderRadius: '4px',
-                                                            border: '1px solid var(--card-border)',
-                                                            background: 'var(--card-hover-bg)',
-                                                            color: 'var(--text-color)',
-                                                            cursor: 'pointer',
-                                                            fontSize: '12px',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            zIndex: 5
-                                                        }}
+                                                        className="absolute bottom-2 right-2 w-6 h-6 rounded border border-card-border bg-card-hover text-text-main cursor-pointer text-xs flex items-center justify-center z-[5] hover:bg-primary/20 hover:text-primary transition-all"
                                                     >
                                                         i
                                                     </button>
@@ -442,23 +465,22 @@ export default function UserManagement({
 
                                                 {/* Capa superpuesta del modo eliminar */}
                                                 {mode === 'delete_selection' && canManageUser(u) && (
-                                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div className="absolute inset-0 bg-black/80 z-10 flex items-center justify-center">
                                                         <DeleteConfirmBtn
                                                             id={u.username}
                                                             activeId={confirmDeleteId}
                                                             setActiveId={setConfirmDeleteId}
                                                             onDelete={() => handleDelete(u.username)}
-                                                            style={{ padding: '8px 16px', fontSize: '14px', borderRadius: '6px' }}
                                                         />
                                                     </div>
                                                 )}
 
                                                 {/* Capa superpuesta del modo editar */}
                                                 {mode === 'edit_selection' && editingUsername !== u.username && canManageUser(u) && (
-                                                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div className="absolute inset-0 bg-black/80 z-10 flex items-center justify-center">
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); startEdit(u); }}
-                                                            style={{ background: '#2563eb', color: 'white', border: '2px solid white', padding: '0.5em 1.25em', fontSize: '1em', fontWeight: 'bold', cursor: 'pointer', borderRadius: '0.375em' }}
+                                                            className="bg-primary text-white border-2 border-white px-5 py-2 text-base font-bold cursor-pointer rounded-md hover:brightness-110 active:scale-95 transition-all"
                                                         >
                                                             EDITAR
                                                         </button>
@@ -467,32 +489,34 @@ export default function UserManagement({
 
                                                 {/* Contenido de tarjeta de usuario O formulario de edición */}
                                                 {editingUsername === u.username ? (
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', opacity: 1 }} onClick={e => e.stopPropagation()}>
-                                                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9em', fontWeight: '800', color: 'var(--primary-color)', borderBottom: `1px solid var(--primary-color-alpha-20)`, paddingBottom: '0.4rem' }}>EDITAR PERFIL</h4>
+                                                    <div className="flex flex-col gap-3 opacity-100" onClick={e => e.stopPropagation()}>
+                                                        <h4 className="m-0 mb-2 text-sm font-extrabold text-primary border-b border-primary/20 pb-1.5">
+                                                            EDITAR PERFIL
+                                                        </h4>
 
                                                         <div className="form-group">
-                                                            <label className="form-label" style={{ fontSize: '0.65em' }}>NOMBRE</label>
+                                                            <label className="form-label text-[0.65em]">NOMBRE</label>
                                                             <input
                                                                 value={editName}
                                                                 onChange={e => setEditName(e.target.value)}
-                                                                style={{ padding: '0.5rem', fontSize: '0.9em' }}
+                                                                className="w-full p-2 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                                             />
                                                         </div>
                                                         <div className="form-group">
-                                                            <label className="form-label" style={{ fontSize: '0.65em' }}>CLAVE</label>
+                                                            <label className="form-label text-[0.65em]">CLAVE</label>
                                                             <input
                                                                 value={editPass}
                                                                 onChange={e => setEditPass(e.target.value)}
-                                                                style={{ padding: '0.5rem', fontSize: '0.9em' }}
+                                                                className="w-full p-2 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                                             />
                                                         </div>
                                                         <div className="form-group">
-                                                            <label className="form-label" style={{ fontSize: '0.65em' }}>NACIMIENTO</label>
+                                                            <label className="form-label text-[0.65em]">NACIMIENTO</label>
                                                             <input
                                                                 type="date"
                                                                 value={editBirthDate}
                                                                 onChange={e => setEditBirthDate(e.target.value)}
-                                                                style={{ padding: '0.5rem', fontSize: '0.9em' }}
+                                                                className="w-full p-2 text-sm bg-input-bg border border-input-border text-text-main rounded-md box-border outline-none focus:border-primary"
                                                             />
                                                         </div>
                                                         <div className="form-group">
@@ -507,7 +531,7 @@ export default function UserManagement({
                                                                 width="100%"
                                                             />
                                                         </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--card-hover-bg)', padding: '0.5rem', borderRadius: '0.4rem' }}>
+                                                        <div className="flex items-center gap-3 bg-card-hover p-2 rounded-md">
                                                             <div
                                                                 onClick={() => {
                                                                     const newVal = !editActive;
@@ -517,42 +541,54 @@ export default function UserManagement({
                                                                     }
                                                                     setEditActive(newVal);
                                                                 }}
-                                                                style={{
-                                                                    width: '50px', height: '24px', background: editActive ? 'var(--success-color)' : 'var(--input-border)',
-                                                                    borderRadius: '4px', position: 'relative', cursor: 'pointer', transition: 'all 0.2s', border: '1px solid rgba(255,255,255,0.1)'
-                                                                }}
+                                                                className={`w-[50px] h-6 rounded relative cursor-pointer transition-all border border-white/10 ${
+                                                                    editActive ? 'bg-success' : 'bg-input-border'
+                                                                }`}
                                                             >
-                                                                <div style={{
-                                                                    width: '18px', height: '18px', background: 'white', borderRadius: '2px',
-                                                                    position: 'absolute', top: '2px', left: editActive ? '28px' : '2px',
-                                                                    transition: 'all 0.2s'
-                                                                }} />
+                                                                <div
+                                                                    className={`w-[18px] h-[18px] bg-white rounded-[2px] absolute top-[2px] transition-all ${
+                                                                        editActive ? 'left-[28px]' : 'left-[2px]'
+                                                                    }`}
+                                                                />
                                                             </div>
-                                                            <span style={{ fontSize: '0.75em', fontWeight: 'bold', color: editActive ? 'var(--success-color)' : 'var(--text-muted)' }}>
+                                                            <span className={`text-[0.75em] font-bold ${
+                                                                editActive ? 'text-success' : 'text-text-muted'
+                                                            }`}>
                                                                 {editActive ? 'USUARIO ACTIVO' : 'USUARIO DESHABILITADO'}
                                                             </span>
                                                         </div>
-                                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                            <button onClick={() => saveEdit(u.username)} style={{ flex: 1, background: 'var(--success-color)', color: 'white', border: 'none', padding: '0.75rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85em' }}>GUARDAR</button>
-                                                            <button onClick={() => setEditingUsername(null)} style={{ background: 'var(--card-hover-bg)', color: 'var(--text-color)', border: 'none', padding: '0.75rem', borderRadius: '0.5rem', cursor: 'pointer' }}>✕</button>
+                                                        <div className="flex gap-2 mt-2">
+                                                            <button
+                                                                onClick={() => saveEdit(u.username)}
+                                                                className="flex-1 bg-success text-white border-none p-3 rounded-lg cursor-pointer font-bold text-xs hover:brightness-110 active:scale-95 transition-all"
+                                                            >
+                                                                GUARDAR
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingUsername(null)}
+                                                                className="bg-card-hover text-text-main border-none p-3 rounded-lg cursor-pointer hover:brightness-110 active:scale-95 transition-all"
+                                                            >
+                                                                ✕
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                                            <div style={{ fontWeight: "bold", fontSize: "1.1em", color: isEffectivelyActive ? 'var(--text-color)' : 'var(--text-muted)' }}>{u.username}</div>
-                                                            <div style={{
-                                                                fontSize: '0.65em',
-                                                                padding: '0.15em 0.4em',
-                                                                borderRadius: '0.25em',
-                                                                background: isEffectivelyActive ? 'var(--primary-color-alpha-20)' : (!isManuallyActive ? 'var(--primary-color-alpha-20)' /* usar el mismo alfa para tonos rojizos es complejo sin lógica adicional */ : 'var(--card-hover-bg)'),
-                                                                color: statusColor,
-                                                                border: `1px solid ${isEffectivelyActive ? 'var(--primary-color-alpha-20)' : 'transparent'}`
-                                                            }}>
+                                                        <div className="flex justify-between items-start">
+                                                            <div className={`font-bold text-lg ${isEffectivelyActive ? 'text-text-main' : 'text-text-muted'}`}>
+                                                                {u.username}
+                                                            </div>
+                                                            <div className={`text-[0.65em] px-2 py-0.5 rounded border ${
+                                                                isEffectivelyActive
+                                                                    ? 'bg-success/15 border-success/30 text-success font-bold'
+                                                                    : (!isManuallyActive
+                                                                        ? 'bg-danger/15 border-danger/30 text-danger font-bold'
+                                                                        : 'bg-card-hover border-transparent text-text-muted')
+                                                            }`}>
                                                                 {statusText}
                                                             </div>
                                                         </div>
-                                                        <div style={{ opacity: 0.7, fontSize: "0.85em", marginTop: "0.25em", textTransform: "capitalize" }}>
+                                                        <div className="opacity-70 text-sm mt-1 capitalize">
                                                             {u.role === 'manager' ? 'Gerente' : u.role === 'waiter' ? 'Mesero' : u.role}
                                                         </div>
                                                     </>
@@ -569,74 +605,78 @@ export default function UserManagement({
                 {/* Modal de información */}
                 {infoUser && (
                     <div
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1.5rem' }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-6"
                         onClick={() => { setInfoUser(null); setRevealPassword(false); }}
                     >
                         <div
-                            className="glass-card"
-                            style={{ width: '100%', maxWidth: '24rem', padding: '2rem', cursor: 'default' }}
+                            className="glass-card w-full max-w-sm p-8 cursor-default"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.25em', color: 'var(--text-color)' }}>Información de Usuario</h3>
-                                <button onClick={() => { setInfoUser(null); setRevealPassword(false); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '1.5em', cursor: 'pointer', padding: 0 }}>✕</button>
+                            <div className="flex justify-between items-center mb-8">
+                                <h3 className="m-0 text-xl text-text-main">Información de Usuario</h3>
+                                <button
+                                    onClick={() => { setInfoUser(null); setRevealPassword(false); }}
+                                    className="bg-transparent border-none text-text-main text-2xl cursor-pointer p-0 hover:text-primary transition-colors"
+                                >
+                                    ✕
+                                </button>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div className="flex flex-col gap-6">
                                 <div>
-                                    <label className="form-label" style={{ fontSize: '0.7em' }}>ID DE USUARIO</label>
-                                    <div style={{ fontSize: '1em', fontWeight: 'bold', color: 'var(--primary-color)', fontFamily: 'monospace', marginTop: '0.25rem' }}>{infoUser.id}</div>
+                                    <label className="form-label text-[0.7em]">ID DE USUARIO</label>
+                                    <div className="text-base font-bold text-primary font-mono mt-1">{infoUser.id}</div>
                                 </div>
                                 <div>
-                                    <label className="form-label" style={{ fontSize: '0.7em' }}>NOMBRE</label>
-                                    <div style={{ fontSize: '1.1em', fontWeight: 'bold', marginTop: '0.25rem', color: 'var(--text-color)' }}>{infoUser.username}</div>
+                                    <label className="form-label text-[0.7em]">NOMBRE</label>
+                                    <div className="text-lg font-bold mt-1 text-text-main">{infoUser.username}</div>
                                 </div>
 
                                 <div>
-                                    <label className="form-label" style={{ fontSize: '0.7em' }}>CONTRASEÑA</label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem' }}>
+                                    <label className="form-label text-[0.7em]">CONTRASEÑA</label>
+                                    <div className="flex items-center gap-3 mt-1">
                                         {/* Verificación de permisos: Los gerentes no pueden ver contraseñas de otros gerentes */}
                                         {!(user.role === 'manager' && infoUser.role === 'manager' && user.id !== infoUser.id) ? (
                                             !revealPassword ? (
                                                 <>
-                                                    <div style={{ fontSize: '1.1em', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-color)' }}>********</div>
+                                                    <div className="text-lg font-bold font-mono text-text-main">********</div>
                                                     <button
                                                         onClick={() => {
                                                             setPendingAction({ type: 'reveal', data: null });
                                                             setShowSecurityModal(true);
                                                         }}
-                                                        style={{ background: 'var(--primary-color)', color: 'white', border: 'none', padding: '0.4em 0.8em', borderRadius: '0.4rem', fontSize: '0.7em', cursor: 'pointer', fontWeight: 'bold' }}
+                                                        className="bg-primary text-white border-none px-3 py-1.5 rounded text-[0.7em] cursor-pointer font-bold hover:brightness-110 transition-all"
                                                     >
                                                         VER
                                                     </button>
                                                 </>
                                             ) : (
-                                                <div style={{ fontSize: '1.1em', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--success-color)' }}>{infoUser.password}</div>
+                                                <div className="text-lg font-bold font-mono text-success">{infoUser.password}</div>
                                             )
                                         ) : (
-                                            <div style={{ fontSize: '1.1em', fontWeight: 'bold', fontFamily: 'monospace', color: 'var(--text-muted)', opacity: 0.5 }}>RESTRICTED</div>
+                                            <div className="text-lg font-bold font-mono text-text-muted opacity-50">RESTRICTED</div>
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="form-label" style={{ fontSize: '0.7em' }}>DÍAS TRABAJADOS</label>
-                                        <div style={{ fontSize: '1.1em', fontWeight: 'bold', color: 'var(--primary-color)', marginTop: '0.25rem' }}>{infoUser.loginDates?.length || 0}</div>
+                                        <label className="form-label text-[0.7em]">DÍAS TRABAJADOS</label>
+                                        <div className="text-lg font-bold text-primary mt-1">{infoUser.loginDates?.length || 0}</div>
                                     </div>
                                     <div>
-                                        <label className="form-label" style={{ fontSize: '0.7em' }}>NACIMIENTO</label>
-                                        <div style={{ fontSize: '1em', marginTop: '0.25rem' }}>{infoUser.birthDate || 'N/A'}</div>
+                                        <label className="form-label text-[0.7em]">NACIMIENTO</label>
+                                        <div className="text-base mt-1 text-text-main">{infoUser.birthDate || 'N/A'}</div>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="form-label" style={{ fontSize: '0.7em' }}>REGISTRO</label>
-                                    <div style={{ fontSize: '0.9em', opacity: 0.8, marginTop: '0.25rem' }}>{infoUser.registrationDate || 'N/A'}</div>
+                                    <label className="form-label text-[0.7em]">REGISTRO</label>
+                                    <div className="text-sm opacity-80 mt-1 text-text-main">{infoUser.registrationDate || 'N/A'}</div>
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => { setInfoUser(null); setRevealPassword(false); }}
-                                style={{ width: '100%', marginTop: '2.5rem', padding: '1em', borderRadius: '0.75rem', border: 'none', background: 'var(--primary-color)', color: 'white', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                                className="w-full mt-10 p-4 rounded-xl border-none bg-primary text-white font-bold cursor-pointer hover:brightness-110 active:scale-98 transition-all"
                             >
                                 CERRAR
                             </button>
@@ -652,8 +692,8 @@ export default function UserManagement({
                     onConfirm={() => {
                         if (pendingAction) {
                             if (pendingAction.type === 'create') confirmAddUser();
-                            else if (pendingAction.type === 'edit') confirmSaveEdit(pendingAction.data);
-                            else if (pendingAction.type === 'delete') confirmDelete(pendingAction.data);
+                            else if (pendingAction.type === 'edit' && pendingAction.data) confirmSaveEdit(pendingAction.data);
+                            else if (pendingAction.type === 'delete' && pendingAction.data) confirmDelete(pendingAction.data);
                             else if (pendingAction.type === 'reveal') setRevealPassword(true);
                             setShowSecurityModal(false);
                             setPendingAction(null);

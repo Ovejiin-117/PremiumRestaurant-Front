@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
-import SetupWizard from './features/setup/components/SetupWizard';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import UserManagement from './features/users/components/UserManagement';
 import MenuEditor from './features/menu/components/MenuEditor';
-import History from './features/history/components/History';
-import ShiftManagement from './features/shifts/components/ShiftManagement';
-import AuditLog from './pages/AuditLog';
-import TaxSettings from './pages/TaxSettings';
-import Promotions from './features/promotions/components/Promotions';
-import SalesRecords from './features/history/components/SalesRecords';
-import VisualSettings from './pages/VisualSettings';
-import SupplyManagement from './features/inventory/components/SupplyManagement';
+
+// Carga diferida (Lazy Loading) de vistas secundarias para optimizar el bundle inicial
+const SetupWizard = lazy(() => import('./features/setup/components/SetupWizard'));
+const UserManagement = lazy(() => import('./features/users/components/UserManagement'));
+const History = lazy(() => import('./features/history/components/History'));
+const ShiftManagement = lazy(() => import('./features/shifts/components/ShiftManagement'));
+const AuditLog = lazy(() => import('./pages/AuditLog'));
+const TaxSettings = lazy(() => import('./pages/TaxSettings'));
+const Promotions = lazy(() => import('./features/promotions/components/Promotions'));
+const SalesRecords = lazy(() => import('./features/history/components/SalesRecords'));
+const VisualSettings = lazy(() => import('./pages/VisualSettings'));
+const SupplyManagement = lazy(() => import('./features/inventory/components/SupplyManagement'));
+
 import type { User, MenuItem, Order, UIScale, LayoutOrientation, Shift, Theme, AuditLogEntry, AuditAction, AuditConfig, TaxConfig, Promotion, SupplyItem } from './types';
 import './App.css';
 
@@ -129,52 +132,47 @@ function App() {
     localStorage.setItem('rp_supplies', JSON.stringify(supplies));
   }, [supplies]);
 
-  // Cargar preferencias de tema según el usuario o estado de inicio de sesión
-  useEffect(() => {
-    if (user) {
-      const savedUserTheme = localStorage.getItem(`theme_${user.username}`) as Theme;
-      setTheme(savedUserTheme || 'dark');
+  // Aplicar preferencias de usuario al iniciar sesión sin efectos síncronos en cascada
+  const applyUserPreferences = (username: string) => {
+    const savedUserTheme = localStorage.getItem(`theme_${username}`) as Theme;
+    setTheme(savedUserTheme || 'dark');
 
-      // Restaurar escalas de interfaz y otras preferencias
-      const savedDash = localStorage.getItem(`uiScale_dashboard_${user.username}`);
-      const savedGest = localStorage.getItem(`uiScale_gestion_${user.username}`);
-      const savedMenuEdit = localStorage.getItem(`uiScale_menu_editor_${user.username}`) || localStorage.getItem(`uiScale_menu_${user.username}`);
-      const savedMenuOrder = localStorage.getItem(`uiScale_menu_ordering_${user.username}`) || localStorage.getItem(`uiScale_menu_${user.username}`);
-      const savedHist = localStorage.getItem(`uiScale_history_${user.username}`);
-      const savedTurno = localStorage.getItem(`uiScale_turno_${user.username}`);
-      const savedPromotions = localStorage.getItem(`uiScale_promotions_${user.username}`);
-      const savedDashOrient = localStorage.getItem(`layoutOrientation_dashboard_${user.username}`);
-      const savedGestOrient = localStorage.getItem(`layoutOrientation_gestion_${user.username}`);
-      const savedMenuEditOrient = localStorage.getItem(`layoutOrientation_menu_editor_${user.username}`) || localStorage.getItem(`layoutOrientation_${user.username}`);
-      const savedMenuOrderOrient = localStorage.getItem(`layoutOrientation_menu_ordering_${user.username}`) || localStorage.getItem(`layoutOrientation_${user.username}`);
-      const savedHistOrient = localStorage.getItem(`layoutOrientation_history_${user.username}`);
-      const savedTurnoOrient = localStorage.getItem(`layoutOrientation_turno_${user.username}`);
-      const savedPromotionsOrient = localStorage.getItem(`layoutOrientation_promotions_${user.username}`);
-      const savedTicketWidth = localStorage.getItem(`ticketWidth_${user.username}`);
+    const savedDash = localStorage.getItem(`uiScale_dashboard_${username}`);
+    const savedGest = localStorage.getItem(`uiScale_gestion_${username}`);
+    const savedMenuEdit = localStorage.getItem(`uiScale_menu_editor_${username}`) || localStorage.getItem(`uiScale_menu_${username}`);
+    const savedMenuOrder = localStorage.getItem(`uiScale_menu_ordering_${username}`) || localStorage.getItem(`uiScale_menu_${username}`);
+    const savedHist = localStorage.getItem(`uiScale_history_${username}`);
+    const savedTurno = localStorage.getItem(`uiScale_turno_${username}`);
+    const savedPromotions = localStorage.getItem(`uiScale_promotions_${username}`);
+    const savedDashOrient = localStorage.getItem(`layoutOrientation_dashboard_${username}`);
+    const savedGestOrient = localStorage.getItem(`layoutOrientation_gestion_${username}`);
+    const savedMenuEditOrient = localStorage.getItem(`layoutOrientation_menu_editor_${username}`) || localStorage.getItem(`layoutOrientation_${username}`);
+    const savedMenuOrderOrient = localStorage.getItem(`layoutOrientation_menu_ordering_${username}`) || localStorage.getItem(`layoutOrientation_${username}`);
+    const savedHistOrient = localStorage.getItem(`layoutOrientation_history_${username}`);
+    const savedTurnoOrient = localStorage.getItem(`layoutOrientation_turno_${username}`);
+    const savedPromotionsOrient = localStorage.getItem(`layoutOrientation_promotions_${username}`);
+    const savedTicketWidth = localStorage.getItem(`ticketWidth_${username}`);
 
-      if (savedDash) setDashboardScale(savedDash as UIScale);
-      if (savedGest) setGestionScale(savedGest as UIScale);
-      if (savedMenuEdit) setMenuEditorScale(savedMenuEdit as UIScale);
-      if (savedMenuOrder) setMenuOrderingScale(savedMenuOrder as UIScale);
-      if (savedHist) setHistoryScale(savedHist as UIScale);
-      if (savedTurno) setTurnoScale(savedTurno as UIScale);
-      if (savedPromotions) setPromotionsScale(savedPromotions as UIScale);
+    if (savedDash) setDashboardScale(savedDash as UIScale);
+    if (savedGest) setGestionScale(savedGest as UIScale);
+    if (savedMenuEdit) setMenuEditorScale(savedMenuEdit as UIScale);
+    if (savedMenuOrder) setMenuOrderingScale(savedMenuOrder as UIScale);
+    if (savedHist) setHistoryScale(savedHist as UIScale);
+    if (savedTurno) setTurnoScale(savedTurno as UIScale);
+    if (savedPromotions) setPromotionsScale(savedPromotions as UIScale);
 
-      if (savedDashOrient) setDashboardOrientation(savedDashOrient as LayoutOrientation);
-      if (savedGestOrient) setGestionOrientation(savedGestOrient as LayoutOrientation);
-      if (savedMenuEditOrient) setMenuEditorOrientation(savedMenuEditOrient as LayoutOrientation);
-      if (savedMenuOrderOrient) setMenuOrderingOrientation(savedMenuOrderOrient as LayoutOrientation);
-      if (savedHistOrient) setHistoryOrientation(savedHistOrient as LayoutOrientation);
-      if (savedTurnoOrient) setTurnoOrientation(savedTurnoOrient as LayoutOrientation);
-      if (savedPromotionsOrient) setPromotionsOrientation(savedPromotionsOrient as LayoutOrientation);
-      if (savedTicketWidth) setTicketWidth(Number(savedTicketWidth));
+    if (savedDashOrient) setDashboardOrientation(savedDashOrient as LayoutOrientation);
+    if (savedGestOrient) setGestionOrientation(savedGestOrient as LayoutOrientation);
+    if (savedMenuEditOrient) setMenuEditorOrientation(savedMenuEditOrient as LayoutOrientation);
+    if (savedMenuOrderOrient) setMenuOrderingOrientation(savedMenuOrderOrient as LayoutOrientation);
+    if (savedHistOrient) setHistoryOrientation(savedHistOrient as LayoutOrientation);
+    if (savedTurnoOrient) setTurnoOrientation(savedTurnoOrient as LayoutOrientation);
+    if (savedPromotionsOrient) setPromotionsOrientation(savedPromotionsOrient as LayoutOrientation);
+    if (savedTicketWidth) setTicketWidth(Number(savedTicketWidth));
 
-      const savedAnim = localStorage.getItem(`animations_${user.username}`);
-      if (savedAnim) setAnimationsEnabled(savedAnim === 'true');
-    } else {
-      setTheme(loginTheme);
-    }
-  }, [user, loginTheme]);
+    const savedAnim = localStorage.getItem(`animations_${username}`);
+    if (savedAnim) setAnimationsEnabled(savedAnim === 'true');
+  };
 
   // Aplicar clases de tema, animaciones y escala global
   useEffect(() => {
@@ -191,7 +189,7 @@ function App() {
     } else {
       document.body.classList.remove('performance-mode');
     }
-  }, [theme, animationsEnabled, performanceMode]);
+  }, [theme, animationsEnabled, performanceMode, globalScale]);
 
   // Guardar ajustes de interfaz solo cuando el usuario ha iniciado sesión
   useEffect(() => { if (user) localStorage.setItem(`uiScale_dashboard_${user.username}`, dashboardScale); }, [dashboardScale, user]);
@@ -237,7 +235,19 @@ function App() {
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('rp_users');
-    return saved ? JSON.parse(saved) : (localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : []); // Solo cargar valores predeterminados si la configuración previa ya se completó (legado) o vacío con la nueva lógica
+    let loadedUsers: User[] = saved ? JSON.parse(saved) : (localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : []);
+    if (loadedUsers.length > 0) {
+      const hasGerente = loadedUsers.some(u => u.username === 'Gerente');
+      const hasMesero = loadedUsers.some(u => u.username === 'Mesero');
+      if (!hasGerente || !hasMesero) {
+        const missing = INITIAL_USERS.filter(u =>
+          (u.username === 'Gerente' && !hasGerente) ||
+          (u.username === 'Mesero' && !hasMesero)
+        );
+        loadedUsers = [...loadedUsers, ...missing];
+      }
+    }
+    return loadedUsers;
   });
 
   const [categories, setCategories] = useState<string[]>(() => {
@@ -354,21 +364,6 @@ function App() {
 
   // Sincronizar estado con localStorage ante cambios
   useEffect(() => { localStorage.setItem('rp_users', JSON.stringify(users)); }, [users]);
-
-  // Poblar usuarios temporales si faltan (solicitado para pruebas)
-  useEffect(() => {
-    const hasGerente = users.some(u => u.username === 'Gerente');
-    const hasMesero = users.some(u => u.username === 'Mesero');
-    if (!hasGerente || !hasMesero) {
-      const missingUsers = INITIAL_USERS.filter(u =>
-        (u.username === 'Gerente' && !hasGerente) ||
-        (u.username === 'Mesero' && !hasMesero)
-      );
-      if (missingUsers.length > 0) {
-        setUsers(prev => [...prev, ...missingUsers]);
-      }
-    }
-  }, [users]);
   useEffect(() => { localStorage.setItem('rp_categories', JSON.stringify(categories)); }, [categories]);
   useEffect(() => { localStorage.setItem('rp_subcategories', JSON.stringify(subCategories)); }, [subCategories]);
   useEffect(() => { localStorage.setItem('rp_sections', JSON.stringify(sections)); }, [sections]);
@@ -402,6 +397,7 @@ function App() {
     // Encontrar el usuario actualizado para establecerlo como activo
     const updatedUser = users.find(u => u.username === loggedInUser.username) || loggedInUser;
     setUser(updatedUser);
+    applyUserPreferences(loggedInUser.username);
     setView('dashboard');
 
     // Registrar inicio de sesión (directamente aquí ya que tenemos el contexto del usuario)
@@ -421,6 +417,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    setTheme(loginTheme);
     if (user) {
       if (auditConfig.user_logout) {
         const logoutEntry: AuditLogEntry = {
@@ -473,182 +470,188 @@ function App() {
     <div style={{ minHeight: '100vh', background: 'var(--bg-color)' }}>
       <div className="watermark">Synkode®<br /><span style={{ fontSize: '12px', opacity: 0.8 }}>Version 0.2.0</span></div>
 
-      {(!isSetupComplete || isPreviewingSetup) ? (
-        <SetupWizard
-          onComplete={isPreviewingSetup ? () => setIsPreviewingSetup(false) : handleSetupComplete}
-          theme={theme}
-          setTheme={updateTheme}
-        />
-      ) : (!user) ? (
-        <Login
-          users={users}
-          onLogin={handleLogin}
-          isShiftOpen={isShiftOpen}
-          onShowSetup={() => setIsPreviewingSetup(true)}
-          theme={theme}
-          setTheme={updateTheme}
-        />
-      ) : view === 'dashboard' ? (
-        <Dashboard
-          user={user}
-          goTo={(page) => setView(page)}
-          onLogout={handleLogout}
-          uiScale={dashboardScale}
-          setUiScale={setDashboardScale}
-          layoutOrientation={dashboardOrientation}
-          setLayoutOrientation={setDashboardOrientation}
-          isShiftOpen={isShiftOpen}
-          taxConfig={taxConfig}
-        />
-      ) : view === 'visual_settings' ? (
-        <VisualSettings
-          theme={theme}
-          setTheme={updateTheme}
-          animationsEnabled={animationsEnabled}
-          setAnimationsEnabled={setAnimationsEnabled}
-          globalScale={globalScale}
-          setGlobalScale={setGlobalScale}
-          performanceMode={performanceMode}
-          setPerformanceMode={setPerformanceMode}
-          showImages={showImages}
-          setShowImages={setShowImages}
-          back={goBack}
-          user={user}
-        />
-      ) : view === 'gestion' ? (
-        <UserManagement
-          user={user}
-          users={users}
-          setUsers={setUsers}
-          back={goBack}
-          uiScale={gestionScale}
-          setUiScale={setGestionScale}
-          layoutOrientation={gestionOrientation}
-          setLayoutOrientation={setGestionOrientation}
-          isShiftOpen={isShiftOpen}
-          logAction={logAction}
-        />
-      ) : (view === 'menu_ordering' || view === 'menu_editor') ? (
-        <MenuEditor
-          user={user}
-          menu={menu}
-          setMenu={setMenu}
-          categories={categories}
-          setCategories={setCategories}
-          subCategories={subCategories}
-          setSubCategories={setSubCategories}
-          sections={sections}
-          setSections={setSections}
-          back={goBack}
-          isOrderingMode={view === 'menu_ordering'}
-          setHistory={setHistory}
-          history={history}
-          uiScale={view === 'menu_ordering' ? menuOrderingScale : menuEditorScale}
-          setUiScale={view === 'menu_ordering' ? setMenuOrderingScale : setMenuEditorScale}
-          layoutOrientation={view === 'menu_ordering' ? menuOrderingOrientation : menuEditorOrientation}
-          setLayoutOrientation={view === 'menu_ordering' ? setMenuOrderingOrientation : setMenuEditorOrientation}
-          currentShiftId={currentShiftId}
-          logAction={logAction}
-          ticketWidth={ticketWidth}
-          setTicketWidth={setTicketWidth}
-          taxConfig={taxConfig}
-          promotions={promotions}
-          showImages={showImages}
-        />
-      ) : view === 'promotions' && user ? (
-        <Promotions
-          back={() => setView('dashboard')}
-          promotions={promotions}
-          setPromotions={setPromotions}
-          menu={menu}
-          categories={categories}
-          subCategories={subCategories}
-          sections={sections}
-          uiScale={promotionsScale}
-          setUiScale={setPromotionsScale}
-          layoutOrientation={promotionsOrientation}
-          setLayoutOrientation={setPromotionsOrientation}
-          logAction={logAction}
-          user={user}
-        />
-      ) : view === 'historial' && user ? (
-        <History
-          user={user}
-          history={history}
-          back={goBack}
-          uiScale={historyScale}
-          setUiScale={setHistoryScale}
-          layoutOrientation={historyOrientation}
-          setLayoutOrientation={setHistoryOrientation}
-          ticketWidth={ticketWidth}
-          setTicketWidth={setTicketWidth}
-          shifts={shifts}
-          currentShiftId={currentShiftId}
-          logAction={logAction}
-        />
-      ) : view === 'registro_ventas' && user ? (
-        <SalesRecords
-          history={history}
-          shifts={shifts}
-          currentShiftId={currentShiftId}
-          back={goBack}
-          uiScale={dashboardScale}
-          setUiScale={setDashboardScale}
-          layoutOrientation={dashboardOrientation}
-          setLayoutOrientation={setDashboardOrientation}
-        />
-      ) : view === 'inventory' && user ? (
-        <SupplyManagement
-          supplies={supplies}
-          setSupplies={setSupplies}
-          back={goBack}
-          logAction={logAction}
-        />
-      ) : view === 'turno_gestion' && user ? (
-        <ShiftManagement
-          user={user}
-          back={goBack}
-          isShiftOpen={isShiftOpen}
-          shifts={shifts}
-          setShifts={setShifts}
-          currentShiftId={currentShiftId}
-          setCurrentShiftId={setCurrentShiftId}
-          history={history}
-          uiScale={turnoScale}
-          setUiScale={setTurnoScale}
-          layoutOrientation={turnoOrientation}
-          setLayoutOrientation={setTurnoOrientation}
-          logAction={logAction}
-        />
-      ) : view === 'audit_log' && user ? (
-        <AuditLog
-          user={user}
-          auditLog={auditLog}
-          users={users}
-          back={goBack}
-          uiScale={dashboardScale} // Usar escala de panel principal
-          setUiScale={setDashboardScale}
-          layoutOrientation={dashboardOrientation}
-          setLayoutOrientation={setDashboardOrientation}
-          auditConfig={auditConfig}
-          toggleAuditAction={toggleAuditAction}
-        />
-      ) : view === 'tax_settings' && user?.role === 'developer' ? (
-        <TaxSettings
-          user={user}
-          taxConfig={taxConfig}
-          setTaxConfig={setTaxConfig}
-          back={goBack}
-          uiScale={dashboardScale}
-          layoutOrientation={dashboardOrientation}
-          logAction={logAction}
-        />
-      ) : (
-        <div style={{ padding: 20, color: 'white' }}>
-          <h1>Página no encontrada o en construcción: {view}</h1>
-          <button onClick={goBack}>Volver al panel</button>
+      <Suspense fallback={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--primary-color)' }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 'bold', opacity: 0.8 }}>Cargando módulo...</div>
         </div>
-      )}
+      }>
+        {(!isSetupComplete || isPreviewingSetup) ? (
+          <SetupWizard
+            onComplete={isPreviewingSetup ? () => setIsPreviewingSetup(false) : handleSetupComplete}
+            theme={theme}
+            setTheme={updateTheme}
+          />
+        ) : (!user) ? (
+          <Login
+            users={users}
+            onLogin={handleLogin}
+            isShiftOpen={isShiftOpen}
+            onShowSetup={() => setIsPreviewingSetup(true)}
+            theme={theme}
+            setTheme={updateTheme}
+          />
+        ) : view === 'dashboard' ? (
+          <Dashboard
+            user={user}
+            goTo={(page) => setView(page)}
+            onLogout={handleLogout}
+            uiScale={dashboardScale}
+            setUiScale={setDashboardScale}
+            layoutOrientation={dashboardOrientation}
+            setLayoutOrientation={setDashboardOrientation}
+            isShiftOpen={isShiftOpen}
+            taxConfig={taxConfig}
+          />
+        ) : view === 'visual_settings' ? (
+          <VisualSettings
+            theme={theme}
+            setTheme={updateTheme}
+            animationsEnabled={animationsEnabled}
+            setAnimationsEnabled={setAnimationsEnabled}
+            globalScale={globalScale}
+            setGlobalScale={setGlobalScale}
+            performanceMode={performanceMode}
+            setPerformanceMode={setPerformanceMode}
+            showImages={showImages}
+            setShowImages={setShowImages}
+            back={goBack}
+            user={user}
+          />
+        ) : view === 'gestion' ? (
+          <UserManagement
+            user={user}
+            users={users}
+            setUsers={setUsers}
+            back={goBack}
+            uiScale={gestionScale}
+            setUiScale={setGestionScale}
+            layoutOrientation={gestionOrientation}
+            setLayoutOrientation={setGestionOrientation}
+            isShiftOpen={isShiftOpen}
+            logAction={logAction}
+          />
+        ) : (view === 'menu_ordering' || view === 'menu_editor') ? (
+          <MenuEditor
+            user={user}
+            menu={menu}
+            setMenu={setMenu}
+            categories={categories}
+            setCategories={setCategories}
+            subCategories={subCategories}
+            setSubCategories={setSubCategories}
+            sections={sections}
+            setSections={setSections}
+            back={goBack}
+            isOrderingMode={view === 'menu_ordering'}
+            setHistory={setHistory}
+            history={history}
+            uiScale={view === 'menu_ordering' ? menuOrderingScale : menuEditorScale}
+            setUiScale={view === 'menu_ordering' ? setMenuOrderingScale : setMenuEditorScale}
+            layoutOrientation={view === 'menu_ordering' ? menuOrderingOrientation : menuEditorOrientation}
+            setLayoutOrientation={view === 'menu_ordering' ? setMenuOrderingOrientation : setMenuEditorOrientation}
+            currentShiftId={currentShiftId}
+            logAction={logAction}
+            ticketWidth={ticketWidth}
+            setTicketWidth={setTicketWidth}
+            taxConfig={taxConfig}
+            promotions={promotions}
+            showImages={showImages}
+          />
+        ) : view === 'promotions' && user ? (
+          <Promotions
+            back={() => setView('dashboard')}
+            promotions={promotions}
+            setPromotions={setPromotions}
+            menu={menu}
+            categories={categories}
+            subCategories={subCategories}
+            sections={sections}
+            uiScale={promotionsScale}
+            setUiScale={setPromotionsScale}
+            layoutOrientation={promotionsOrientation}
+            setLayoutOrientation={setPromotionsOrientation}
+            logAction={logAction}
+            user={user}
+          />
+        ) : view === 'historial' && user ? (
+          <History
+            user={user}
+            history={history}
+            back={goBack}
+            uiScale={historyScale}
+            setUiScale={setHistoryScale}
+            layoutOrientation={historyOrientation}
+            setLayoutOrientation={setHistoryOrientation}
+            ticketWidth={ticketWidth}
+            setTicketWidth={setTicketWidth}
+            shifts={shifts}
+            currentShiftId={currentShiftId}
+            logAction={logAction}
+          />
+        ) : view === 'registro_ventas' && user ? (
+          <SalesRecords
+            history={history}
+            shifts={shifts}
+            currentShiftId={currentShiftId}
+            back={goBack}
+            uiScale={dashboardScale}
+            setUiScale={setDashboardScale}
+            layoutOrientation={dashboardOrientation}
+            setLayoutOrientation={setDashboardOrientation}
+          />
+        ) : view === 'inventory' && user ? (
+          <SupplyManagement
+            supplies={supplies}
+            setSupplies={setSupplies}
+            back={goBack}
+            logAction={logAction}
+          />
+        ) : view === 'turno_gestion' && user ? (
+          <ShiftManagement
+            user={user}
+            back={goBack}
+            isShiftOpen={isShiftOpen}
+            shifts={shifts}
+            setShifts={setShifts}
+            currentShiftId={currentShiftId}
+            setCurrentShiftId={setCurrentShiftId}
+            history={history}
+            uiScale={turnoScale}
+            setUiScale={setTurnoScale}
+            layoutOrientation={turnoOrientation}
+            setLayoutOrientation={setTurnoOrientation}
+            logAction={logAction}
+          />
+        ) : view === 'audit_log' && user ? (
+          <AuditLog
+            user={user}
+            auditLog={auditLog}
+            users={users}
+            back={goBack}
+            uiScale={dashboardScale} // Usar escala de panel principal
+            setUiScale={setDashboardScale}
+            layoutOrientation={dashboardOrientation}
+            setLayoutOrientation={setDashboardOrientation}
+            auditConfig={auditConfig}
+            toggleAuditAction={toggleAuditAction}
+          />
+        ) : view === 'tax_settings' && user?.role === 'developer' ? (
+          <TaxSettings
+            user={user}
+            taxConfig={taxConfig}
+            setTaxConfig={setTaxConfig}
+            back={goBack}
+            uiScale={dashboardScale}
+            layoutOrientation={dashboardOrientation}
+            logAction={logAction}
+          />
+        ) : (
+          <div style={{ padding: 20, color: 'white' }}>
+            <h1>Página no encontrada o en construcción: {view}</h1>
+            <button onClick={goBack}>Volver al panel</button>
+          </div>
+        )}
+      </Suspense>
     </div>
   );
 }

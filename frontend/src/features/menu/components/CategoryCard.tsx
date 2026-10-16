@@ -138,9 +138,10 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         localStorage.setItem(key, JSON.stringify(collapsedSecs));
     }, [collapsedSecs, user.username, cat, viewSuffix]);
 
-    // Responder al cambio de alternancia global
-    useEffect(() => {
-        if (!globalCollapseState) return;
+    const [prevGlobalCollapseState, setPrevGlobalCollapseState] = useState(globalCollapseState);
+    // Responder al cambio de alternancia global ajustando el estado durante la renderización
+    if (globalCollapseState && prevGlobalCollapseState !== globalCollapseState) {
+        setPrevGlobalCollapseState(globalCollapseState);
 
         if (globalCollapseState === 'expanded') {
             setIsCollapsed(false);
@@ -160,7 +161,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
             setCollapsedSubs(allSubs);
             setCollapsedSecs(allSecs);
         }
-    }, [globalCollapseState, cat, subCategories, sections]);
+    }
 
     const toggleSub = (subKey: string) => {
         setCollapsedSubs(prev => ({ ...prev, [subKey]: !prev[subKey] }));
@@ -171,7 +172,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
     };
 
     // Lógica de pulsación prolongada
-    const timerRef = React.useRef<any>(null);
+    const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const onPointerDown = (e: React.PointerEvent) => {
         if (!canEdit || isReorderMode) return;
