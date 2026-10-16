@@ -109,6 +109,7 @@ export default function ShiftManagement({
     user, back, isShiftOpen, shifts, setShifts, currentShiftId, setCurrentShiftId, history,
     uiScale, setUiScale, layoutOrientation, setLayoutOrientation, logAction
 }: Props) {
+    const [activeView, setActiveView] = useState<'controls' | 'analytics'>('controls');
     const [isVerifying, setIsVerifying] = useState(false);
     const [passwordInput, setPasswordInput] = useState("");
     const [verifyAction, setVerifyAction] = useState<'start' | 'end' | null>(null);
@@ -245,7 +246,11 @@ export default function ShiftManagement({
                 {/* Barra superior de navegación y estado */}
                 <div className="title-bar">
                     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75em' }}>
-                        <button onClick={back} className="btn-back">← Volver al panel</button>
+                        {activeView === 'controls' ? (
+                            <button onClick={back} className="btn-back">← Volver al panel</button>
+                        ) : (
+                            <button onClick={() => setActiveView('controls')} className="btn-back">← Volver a Controles</button>
+                        )}
                         <SettingsControls
                             uiScale={uiScale}
                             setUiScale={setUiScale}
@@ -285,240 +290,330 @@ export default function ShiftManagement({
                     </div>
                 </div>
 
-                <h1 className="page-main-title">GESTIÓN DE TURNO</h1>
+                {/* Título de la vista activa */}
+                <h1 className="page-main-title">
+                    {activeView === 'controls' ? "GESTIÓN DE TURNO" : "RESUMEN EJECUTIVO DEL TURNO"}
+                </h1>
 
-                {/* Contenedor principal en 2 columnas equilibradas */}
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 310px), 1fr))",
-                    gap: "1.75em",
-                    alignItems: "start"
-                }}>
-
-                    {/* Columna Izquierda: Panel de Control y Estado Operativo */}
-                    <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.25em" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--card-border)", paddingBottom: "0.85em" }}>
-                            <h3 style={{ margin: 0, fontSize: "1.15em", display: "flex", alignItems: "center", gap: "0.5em" }}>
-                                <span>⚙️</span> Controles de Turno
-                            </h3>
-                            <span style={{
-                                fontSize: "0.75em",
-                                padding: "0.25em 0.65em",
-                                borderRadius: "6px",
-                                background: isShiftOpen ? "rgba(34, 197, 94, 0.15)" : "rgba(148, 163, 184, 0.15)",
-                                color: isShiftOpen ? "var(--success-color)" : "var(--text-secondary)",
-                                fontWeight: 700
-                            }}>
-                                {isShiftOpen ? "Activo" : "Inactivo"}
-                            </span>
-                        </div>
-
-                        {isVerifying ? (
-                            <div style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.85em",
-                                background: "rgba(15, 23, 42, 0.5)",
-                                padding: "1.2em",
-                                borderRadius: "0.9em",
-                                border: "1px solid var(--card-border)"
-                            }}>
-                                <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.9em" }}>
-                                    Confirma tu contraseña para <strong>{verifyAction === 'start' ? 'iniciar' : 'finalizar'}</strong> el turno:
-                                </p>
-                                <input
-                                    type="password"
-                                    placeholder="Contraseña del usuario"
-                                    autoFocus
-                                    value={passwordInput}
-                                    onChange={(e) => setPasswordInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && confirmShiftAction()}
-                                    style={{
-                                        padding: "0.75em 1em",
-                                        borderRadius: "8px",
-                                        border: "1px solid var(--input-border)",
-                                        background: "var(--input-bg)",
-                                        color: "var(--text-color)",
-                                        fontSize: "0.95em"
-                                    }}
-                                />
-                                <div style={{ display: "flex", gap: "0.6em" }}>
-                                    <button
-                                        onClick={confirmShiftAction}
-                                        style={{
-                                            flex: 1,
-                                            padding: "0.75em",
-                                            borderRadius: "8px",
-                                            border: "none",
-                                            background: verifyAction === 'start' ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #ef4444, #dc2626)",
-                                            color: "white",
-                                            fontWeight: "bold",
-                                            cursor: "pointer",
-                                            boxShadow: verifyAction === 'start' ? "0 4px 12px rgba(34,197,94,0.3)" : "0 4px 12px rgba(239,68,68,0.3)"
-                                        }}
-                                    >
-                                        Confirmar
-                                    </button>
-                                    <button
-                                        onClick={() => setIsVerifying(false)}
-                                        style={{
-                                            flex: 1,
-                                            padding: "0.75em",
-                                            borderRadius: "8px",
-                                            border: "1px solid var(--card-border)",
-                                            background: "var(--card-hover-bg)",
-                                            color: "var(--text-color)",
-                                            cursor: "pointer",
-                                            fontWeight: 600
-                                        }}
-                                    >
-                                        Cancelar
-                                    </button>
+                {/* VISTA 1: CONTROLES DE TURNO (LAYOUT HORIZONTAL LIMPIO Y ESPACIOSO) */}
+                {activeView === 'controls' && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5em" }}>
+                        <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.5em" }}>
+                            {/* Cabecera de la ficha */}
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--card-border)", paddingBottom: "1em", flexWrap: "wrap", gap: "0.75em" }}>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: "1.25em", display: "flex", alignItems: "center", gap: "0.5em" }}>
+                                        <span>⚙️</span> Panel de Operación y Control de Turno
+                                    </h3>
+                                    <p style={{ margin: "0.25em 0 0 0", fontSize: "0.82em", color: "var(--text-secondary)" }}>
+                                        Administra la sesión de caja y consulta las métricas comerciales
+                                    </p>
                                 </div>
-                                {error && <p style={{ color: "var(--danger-color)", margin: 0, fontSize: "0.85em", fontWeight: 600 }}>⚠️ {error}</p>}
+                                <span style={{
+                                    fontSize: "0.8em",
+                                    padding: "0.3em 0.8em",
+                                    borderRadius: "8px",
+                                    background: isShiftOpen ? "rgba(34, 197, 94, 0.15)" : "rgba(148, 163, 184, 0.15)",
+                                    color: isShiftOpen ? "var(--success-color)" : "var(--text-secondary)",
+                                    fontWeight: 700,
+                                    border: `1px solid ${isShiftOpen ? "rgba(34,197,94,0.3)" : "rgba(148,163,184,0.25)"}`
+                                }}>
+                                    {isShiftOpen ? "🟢 Turno en Curso" : "⚪ Turno Cerrado"}
+                                </span>
                             </div>
-                        ) : (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "0.75em" }}>
-                                {!isShiftOpen ? (
-                                    <button
-                                        onClick={() => handleShiftAction('start')}
+
+                            {/* Mini métricas horizontales rápidas */}
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 190px), 1fr))",
+                                gap: "1em"
+                            }}>
+                                <div style={{ background: "rgba(15, 23, 42, 0.4)", padding: "1em 1.2em", borderRadius: "0.85em", border: "1px solid var(--card-border)" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase" }}>💰 Ventas del Turno</div>
+                                    <div style={{ color: "var(--success-color)", fontSize: "1.5em", fontWeight: 800, marginTop: "0.2em" }}>${stats.totalSales.toFixed(2)}</div>
+                                </div>
+                                <div style={{ background: "rgba(15, 23, 42, 0.4)", padding: "1em 1.2em", borderRadius: "0.85em", border: "1px solid var(--card-border)" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase" }}>📦 Artículos Vendidos</div>
+                                    <div style={{ color: "var(--primary-color)", fontSize: "1.5em", fontWeight: 800, marginTop: "0.2em" }}>{stats.totalItemsSold} uds</div>
+                                </div>
+                                <div style={{ background: "rgba(15, 23, 42, 0.4)", padding: "1em 1.2em", borderRadius: "0.85em", border: "1px solid var(--card-border)" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase" }}>🧾 Tickets Emitidos</div>
+                                    <div style={{ color: "var(--text-color)", fontSize: "1.5em", fontWeight: 800, marginTop: "0.2em" }}>{stats.totalOrders} tickets</div>
+                                </div>
+                                <div style={{ background: "rgba(15, 23, 42, 0.4)", padding: "1em 1.2em", borderRadius: "0.85em", border: "1px solid var(--card-border)" }}>
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase" }}>⏱ Duración Activa</div>
+                                    <div style={{ color: "#fbbf24", fontSize: "1.5em", fontWeight: 800, marginTop: "0.2em" }}>{shiftDurationText || (isShiftOpen ? 'Menos de 1m' : 'Inactivo')}</div>
+                                </div>
+                            </div>
+
+                            {/* Barra de Acciones Principales (Horizontal y prominente) */}
+                            {isVerifying ? (
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.85em",
+                                    background: "rgba(15, 23, 42, 0.6)",
+                                    padding: "1.3em",
+                                    borderRadius: "1em",
+                                    border: "1px solid var(--card-border)"
+                                }}>
+                                    <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.95em" }}>
+                                        Confirma tu contraseña de usuario para <strong>{verifyAction === 'start' ? 'iniciar' : 'finalizar'}</strong> el turno:
+                                    </p>
+                                    <input
+                                        type="password"
+                                        placeholder="Contraseña de usuario"
+                                        autoFocus
+                                        value={passwordInput}
+                                        onChange={(e) => setPasswordInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && confirmShiftAction()}
                                         style={{
-                                            width: "100%",
-                                            padding: "1.1em",
-                                            borderRadius: "0.85em",
-                                            border: "none",
-                                            background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                                            padding: "0.85em 1em",
+                                            borderRadius: "8px",
+                                            border: "1px solid var(--input-border)",
+                                            background: "var(--input-bg)",
+                                            color: "var(--text-color)",
+                                            fontSize: "1em",
+                                            maxWidth: "400px"
+                                        }}
+                                    />
+                                    <div style={{ display: "flex", gap: "0.75em", maxWidth: "400px" }}>
+                                        <button
+                                            onClick={confirmShiftAction}
+                                            style={{
+                                                flex: 1,
+                                                padding: "0.85em",
+                                                borderRadius: "8px",
+                                                border: "none",
+                                                background: verifyAction === 'start' ? "linear-gradient(135deg, #22c55e, #16a34a)" : "linear-gradient(135deg, #ef4444, #dc2626)",
+                                                color: "white",
+                                                fontWeight: 800,
+                                                cursor: "pointer",
+                                                boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
+                                            }}
+                                        >
+                                            Confirmar
+                                        </button>
+                                        <button
+                                            onClick={() => setIsVerifying(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "0.85em",
+                                                borderRadius: "8px",
+                                                border: "1px solid var(--card-border)",
+                                                background: "var(--card-hover-bg)",
+                                                color: "var(--text-color)",
+                                                cursor: "pointer",
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                    {error && <p style={{ color: "var(--danger-color)", margin: 0, fontSize: "0.85em", fontWeight: 700 }}>⚠️ {error}</p>}
+                                </div>
+                            ) : (
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+                                    gap: "1.2em",
+                                    alignItems: "stretch"
+                                }}>
+                                    {/* Botón de Iniciar / Finalizar Turno */}
+                                    {!isShiftOpen ? (
+                                        <button
+                                            onClick={() => handleShiftAction('start')}
+                                            style={{
+                                                padding: "1.25em 1.5em",
+                                                borderRadius: "1em",
+                                                border: "none",
+                                                background: "linear-gradient(135deg, #22c55e, #16a34a)",
+                                                color: "white",
+                                                fontSize: "1.05em",
+                                                fontWeight: "800",
+                                                cursor: "pointer",
+                                                boxShadow: "0 8px 24px rgba(34, 197, 94, 0.35)",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: "0.6em",
+                                                transition: "transform 0.15s ease, box-shadow 0.15s ease"
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                                        >
+                                            <span style={{ fontSize: "1.2em" }}>▶</span> Iniciar Nuevo Turno
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleShiftAction('end')}
+                                            style={{
+                                                padding: "1.25em 1.5em",
+                                                borderRadius: "1em",
+                                                border: "none",
+                                                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                                                color: "white",
+                                                fontSize: "1.05em",
+                                                fontWeight: "800",
+                                                cursor: "pointer",
+                                                boxShadow: "0 8px 24px rgba(239, 68, 68, 0.35)",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: "0.6em",
+                                                transition: "transform 0.15s ease, box-shadow 0.15s ease"
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                                        >
+                                            <span style={{ fontSize: "1.2em" }}>⏹</span> Finalizar Turno Actual
+                                        </button>
+                                    )}
+
+                                    {/* Botón Prominente para Abrir el Resumen Ejecutivo */}
+                                    <button
+                                        onClick={() => setActiveView('analytics')}
+                                        style={{
+                                            padding: "1.25em 1.5em",
+                                            borderRadius: "1em",
+                                            border: "1px solid rgba(59, 130, 246, 0.4)",
+                                            background: "linear-gradient(135deg, #2563eb, #4f46e5)",
                                             color: "white",
                                             fontSize: "1.05em",
                                             fontWeight: "800",
                                             cursor: "pointer",
-                                            boxShadow: "0 6px 20px rgba(34, 197, 94, 0.35)",
+                                            boxShadow: "0 8px 24px rgba(59, 130, 246, 0.35)",
                                             display: "flex",
                                             alignItems: "center",
-                                            justifyContent: "center",
-                                            gap: "0.5em",
+                                            justifyContent: "space-between",
+                                            gap: "0.75em",
                                             transition: "transform 0.15s ease, box-shadow 0.15s ease"
                                         }}
                                         onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                                         onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                                     >
-                                        <span>▶</span> Iniciar Nuevo Turno
+                                        <div style={{ display: "flex", alignItems: "center", gap: "0.6em" }}>
+                                            <span style={{ fontSize: "1.2em" }}>📊</span>
+                                            <span>Ver Resumen Ejecutivo del Turno</span>
+                                        </div>
+                                        <span style={{
+                                            fontSize: "0.78em",
+                                            padding: "0.25em 0.6em",
+                                            borderRadius: "6px",
+                                            background: "rgba(255, 255, 255, 0.2)",
+                                            color: "#fff",
+                                            fontWeight: 700
+                                        }}>
+                                            Abrir →
+                                        </span>
                                     </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleShiftAction('end')}
-                                        style={{
-                                            width: "100%",
-                                            padding: "1.1em",
-                                            borderRadius: "0.85em",
-                                            border: "none",
-                                            background: "linear-gradient(135deg, #ef4444, #dc2626)",
-                                            color: "white",
-                                            fontSize: "1.05em",
-                                            fontWeight: "800",
-                                            cursor: "pointer",
-                                            boxShadow: "0 6px 20px rgba(239, 68, 68, 0.35)",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            gap: "0.5em",
-                                            transition: "transform 0.15s ease, box-shadow 0.15s ease"
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                                    >
-                                        <span>⏹</span> Finalizar Turno Actual
-                                    </button>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Ficha operativa del turno */}
-                        <div style={{
-                            background: "rgba(15, 23, 42, 0.4)",
-                            border: "1px solid var(--card-border)",
-                            borderRadius: "0.85em",
-                            padding: "1.1em",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.85em"
-                        }}>
-                            <div style={{ fontSize: "0.75em", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-secondary)", fontWeight: 700 }}>
-                                Estado Operativo
-                            </div>
-
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ color: "var(--text-secondary)", fontSize: "0.85em" }}>Responsable:</span>
-                                <span style={{ fontWeight: 700, color: "var(--text-color)", fontSize: "0.9em" }}>
-                                    {user.username} <span style={{ opacity: 0.6, fontSize: "0.85em" }}>({user.role})</span>
-                                </span>
-                            </div>
-
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ color: "var(--text-secondary)", fontSize: "0.85em" }}>Apertura:</span>
-                                <span style={{ fontWeight: 600, color: "var(--text-color)", fontSize: "0.85em" }}>
-                                    {activeShift?.startTime ? new Date(activeShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '---'}
-                                </span>
-                            </div>
-
-                            {shiftDurationText && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <span style={{ color: "var(--text-secondary)", fontSize: "0.85em" }}>Tiempo en curso:</span>
-                                    <span style={{
-                                        fontWeight: 700,
-                                        color: "var(--primary-color)",
-                                        fontSize: "0.85em",
-                                        background: "rgba(59, 130, 246, 0.12)",
-                                        padding: "0.15em 0.55em",
-                                        borderRadius: "6px",
-                                        border: "1px solid rgba(59, 130, 246, 0.3)"
-                                    }}>
-                                        ⏱ {shiftDurationText}
-                                    </span>
                                 </div>
                             )}
 
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ color: "var(--text-secondary)", fontSize: "0.85em" }}>ID Turno:</span>
-                                <span style={{ fontFamily: "monospace", fontSize: "0.8em", color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)", padding: "0.15em 0.45em", borderRadius: "4px" }}>
-                                    {currentShiftId ? `#${currentShiftId.slice(0, 8)}` : 'Sin asignar'}
-                                </span>
-                            </div>
-
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ color: "var(--text-secondary)", fontSize: "0.85em" }}>Órdenes emitidas:</span>
-                                <span style={{ fontWeight: 700, color: "var(--text-color)", fontSize: "0.9em" }}>
-                                    {stats.totalOrders} tickets
-                                </span>
+                            {/* Ficha operativa horizontal en rejilla limpia */}
+                            <div style={{
+                                background: "rgba(15, 23, 42, 0.35)",
+                                border: "1px solid var(--card-border)",
+                                borderRadius: "0.85em",
+                                padding: "1.25em",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "1em"
+                            }}>
+                                <div style={{ fontSize: "0.75em", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-secondary)", fontWeight: 700 }}>
+                                    Detalles Operativos de la Sesión
+                                </div>
+                                <div style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
+                                    gap: "1.2em"
+                                }}>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Responsable en Caja:</div>
+                                        <div style={{ fontWeight: 700, color: "var(--text-color)", fontSize: "0.95em", marginTop: "0.2em" }}>
+                                            {user.username} <span style={{ opacity: 0.6, fontSize: "0.85em" }}>({user.role.toUpperCase()})</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Hora de Inicio:</div>
+                                        <div style={{ fontWeight: 600, color: "var(--text-color)", fontSize: "0.95em", marginTop: "0.2em" }}>
+                                            {activeShift?.startTime ? new Date(activeShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '---'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Fecha de Apertura:</div>
+                                        <div style={{ fontWeight: 600, color: "var(--text-color)", fontSize: "0.95em", marginTop: "0.2em" }}>
+                                            {activeShift?.startTime ? new Date(activeShift.startTime).toLocaleDateString() : '---'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Identificador de Turno:</div>
+                                        <div style={{ fontFamily: "monospace", fontSize: "0.85em", color: "var(--primary-color)", marginTop: "0.2em" }}>
+                                            {currentShiftId ? `#${currentShiftId.slice(0, 8)}` : 'Sin asignar'}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Personal con Ventas:</div>
+                                        <div style={{ fontWeight: 700, color: "var(--text-color)", fontSize: "0.95em", marginTop: "0.2em" }}>
+                                            {stats.chartData.length} miembros activos
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style={{ color: "var(--text-secondary)", fontSize: "0.8em" }}>Ticket Promedio:</div>
+                                        <div style={{ fontWeight: 700, color: "#fbbf24", fontSize: "0.95em", marginTop: "0.2em" }}>
+                                            ${stats.averageTicket.toFixed(2)}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                )}
 
-                    {/* Columna Derecha: Métricas Ejecutivas y Gráficas Avanzadas */}
+                {/* VISTA 2: RESUMEN EJECUTIVO COMPLETO (ANCHO COMPLETO HORIZONTAL, NADA SE DEFORMA) */}
+                {activeView === 'analytics' && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.75em" }}>
-                        <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.5em" }}>
+                        <div className="glass-card" style={{ display: "flex", flexDirection: "column", gap: "1.75em" }}>
                             
                             {/* Cabecera del Resumen */}
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em" }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75em" }}>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: "1.2em" }}>Resumen Ejecutivo del Turno</h3>
-                                    <p style={{ margin: "0.2em 0 0 0", fontSize: "0.8em", color: "var(--text-secondary)" }}>
-                                        Métricas y comportamiento comercial en tiempo real
+                                    <h3 style={{ margin: 0, fontSize: "1.3em" }}>Rendimiento Comercial y Analítica en Tiempo Real</h3>
+                                    <p style={{ margin: "0.25em 0 0 0", fontSize: "0.85em", color: "var(--text-secondary)" }}>
+                                        Monitoreo de ingresos, demanda por artículo y ventas por integrante del equipo
                                     </p>
                                 </div>
+                                <button
+                                    onClick={() => setActiveView('controls')}
+                                    style={{
+                                        padding: "0.6em 1.1em",
+                                        borderRadius: "8px",
+                                        border: "1px solid var(--card-border)",
+                                        background: "var(--card-hover-bg)",
+                                        color: "var(--text-color)",
+                                        cursor: "pointer",
+                                        fontWeight: 700,
+                                        fontSize: "0.85em",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.5em"
+                                    }}
+                                >
+                                    <span>⚙️</span> Controles de Turno
+                                </button>
                             </div>
 
-                            {/* 4 Tarjetas KPI Ejecutivas */}
+                            {/* 4 Tarjetas KPI Ejecutivas en Fila Completa Horizontal */}
                             <div style={{
                                 display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
-                                gap: "1em"
+                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+                                gap: "1.2em"
                             }}>
                                 {/* KPI 1: Ventas Totales */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.2em",
-                                    borderRadius: "0.9em",
+                                    padding: "1.25em 1.4em",
+                                    borderRadius: "1em",
                                     border: "1px solid rgba(34, 197, 94, 0.25)",
                                     position: "relative",
                                     overflow: "hidden"
@@ -527,25 +622,25 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #22c55e, #10b981)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.4em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.78em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Ventas Turno
                                         </span>
-                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>💰</span>
+                                        <span style={{ fontSize: "1.2em", flexShrink: 0 }}>💰</span>
                                     </div>
-                                    <div style={{ color: "var(--text-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
+                                    <div style={{ color: "var(--text-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         ${stats.totalSales.toFixed(2)}
                                     </div>
-                                    <div style={{ color: "var(--success-color)", fontSize: "0.75em", fontWeight: 600, marginTop: "0.3em", whiteSpace: "nowrap" }}>
-                                        Recaudación activa
+                                    <div style={{ color: "var(--success-color)", fontSize: "0.78em", fontWeight: 600, marginTop: "0.3em", whiteSpace: "nowrap" }}>
+                                        Recaudación activa del turno
                                     </div>
                                 </div>
 
                                 {/* KPI 2: Artículos Vendidos */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.2em",
-                                    borderRadius: "0.9em",
+                                    padding: "1.25em 1.4em",
+                                    borderRadius: "1em",
                                     border: "1px solid rgba(59, 130, 246, 0.25)",
                                     position: "relative",
                                     overflow: "hidden"
@@ -554,25 +649,25 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #3b82f6, #06b6d4)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
-                                            Artículos
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.4em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.78em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+                                            Artículos Despachados
                                         </span>
-                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>📦</span>
+                                        <span style={{ fontSize: "1.2em", flexShrink: 0 }}>📦</span>
                                     </div>
-                                    <div style={{ color: "var(--primary-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
-                                        {stats.totalItemsSold}
+                                    <div style={{ color: "var(--primary-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
+                                        {stats.totalItemsSold} uds
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
-                                        {stats.itemChartData.length} productos distintos
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.78em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
+                                        En {stats.itemChartData.length} productos diferentes
                                     </div>
                                 </div>
 
                                 {/* KPI 3: Tickets / Órdenes */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.2em",
-                                    borderRadius: "0.9em",
+                                    padding: "1.25em 1.4em",
+                                    borderRadius: "1em",
                                     border: "1px solid rgba(168, 85, 247, 0.25)",
                                     position: "relative",
                                     overflow: "hidden"
@@ -581,25 +676,25 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #a855f7, #6366f1)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
-                                            Tickets
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.4em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.78em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+                                            Tickets Cobrados
                                         </span>
-                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>🧾</span>
+                                        <span style={{ fontSize: "1.2em", flexShrink: 0 }}>🧾</span>
                                     </div>
-                                    <div style={{ color: "var(--text-color)", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
-                                        {stats.totalOrders}
+                                    <div style={{ color: "var(--text-color)", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
+                                        {stats.totalOrders} órdenes
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
-                                        Órdenes completadas
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.78em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
+                                        Procesadas y cerradas
                                     </div>
                                 </div>
 
                                 {/* KPI 4: Ticket Promedio */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.1em 1.2em",
-                                    borderRadius: "0.9em",
+                                    padding: "1.25em 1.4em",
+                                    borderRadius: "1em",
                                     border: "1px solid rgba(245, 158, 11, 0.25)",
                                     position: "relative",
                                     overflow: "hidden"
@@ -608,34 +703,34 @@ export default function ShiftManagement({
                                         position: "absolute", top: 0, left: 0, right: 0, height: "3px",
                                         background: "linear-gradient(90deg, #f59e0b, #fbbf24)"
                                     }} />
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.35em" }}>
-                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.75em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.4em", marginBottom: "0.4em" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.78em", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                                             Ticket Promedio
                                         </span>
-                                        <span style={{ fontSize: "1.1em", flexShrink: 0 }}>⚡</span>
+                                        <span style={{ fontSize: "1.2em", flexShrink: 0 }}>⚡</span>
                                     </div>
-                                    <div style={{ color: "#fbbf24", fontSize: "1.55em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
+                                    <div style={{ color: "#fbbf24", fontSize: "1.75em", fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap" }}>
                                         ${stats.averageTicket.toFixed(2)}
                                     </div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.75em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
-                                        Por cada ticket
+                                    <div style={{ color: "var(--text-secondary)", fontSize: "0.78em", marginTop: "0.3em", whiteSpace: "nowrap" }}>
+                                        Promedio por ticket
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Sección de Gráficos de Doble Tarjeta */}
+                            {/* Sección de Gráficos de Doble Tarjeta en Ancho Completo */}
                             <div style={{
                                 display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
-                                gap: "1.5em",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
+                                gap: "1.75em",
                                 alignItems: "stretch"
                             }}>
 
                                 {/* Tarjeta 1: Ventas por Usuario (Donut + desglose) */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.35em",
-                                    borderRadius: "1em",
+                                    padding: "1.5em",
+                                    borderRadius: "1.1em",
                                     border: "1px solid var(--card-border)",
                                     display: "flex",
                                     flexDirection: "column",
@@ -643,30 +738,30 @@ export default function ShiftManagement({
                                 }}>
                                     <div>
                                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em", marginBottom: "0.4em" }}>
-                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
+                                            <h4 style={{ margin: 0, fontSize: "1.05em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
                                                 <span>👥</span> VENTAS POR USUARIO
                                             </h4>
-                                            <span style={{ fontSize: "0.75em", color: "var(--text-secondary)", background: "rgba(255,255,255,0.06)", padding: "0.2em 0.55em", borderRadius: "5px", whiteSpace: "nowrap", flexShrink: 0 }}>
-                                                {stats.chartData.length} miembros
+                                            <span style={{ fontSize: "0.78em", color: "var(--text-secondary)", background: "rgba(255,255,255,0.06)", padding: "0.25em 0.6em", borderRadius: "6px", whiteSpace: "nowrap", flexShrink: 0 }}>
+                                                {stats.chartData.length} miembros activos
                                             </span>
                                         </div>
-                                        <p style={{ margin: "0 0 1em 0", fontSize: "0.78em", color: "var(--text-secondary)" }}>
-                                            Participación porcentual y volumen por vendedor
+                                        <p style={{ margin: "0 0 1em 0", fontSize: "0.82em", color: "var(--text-secondary)" }}>
+                                            Participación porcentual y volumen recaudado por cada vendedor
                                         </p>
                                     </div>
 
                                     {stats.chartData.length > 0 ? (
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "1.25em" }}>
                                             {/* Gráfico Donut con métrica central */}
-                                            <div style={{ position: "relative", width: "100%", height: `${Math.round(200 * textScale)}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <div style={{ position: "relative", width: "100%", height: `${Math.round(210 * textScale)}px`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <PieChart>
                                                         <Pie
                                                             data={stats.chartData}
                                                             cx="50%"
                                                             cy="50%"
-                                                            innerRadius={50 * textScale}
-                                                            outerRadius={76 * textScale}
+                                                            innerRadius={54 * textScale}
+                                                            outerRadius={80 * textScale}
                                                             paddingAngle={4}
                                                             dataKey="value"
                                                             stroke="none"
@@ -691,10 +786,10 @@ export default function ShiftManagement({
                                                     textAlign: "center",
                                                     pointerEvents: "none"
                                                 }}>
-                                                    <div style={{ fontSize: "0.65em", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                                    <div style={{ fontSize: "0.7em", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                                         Total
                                                     </div>
-                                                    <div style={{ fontSize: "1.1em", fontWeight: 800, color: "var(--text-color)", lineHeight: 1.15, whiteSpace: "nowrap" }}>
+                                                    <div style={{ fontSize: "1.2em", fontWeight: 800, color: "var(--text-color)", lineHeight: 1.15, whiteSpace: "nowrap" }}>
                                                         ${stats.totalSales.toFixed(2)}
                                                     </div>
                                                 </div>
@@ -704,8 +799,8 @@ export default function ShiftManagement({
                                             <div style={{
                                                 display: "flex",
                                                 flexDirection: "column",
-                                                gap: "0.55em",
-                                                maxHeight: "16em",
+                                                gap: "0.6em",
+                                                maxHeight: "18em",
                                                 overflowY: "auto",
                                                 paddingRight: "0.2em"
                                             }}>
@@ -716,35 +811,35 @@ export default function ShiftManagement({
                                                         <div key={item.name} style={{
                                                             background: "rgba(255, 255, 255, 0.03)",
                                                             border: "1px solid rgba(255, 255, 255, 0.06)",
-                                                            borderRadius: "0.6em",
-                                                            padding: "0.55em 0.75em",
+                                                            borderRadius: "0.7em",
+                                                            padding: "0.65em 0.85em",
                                                             display: "flex",
                                                             flexDirection: "column",
                                                             gap: "0.35em"
                                                         }}>
-                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.4em" }}>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em", minWidth: "120px", flex: "1 1 auto" }}>
+                                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.55em", minWidth: "120px", flex: "1 1 auto" }}>
                                                                     <span style={{
-                                                                        width: "0.65em",
-                                                                        height: "0.65em",
+                                                                        width: "0.7em",
+                                                                        height: "0.7em",
                                                                         borderRadius: "50%",
                                                                         background: color,
                                                                         boxShadow: `0 0 6px ${color}88`,
                                                                         flexShrink: 0
                                                                     }} />
-                                                                    <span style={{ fontWeight: 600, fontSize: "0.85em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
+                                                                    <span style={{ fontWeight: 600, fontSize: "0.88em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
                                                                         {item.name}
                                                                     </span>
                                                                 </div>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.5em", flexShrink: 0, marginLeft: "auto" }}>
-                                                                    <span style={{ fontWeight: 700, fontSize: "0.85em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.6em", flexShrink: 0, marginLeft: "auto" }}>
+                                                                    <span style={{ fontWeight: 700, fontSize: "0.88em", color: "var(--text-color)", whiteSpace: "nowrap" }}>
                                                                         ${item.value.toFixed(2)}
                                                                     </span>
                                                                     <span style={{
-                                                                        fontSize: "0.72em",
+                                                                        fontSize: "0.75em",
                                                                         fontWeight: 700,
-                                                                        padding: "0.15em 0.45em",
-                                                                        borderRadius: "4px",
+                                                                        padding: "0.15em 0.5em",
+                                                                        borderRadius: "5px",
                                                                         background: `${color}20`,
                                                                         color: color,
                                                                         border: `1px solid ${color}40`,
@@ -771,17 +866,17 @@ export default function ShiftManagement({
                                         </div>
                                     ) : (
                                         <div style={{
-                                            padding: "3em 1em",
+                                            padding: "3.5em 1em",
                                             display: "flex",
                                             flexDirection: "column",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             color: "var(--text-secondary)",
-                                            fontSize: "0.85em",
+                                            fontSize: "0.9em",
                                             fontStyle: "italic",
                                             gap: "0.5em"
                                         }}>
-                                            <span style={{ fontSize: "2em", fontStyle: "normal", opacity: 0.6 }}>👥</span>
+                                            <span style={{ fontSize: "2.2em", fontStyle: "normal", opacity: 0.6 }}>👥</span>
                                             Sin registros de ventas por usuario
                                         </div>
                                     )}
@@ -790,8 +885,8 @@ export default function ShiftManagement({
                                 {/* Tarjeta 2: Top Productos (Ranking con Medallas o Gráfico) */}
                                 <div style={{
                                     background: "rgba(15, 23, 42, 0.5)",
-                                    padding: "1.35em",
-                                    borderRadius: "1em",
+                                    padding: "1.5em",
+                                    borderRadius: "1.1em",
                                     border: "1px solid var(--card-border)",
                                     display: "flex",
                                     flexDirection: "column",
@@ -799,7 +894,7 @@ export default function ShiftManagement({
                                 }}>
                                     <div>
                                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6em", marginBottom: "0.4em" }}>
-                                            <h4 style={{ margin: 0, fontSize: "0.95em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
+                                            <h4 style={{ margin: 0, fontSize: "1.05em", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.4em", whiteSpace: "nowrap" }}>
                                                 <span>🔥</span> TOP PRODUCTOS
                                             </h4>
                                             {/* Selector de vista: Ranking vs Gráfico */}
@@ -817,9 +912,9 @@ export default function ShiftManagement({
                                                         border: "none",
                                                         background: productViewMode === 'ranking' ? "var(--primary-color)" : "transparent",
                                                         color: productViewMode === 'ranking' ? "#fff" : "var(--text-secondary)",
-                                                        fontSize: "0.72em",
+                                                        fontSize: "0.75em",
                                                         fontWeight: 700,
-                                                        padding: "0.3em 0.65em",
+                                                        padding: "0.35em 0.75em",
                                                         borderRadius: "4px",
                                                         cursor: "pointer",
                                                         transition: "all 0.15s ease"
@@ -833,9 +928,9 @@ export default function ShiftManagement({
                                                         border: "none",
                                                         background: productViewMode === 'chart' ? "var(--primary-color)" : "transparent",
                                                         color: productViewMode === 'chart' ? "#fff" : "var(--text-secondary)",
-                                                        fontSize: "0.72em",
+                                                        fontSize: "0.75em",
                                                         fontWeight: 700,
-                                                        padding: "0.3em 0.65em",
+                                                        padding: "0.35em 0.75em",
                                                         borderRadius: "4px",
                                                         cursor: "pointer",
                                                         transition: "all 0.15s ease"
@@ -845,8 +940,8 @@ export default function ShiftManagement({
                                                 </button>
                                             </div>
                                         </div>
-                                        <p style={{ margin: "0 0 1em 0", fontSize: "0.78em", color: "var(--text-secondary)" }}>
-                                            Artículos más demandados del turno
+                                        <p style={{ margin: "0 0 1em 0", fontSize: "0.82em", color: "var(--text-secondary)" }}>
+                                            Artículos más solicitados con volumen y recaudación
                                         </p>
                                     </div>
 
@@ -856,8 +951,8 @@ export default function ShiftManagement({
                                             <div style={{
                                                 display: "flex",
                                                 flexDirection: "column",
-                                                gap: "0.6em",
-                                                maxHeight: "22em",
+                                                gap: "0.65em",
+                                                maxHeight: "24em",
                                                 overflowY: "auto",
                                                 paddingRight: "0.2em"
                                             }}>
@@ -888,21 +983,21 @@ export default function ShiftManagement({
                                                     return (
                                                         <div key={item.name} style={{
                                                             background: "rgba(255, 255, 255, 0.03)",
-                                                            border: isTop1 ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid rgba(255, 255, 255, 0.06)",
-                                                            borderRadius: "0.7em",
-                                                            padding: "0.65em 0.85em",
+                                                            border: isTop1 ? "1px solid rgba(245, 158, 11, 0.35)" : "1px solid rgba(255, 255, 255, 0.06)",
+                                                            borderRadius: "0.75em",
+                                                            padding: "0.7em 0.9em",
                                                             display: "flex",
                                                             flexDirection: "column",
-                                                            gap: "0.4em",
+                                                            gap: "0.45em",
                                                             position: "relative",
                                                             overflow: "hidden"
                                                         }}>
                                                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5em" }}>
                                                                 <div style={{ display: "flex", alignItems: "center", gap: "0.65em", flex: "1 1 auto", minWidth: "120px" }}>
                                                                     <span style={{
-                                                                        fontSize: "0.78em",
+                                                                        fontSize: "0.8em",
                                                                         fontWeight: 800,
-                                                                        padding: "0.2em 0.5em",
+                                                                        padding: "0.2em 0.55em",
                                                                         borderRadius: "5px",
                                                                         background: medalBg,
                                                                         color: medalColor,
@@ -912,14 +1007,14 @@ export default function ShiftManagement({
                                                                     </span>
                                                                     <span style={{
                                                                         fontWeight: 700,
-                                                                        fontSize: "0.88em",
+                                                                        fontSize: "0.9em",
                                                                         color: "var(--text-color)",
                                                                         wordBreak: "break-word"
                                                                     }}>
                                                                         {item.name}
                                                                     </span>
                                                                 </div>
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.55em", flexShrink: 0, marginLeft: "auto" }}>
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "0.6em", flexShrink: 0, marginLeft: "auto" }}>
                                                                     <span style={{
                                                                         fontSize: "0.75em",
                                                                         fontWeight: 700,
@@ -932,7 +1027,7 @@ export default function ShiftManagement({
                                                                     }}>
                                                                         {item.quantity} uds
                                                                     </span>
-                                                                    <span style={{ fontSize: "0.85em", fontWeight: 700, color: "var(--success-color)", whiteSpace: "nowrap" }}>
+                                                                    <span style={{ fontSize: "0.88em", fontWeight: 700, color: "var(--success-color)", whiteSpace: "nowrap" }}>
                                                                         ${item.total.toFixed(2)}
                                                                     </span>
                                                                 </div>
@@ -956,7 +1051,7 @@ export default function ShiftManagement({
                                             </div>
                                         ) : (
                                             /* Vista de Gráfico de Barras moderno */
-                                            <div style={{ flex: 1, minHeight: `${Math.round(220 * textScale)}px` }}>
+                                            <div style={{ flex: 1, minHeight: `${Math.round(230 * textScale)}px` }}>
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <BarChart
                                                         data={stats.itemChartData}
@@ -993,17 +1088,17 @@ export default function ShiftManagement({
                                         )
                                     ) : (
                                         <div style={{
-                                            padding: "3em 1em",
+                                            padding: "3.5em 1em",
                                             display: "flex",
                                             flexDirection: "column",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             color: "var(--text-secondary)",
-                                            fontSize: "0.85em",
+                                            fontSize: "0.9em",
                                             fontStyle: "italic",
                                             gap: "0.5em"
                                         }}>
-                                            <span style={{ fontSize: "2em", fontStyle: "normal", opacity: 0.6 }}>📦</span>
+                                            <span style={{ fontSize: "2.2em", fontStyle: "normal", opacity: 0.6 }}>📦</span>
                                             Sin ventas de productos registradas
                                         </div>
                                     )}
@@ -1011,7 +1106,7 @@ export default function ShiftManagement({
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
