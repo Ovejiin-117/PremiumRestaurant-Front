@@ -278,7 +278,7 @@ export default function UserManagement({
         <div className={`scale-${uiScale}`}>
             <div className="page-container" onClick={handleBackgroundClick}>
                 <div className="title-bar">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center flex-wrap gap-3">
                         <button onClick={back} className="btn-back">
                             ← Volver al panel
                         </button>
@@ -310,7 +310,7 @@ export default function UserManagement({
 
                         {/* Menú desplegable */}
                         {showUserMenu && mode === 'normal' && (
-                            <div className="glass-card absolute top-full right-0 mt-3 w-[clamp(300px,45vw,450px)] z-50 shadow-2xl border border-card-border p-0 overflow-hidden">
+                            <div className="glass-card absolute top-full right-0 mt-3 w-[clamp(280px,45vw,450px)] max-w-[calc(100vw-2rem)] z-50 shadow-2xl border border-card-border p-0 overflow-hidden">
                                 {!showCreateInput ? (
                                     <>
                                         <div
@@ -609,7 +609,7 @@ export default function UserManagement({
                         onClick={() => { setInfoUser(null); setRevealPassword(false); }}
                     >
                         <div
-                            className="glass-card w-full max-w-sm p-8 cursor-default"
+                            className="glass-card w-full max-w-[min(92vw,26rem)] p-[clamp(1.5rem,4vw,2rem)] cursor-default box-border"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-8">

@@ -65,10 +65,10 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
     };
 
     return (
-        <div className="page-container animate-fade-in" style={{ padding: '2rem' }}>
+        <div className="page-container animate-fade-in" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
             {/* Encabezado */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <button onClick={back} className="btn-back">
                         <span style={{ fontSize: '1.2em' }}>←</span> VOLVER AL PANEL
                     </button>
@@ -162,7 +162,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
                     background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000
                 }}>
-                    <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem' }}>
+                    <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: 'min(92vw, 34rem)', padding: 'clamp(1.75rem, 4vw, 2.5rem)', boxSizing: 'border-box' }}>
                         <h2 style={{ marginTop: 0, marginBottom: '2rem', textAlign: 'center' }}>
                             {editingId ? 'EDITAR INSUMO' : 'REGISTRAR NUEVO INSUMO'}
                         </h2>

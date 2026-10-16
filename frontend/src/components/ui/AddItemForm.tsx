@@ -126,13 +126,13 @@ const AddItemForm: React.FC<AddItemFormProps> = ({
             <div
                 style={{
                     width: '100%',
-                    maxWidth: '520px',
+                    maxWidth: 'min(94vw, 36rem)',
                     maxHeight: '90vh',
                     overflowY: 'auto',
                     background: 'rgba(15, 23, 42, 0.95)',
                     border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '1.25rem',
-                    padding: '2rem',
+                    padding: 'clamp(1.5rem, 3vw, 2rem)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '1.5rem',
@@ -346,7 +346,7 @@ const AddItemForm: React.FC<AddItemFormProps> = ({
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }} onClick={e => e.stopPropagation()}>
                     <div className="glass-card" style={{
-                        maxWidth: '450px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem'
+                        maxWidth: 'min(92vw, 30rem)', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.75rem', padding: 'clamp(1.75rem, 4vw, 2.5rem)', boxSizing: 'border-box'
                     }}>
                         <div style={{
                             width: '4rem', height: '4rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%',

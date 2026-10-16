@@ -129,7 +129,7 @@ export default function History({
 
                 {/* Encabezado */}
                 <div className="title-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                         <button onClick={back} className="btn-back">← Volver al panel</button>
                         <SettingsControls
                             uiScale={uiScale}
@@ -433,7 +433,8 @@ export default function History({
                     <div style={{
                         position: 'fixed',
                         bottom: '2rem',
-                        right: '2rem',
+                        right: 'min(2rem, 4vw)',
+                        maxWidth: 'calc(100vw - 2rem)',
                         zIndex: 2000,
                         animation: 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}>
@@ -447,7 +448,8 @@ export default function History({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '1.25rem',
-                            minWidth: '320px'
+                            maxWidth: '100%',
+                            boxSizing: 'border-box'
                         }}>
                             <div style={{
                                 width: '40px',

@@ -40,7 +40,7 @@ export default function Dashboard({
                         <div style={{ fontSize: "1.25em", fontWeight: 700 }}>{user.username}</div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <SettingsControls
                             uiScale={uiScale}
                             setUiScale={setUiScale}

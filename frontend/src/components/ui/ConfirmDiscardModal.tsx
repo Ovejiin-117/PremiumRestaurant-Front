@@ -50,14 +50,15 @@ const ConfirmDiscardModal: React.FC<ConfirmDiscardModalProps> = ({
             <div
                 className="glass-card"
                 style={{
-                    maxWidth: '460px',
+                    maxWidth: 'min(92vw, 28rem)',
                     width: '100%',
                     textAlign: 'center',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '1.5rem',
-                    padding: '2.5rem',
-                    cursor: 'default'
+                    padding: 'clamp(1.75rem, 4vw, 2.5rem)',
+                    cursor: 'default',
+                    boxSizing: 'border-box'
                 }}
                 onClick={e => e.stopPropagation()}
             >

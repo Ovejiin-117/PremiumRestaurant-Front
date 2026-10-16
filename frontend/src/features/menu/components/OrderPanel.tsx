@@ -97,7 +97,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
 
     return (
         <div className="glass-card" style={{
-            width: `${Math.max(ticketWidth * 6.5, 380)}px`,
+            width: `${Math.max(ticketWidth * 6.5, 320)}px`,
+            maxWidth: '100%',
+            boxSizing: 'border-box',
             padding: '1.25rem',
             height: 'fit-content',
             position: 'sticky',

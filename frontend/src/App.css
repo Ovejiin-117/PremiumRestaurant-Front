@@ -21,10 +21,10 @@ textarea,
 }
 
 :root {
-  /* Tamaño de fuente base dinámico que escala con la resolución */
+  /* Tamaño de fuente base dinámico que escala equilibradamente con la resolución */
   --fluid-min-size: 14px;
-  --fluid-max-size: 26px;
-  --base-font-size: clamp(var(--fluid-min-size), 0.5vw + 0.5vh + 8px, var(--fluid-max-size));
+  --fluid-max-size: 18px;
+  --base-font-size: clamp(var(--fluid-min-size), 0.25vw + 0.25vh + 11px, var(--fluid-max-size));
   --scale-multiplier: 1;
   --global-scale: 1;
 
@@ -112,6 +112,9 @@ body {
 }
 
 @media (min-width: 2560px) {
+  :root {
+    --fluid-max-size: 20px;
+  }
   .page-container {
     max-width: 2000px;
     padding: 3rem;
@@ -119,6 +122,9 @@ body {
 }
 
 @media (min-width: 3840px) {
+  :root {
+    --fluid-max-size: 22px;
+  }
   .page-container {
     max-width: 3000px;
     padding: 5rem;
@@ -646,5 +652,8 @@ select:focus {
     width: 30px;
     height: 30px;
     font-size: 1rem;
+  }
+  .menu-editor-layout {
+    flex-direction: column !important;
   }
 }

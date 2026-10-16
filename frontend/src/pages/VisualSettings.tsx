@@ -24,15 +24,14 @@ export default function VisualSettings({
     const isAdmin = user?.role === 'developer';
 
     return (
-        <div className="page-container" style={{ position: 'relative', paddingTop: '4rem' }}>
-            {/* Fijar en la esquina superior izquierda */}
-            <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem' }}>
+        <div className="page-container">
+            <div style={{ marginBottom: '1.5rem' }}>
                 <button className="btn-back" onClick={back} style={{ margin: 0 }}>
                     ← VOLVER AL PANEL
                 </button>
             </div>
 
-            <div style={{ marginBottom: '3rem', borderBottom: '2px solid var(--primary-color)', paddingBottom: '0.5rem' }}>
+            <div style={{ marginBottom: '2.5rem', borderBottom: '2px solid var(--primary-color)', paddingBottom: '0.75rem' }}>
                 <h1 style={{
                     margin: 0, fontSize: '1.8rem', fontWeight: '900',
                     textTransform: 'uppercase', letterSpacing: '2px',

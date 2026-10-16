@@ -128,7 +128,7 @@ export default function ShiftManagement({
         <div className={`scale-${uiScale}`}>
             <div className="page-container">
                 <div className="title-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75em' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75em' }}>
                         <button onClick={back} className="btn-back">← Volver al panel</button>
                         <SettingsControls
                             uiScale={uiScale}
@@ -172,7 +172,7 @@ export default function ShiftManagement({
 
                 <h1 style={{ margin: '0 0 2rem 0' }}>Gestión de Turno</h1>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "2em" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "2em" }}>
 
                     {/* Sección de controles */}
                     <div className="glass-card">
@@ -236,7 +236,7 @@ export default function ShiftManagement({
                     <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                         <div className="glass-card" style={{ flex: 1 }}>
                             <h3 style={{ marginTop: 0, marginBottom: "1.5rem" }}>Resumen del Turno</h3>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2em", marginBottom: '2em' }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "1.5em", marginBottom: '2em' }}>
                                 <div style={{ background: 'var(--card-hover-bg)', padding: '1.5em', borderRadius: '1em', border: '1px solid var(--card-border)' }}>
                                     <div className="stat-label" style={{ color: "var(--text-secondary)", fontSize: '0.8em', fontWeight: 'bold' }}>VENTAS TOTALES</div>
                                     <div className="stat-value" style={{ color: "var(--primary-color)", fontSize: "2em" }}>${stats.totalSales.toFixed(2)}</div>
@@ -247,7 +247,7 @@ export default function ShiftManagement({
                                 </div>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5em', minHeight: '20em' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1.5em', minHeight: '20em' }}>
                                 {/* Ventas por usuario (gráfico circular) */}
                                 <div style={{ background: 'var(--card-hover-bg)', padding: '1.3em', borderRadius: '1em', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column' }}>
                                     <h4 style={{ margin: '0 0 1em 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>VENTAS POR USUARIO (%)</h4>

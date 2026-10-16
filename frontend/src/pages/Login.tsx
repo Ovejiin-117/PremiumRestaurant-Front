@@ -100,20 +100,22 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
                 className="glass-card"
                 style={{
                     width: "100%",
-                    maxWidth: "400px",
-                    padding: "3rem",
+                    maxWidth: "min(90vw, 27rem)",
+                    padding: "clamp(2rem, 4vw, 2.75rem) clamp(1.5rem, 4vw, 2.25rem)",
                     boxShadow: "0 25px 50px -12px var(--watermark-color)",
                     border: "1px solid var(--card-border)",
                     position: 'relative'
                 }}
             >
-                <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+                <div style={{ textAlign: "center", marginBottom: "2rem" }}>
                     <h1 style={{
                         margin: 0,
-                        fontSize: "2.2rem",
+                        fontSize: "clamp(1.75rem, 4vw, 2.2rem)",
                         fontWeight: "800",
                         color: "var(--text-color)",
-                        fontFamily: "'Outfit', sans-serif"
+                        fontFamily: "'Outfit', sans-serif",
+                        letterSpacing: "-0.02em",
+                        whiteSpace: "nowrap"
                     }}>
                         RestaurantPro
                     </h1>

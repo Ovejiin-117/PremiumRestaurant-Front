@@ -271,9 +271,8 @@ function App() {
   });
 
   const [history, setHistory] = useState<Order[]>(() => {
-    // Reiniciar historial de pedidos según lo solicitado por el usuario
-    localStorage.removeItem('rp_history');
-    return [];
+    const saved = localStorage.getItem('rp_history');
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [shifts, setShifts] = useState<Shift[]>(() => {

@@ -121,7 +121,7 @@ export default function SalesRecords({
             <div className="page-container">
                 {/* Sección de encabezado - Igual que History.tsx */}
                 <div className="title-bar">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                         <button onClick={back} className="btn-back">← Volver al panel</button>
                         <SettingsControls
                             uiScale={uiScale}

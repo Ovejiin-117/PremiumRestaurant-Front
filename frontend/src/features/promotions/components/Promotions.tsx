@@ -236,7 +236,7 @@ export default function Promotions({
         <div className={`scale-${uiScale}`}>
             <div className="page-container">
                 <div className="title-bar">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center flex-wrap gap-3">
                         <button onClick={() => handleExitAttempt(back)} className="btn-back">
                             ← Volver al panel
                         </button>
@@ -254,7 +254,7 @@ export default function Promotions({
 
                 {viewMode === 'list' && (
                     <div className="glass-card">
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
                             <h2 className="m-0">Promociones Activas</h2>
                             <button
                                 onClick={() => {
@@ -276,7 +276,7 @@ export default function Promotions({
                                 {promotions.map(promo => (
                                     <div
                                         key={promo.id}
-                                        className="relative flex justify-between items-center p-5 rounded-2xl bg-card border border-card-border overflow-hidden shadow-sm transition-all duration-300"
+                                        className="relative flex flex-wrap justify-between items-center gap-4 p-5 rounded-2xl bg-card border border-card-border overflow-hidden shadow-sm transition-all duration-300"
                                     >
                                         {/* Línea indicadora de estado */}
                                         <div
@@ -325,7 +325,7 @@ export default function Promotions({
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-3 items-center" onClick={e => e.stopPropagation()}>
+                                        <div className="flex flex-wrap gap-2 items-center" onClick={e => e.stopPropagation()}>
                                             <button
                                                 onClick={() => {
                                                     setPendingAction({ type: 'toggle', promo });
@@ -364,8 +364,8 @@ export default function Promotions({
                 )}
 
                 {viewMode === 'select_type' && (
-                    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm">
-                        <div className="glass-card max-w-[400px] w-[90%] text-center p-8">
+                    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="glass-card max-w-[min(92vw,28rem)] w-[90%] text-center p-[clamp(1.5rem,4vw,2rem)] box-border">
                             <h2 className="mt-0">Tipo de Promoción</h2>
                             <p className="text-text-secondary mb-8">¿Qué tipo de oferta deseas crear?</p>
 
@@ -730,7 +730,7 @@ export default function Promotions({
                     onClick={() => setSelectedItemForDetails(null)}
                 >
                     <div
-                        className="glass-card max-w-[400px] w-[90%] p-8 text-center relative border border-primary/50"
+                        className="glass-card max-w-[min(92vw,28rem)] w-[90%] p-[clamp(1.5rem,4vw,2rem)] text-center relative border border-primary/50 box-border"
                         onClick={e => e.stopPropagation()}
                     >
                         <button
@@ -829,8 +829,8 @@ export default function Promotions({
             )}
 
             {showExitConfirm && (
-                <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[10000] p-8">
-                    <div className="glass-card max-w-[450px] w-full p-10 text-center flex flex-col items-center gap-6 shadow-2xl">
+                <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[10000] p-4">
+                    <div className="glass-card max-w-[min(92vw,30rem)] w-full p-[clamp(1.75rem,4vw,2.5rem)] text-center flex flex-col items-center gap-6 shadow-2xl box-border">
                         <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl bg-white/5 border-2 border-dashed border-white/30 mb-2 shadow-sm">
                             📢
                         </div>
@@ -839,7 +839,7 @@ export default function Promotions({
                             Promoción en Curso
                         </h2>
 
-                        <p className="text-base opacity-80 leading-relaxed m-0 max-w-[320px]">
+                        <p className="text-base opacity-80 leading-relaxed m-0 max-w-[min(90%,22rem)]">
                             Tienes cambios sin guardar en esta promoción. Si sales ahora, se perderán estos cambios. ¿Estás seguro de que deseas salir?
                         </p>
 

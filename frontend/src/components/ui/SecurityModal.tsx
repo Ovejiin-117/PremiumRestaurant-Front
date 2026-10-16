@@ -65,8 +65,9 @@ const SecurityModal: React.FC<SecurityModalProps> = ({
                 className="glass-card"
                 style={{
                     width: '100%',
-                    maxWidth: '26rem',
-                    padding: '2.5rem',
+                    maxWidth: 'min(92vw, 26rem)',
+                    padding: 'clamp(1.5rem, 4vw, 2.5rem)',
+                    boxSizing: 'border-box',
                     textAlign: 'center',
                     cursor: 'default'
                 }}

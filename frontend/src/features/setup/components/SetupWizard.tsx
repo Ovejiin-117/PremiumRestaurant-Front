@@ -122,12 +122,13 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
             }}></div>
 
             <div className="glass-card" style={{
-                width: '100%', maxWidth: '500px', minHeight: '400px',
-                padding: '3rem', display: 'flex', flexDirection: 'column',
+                width: '100%', maxWidth: 'min(92vw, 34rem)', minHeight: '400px',
+                padding: 'clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem)', display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center', textAlign: 'center',
                 boxShadow: '0 25px 50px -12px var(--watermark-color)',
                 border: '1px solid var(--card-border)',
-                position: 'relative'
+                position: 'relative',
+                boxSizing: 'border-box'
             }}>
                 {/* Alternador de tema */}
                 <button
@@ -147,7 +148,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                 {step === 'language' && (
                     <>
                         <div style={{ height: '80px', display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-                            <h1 style={{ fontSize: '3.5rem', margin: 0, fontWeight: 900, background: 'linear-gradient(to right, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', margin: 0, fontWeight: 900, background: 'linear-gradient(to right, #60a5fa, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap' }}>
                                 {displayedText}<span className="blink-cursor">|</span>
                             </h1>
                         </div>
@@ -281,7 +282,7 @@ export default function SetupWizard({ onComplete, theme, setTheme }: Props) {
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                             <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>{TUTORIAL_SLIDES[slideIndex].icon}</div>
                             <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>{TUTORIAL_SLIDES[slideIndex].title}</h2>
-                            <p style={{ opacity: 0.8, lineHeight: '1.6', maxWidth: '300px', margin: '0 auto' }}>
+                            <p style={{ opacity: 0.8, lineHeight: '1.6', maxWidth: 'min(90%, 22rem)', margin: '0 auto' }}>
                                 {TUTORIAL_SLIDES[slideIndex].desc}
                             </p>
                         </div>

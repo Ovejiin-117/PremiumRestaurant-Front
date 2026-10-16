@@ -149,8 +149,8 @@ const TaxonomyManager: React.FC<TaxonomyManagerProps> = ({
                 display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '1rem'
             }} onClick={resetForm}>
                 <div className="glass-card" style={{
-                    width: '100%', maxWidth: '450px', padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'modalFadeIn 0.3s ease'
+                    width: '100%', maxWidth: 'min(92vw, 30rem)', padding: 'clamp(1.75rem, 4vw, 2.5rem)', display: 'flex', flexDirection: 'column', gap: '1.5rem',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', animation: 'modalFadeIn 0.3s ease', boxSizing: 'border-box'
                 }} onClick={e => e.stopPropagation()}>
 
                     <div style={{ textAlign: 'center' }}>

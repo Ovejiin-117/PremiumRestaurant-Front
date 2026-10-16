@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { MenuItem, User } from '../../../types';
 import ItemList from './ItemList';
 import ConfirmButton from '../../../components/ui/ConfirmButton';
@@ -87,7 +87,7 @@ const CategoryCard: React.FC<CategoryCardProps> = (props) => {
         handleDeleteSection, handleDeleteItem, menu,
         // Props de ItemList
         startEdit,
-        handleAddToOrder, user,
+        handleAddToOrder,
         // Props de reordenamiento
         isReorderMode, handleReorder,
         // Filtros

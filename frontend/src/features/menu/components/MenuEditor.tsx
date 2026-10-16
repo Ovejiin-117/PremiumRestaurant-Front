@@ -181,7 +181,7 @@ export default function MenuEditor(props: Props) {
     return (
         <div className={`scale-${uiScale}`}>
             <div
-                className="page-container"
+                className="page-container menu-editor-layout"
                 style={{ display: "flex", gap: "2rem", flexDirection: layoutOrientation === 'horizontal' ? 'row' : 'column' }}
                 onClick={handlers.handleBackgroundClick}
             >
@@ -375,7 +375,7 @@ export default function MenuEditor(props: Props) {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                     }}>
                         <div className="glass-card" style={{
-                            maxWidth: '450px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem'
+                            maxWidth: 'min(92vw, 30rem)', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.75rem', padding: 'clamp(1.75rem, 4vw, 2.5rem)', boxSizing: 'border-box'
                         }}>
                             <div style={{
                                 width: '4rem', height: '4rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%',
@@ -409,7 +409,7 @@ export default function MenuEditor(props: Props) {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                     }}>
                         <div className="glass-card" style={{
-                            maxWidth: '450px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem', padding: '3rem'
+                            maxWidth: 'min(92vw, 30rem)', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.75rem', padding: 'clamp(1.75rem, 4vw, 2.5rem)', boxSizing: 'border-box'
                         }}>
                             <div style={{
                                 width: '4rem', height: '4rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%',
@@ -473,8 +473,8 @@ export default function MenuEditor(props: Props) {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
                     }} onClick={() => setSelectedItemForDetails(null)}>
                         <div className="glass-card" style={{
-                            maxWidth: '400px', width: '90%', padding: '2rem', textAlign: 'center',
-                            position: 'relative', border: '1px solid var(--primary-color-alpha-50)'
+                            maxWidth: 'min(92vw, 28rem)', width: '90%', padding: 'clamp(1.5rem, 3vw, 2rem)', textAlign: 'center',
+                            position: 'relative', border: '1px solid var(--primary-color-alpha-50)', boxSizing: 'border-box'
                         }} onClick={e => e.stopPropagation()}>
                             <button
                                 onClick={() => setSelectedItemForDetails(null)}
@@ -563,9 +563,9 @@ export default function MenuEditor(props: Props) {
                             display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
                         }} onClick={() => state.setSelectedItemForMenu(null)}>
                             <div className="glass-card" style={{
-                                maxWidth: '400px', width: '90%', padding: '2.5rem', textAlign: 'center',
+                                maxWidth: 'min(92vw, 28rem)', width: '90%', padding: 'clamp(1.75rem, 4vw, 2.5rem)', textAlign: 'center',
                                 position: 'relative', border: '1px solid var(--primary-color-alpha-50)',
-                                display: 'flex', flexDirection: 'column', gap: '1.5rem'
+                                display: 'flex', flexDirection: 'column', gap: '1.5rem', boxSizing: 'border-box'
                             }} onClick={e => e.stopPropagation()}>
                                 <button
                                     onClick={() => state.setSelectedItemForMenu(null)}
