@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { MenuItem, User, Order } from '../../../types';
+import type { MenuItem, User, Order, Promotion, CartItem, OrderItem } from '../../../types';
 import { isPromotionActive } from '../../../utils/promotionUtils';
 import { calculateOrderTax } from '../../../utils/taxUtils';
 
@@ -69,8 +69,7 @@ export const useMenuEditor = ({
     const [editingSecNewName, setEditingSecNewName] = useState('');
 
     // Estado del pedido
-    type OrderItem = { menuItem: MenuItem; quantity: number; notes?: string };
-    const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
+    const [currentOrder, setCurrentOrder] = useState<CartItem[]>([]);
     const [orderNote, setOrderNote] = useState("");
 
     const setModeSafe = (newMode: Mode | ((prev: Mode) => Mode)) => {
@@ -314,6 +313,10 @@ export const useMenuEditor = ({
     };
 
     const handleDeleteCategory = (catToDelete: string) => {
+        if (catToDelete.toLowerCase() === 'promociones') {
+            setConfirmDeleteId(null);
+            return;
+        }
         const subs = subCategories[catToDelete] || [];
         setMenu(menu.filter(m => m.category !== catToDelete));
         setCategories(categories.filter(c => c !== catToDelete));
@@ -332,6 +335,7 @@ export const useMenuEditor = ({
     };
 
     const startRenameCategory = (cat: string) => {
+        if (cat.toLowerCase() === 'promociones') return;
         setEditingCatOriginalName(cat);
         setEditingCatNewName(cat);
         setMode('normal');
@@ -627,6 +631,74 @@ export const useMenuEditor = ({
         setIsConfirmingOrder(false);
     };
 
+    const handleAddComboToOrder = (promo: Promotion) => {
+        if (!currentShiftId) {
+            setShowShiftModal(true);
+            return;
+        }
+        if (!promo.targetItemIds || promo.targetItemIds.length === 0) {
+            alert("Este combo no tiene productos configurados.");
+            return;
+        }
+
+        const comboItems: MenuItem[] = [];
+        for (const itemId of promo.targetItemIds) {
+            const menuItem = menu.find(m => m.id === itemId);
+            if (!menuItem) {
+                alert("Uno de los productos de este combo no existe en el menú.");
+                return;
+            }
+            if (!menuItem.available) {
+                alert(`El producto "${menuItem.name}" del combo no está disponible actualmente.`);
+                return;
+            }
+            comboItems.push(menuItem);
+        }
+
+        const productCounts = new Map<string, { menuItem: MenuItem; count: number }>();
+        for (const item of comboItems) {
+            const existing = productCounts.get(item.id);
+            if (existing) {
+                existing.count += 1;
+            } else {
+                productCounts.set(item.id, { menuItem: item, count: 1 });
+            }
+        }
+        const summaryDesc = Array.from(productCounts.values())
+            .map(({ menuItem, count }) => count > 1 ? `${count}x ${menuItem.name}` : menuItem.name)
+            .join(' + ');
+
+        const comboMenuItem: MenuItem = {
+            id: `combo-${promo.id}`,
+            name: promo.name,
+            price: promo.value ?? 0,
+            category: 'Combo Promocional',
+            type: 'alimento',
+            available: true,
+            description: summaryDesc
+        };
+
+        const updatedOrder = [...currentOrder];
+        const existingIndex = updatedOrder.findIndex(o => o.isCombo && o.comboId === promo.id);
+        if (existingIndex !== -1) {
+            updatedOrder[existingIndex] = {
+                ...updatedOrder[existingIndex],
+                quantity: updatedOrder[existingIndex].quantity + 1
+            };
+        } else {
+            updatedOrder.push({
+                menuItem: comboMenuItem,
+                quantity: 1,
+                isCombo: true,
+                comboId: promo.id,
+                comboProducts: comboItems
+            });
+        }
+
+        setCurrentOrder(updatedOrder);
+        setIsConfirmingOrder(false);
+    };
+
     const handleIncreaseQuantity = (index: number) => {
         setCurrentOrder(currentOrder.map((o, i) =>
             i === index && o.quantity < 99 ? { ...o, quantity: o.quantity + 1 } : o
@@ -650,15 +722,19 @@ export const useMenuEditor = ({
         const now = new Date();
         let total = 0;
 
-        // Crear un grupo de todos los artículos individuales en el pedido
-        let itemsPool = currentOrder.flatMap(item =>
+        // 1. Sumar combos explícitos directamente
+        currentOrder.filter(item => item.isCombo).forEach(item => {
+            total += item.menuItem.price * item.quantity;
+        });
+
+        // 2. Procesar artículos normales individuales (no combos)
+        const normalItems = currentOrder.filter(item => !item.isCombo);
+        let itemsPool = normalItems.flatMap(item =>
             Array(item.quantity).fill(item.menuItem)
         );
 
-        // 1. Procesar COMBOS primero (mayor prioridad)
+        // Procesar combos automáticos para artículos normales si los hay
         const comboPromos = promotions.filter(p => p.type === 'combo' && isPromotionActive(p, now));
-
-        // Ordenar combos por cantidad de targetItemIds descendente para aplicar combos complejos primero
         comboPromos.sort((a, b) => (b.targetItemIds?.length || 0) - (a.targetItemIds?.length || 0));
 
         comboPromos.forEach(promo => {
@@ -689,7 +765,7 @@ export const useMenuEditor = ({
             }
         });
 
-        // 2. Procesar LxM y porcentajes en los artículos restantes
+        // Procesar LxM y porcentajes en los artículos normales restantes
         const remainingItemsById = itemsPool.reduce((acc, item) => {
             if (!acc[item.id]) acc[item.id] = { menuItem: item, quantity: 0 };
             acc[item.id].quantity++;
@@ -753,38 +829,74 @@ export const useMenuEditor = ({
         const now = new Date();
         const baseTotal = calculateTotal();
 
-        // Calcular precios de artículos individuales tras promociones porcentuales/LxM (excluyendo combos)
-        const itemsWithPromos = currentOrder.map(o => {
-            const lineBaseTotal = o.menuItem.price * o.quantity;
-            const applicablePromos = promotions.filter(p =>
-                p.targetItemIds.includes(o.menuItem.id) &&
-                p.type !== 'combo' &&
-                isPromotionActive(p, now)
-            );
+        const itemsWithPromos: OrderItem[] = [];
 
-            let bestTotal = lineBaseTotal;
-            applicablePromos.forEach(p => {
-                let promoTotal = lineBaseTotal;
-                if (p.type === 'percentage' && p.value) {
-                    promoTotal = lineBaseTotal * (1 - p.value / 100);
-                } else if (p.type === 'quantity_offer' && p.pay && p.take) {
-                    const sets = Math.floor(o.quantity / p.take);
-                    const remainder = o.quantity % p.take;
-                    promoTotal = (sets * p.pay + remainder) * o.menuItem.price;
-                }
-                if (promoTotal < bestTotal) bestTotal = promoTotal;
-            });
+        currentOrder.forEach(o => {
+            if (o.isCombo) {
+                const productCounts = new Map<string, { menuItem: MenuItem; count: number }>();
+                (o.comboProducts || []).forEach(p => {
+                    const existing = productCounts.get(p.id);
+                    if (existing) {
+                        existing.count += 1;
+                    } else {
+                        productCounts.set(p.id, { menuItem: p, count: 1 });
+                    }
+                });
 
-            return {
-                menuItemId: o.menuItem.id,
-                name: o.menuItem.name,
-                price: bestTotal / o.quantity, // Precio promedio por unidad para esta línea
-                quantity: o.quantity,
-                notes: o.notes || orderNote
-            };
+                const formattedComboProducts = Array.from(productCounts.values()).map(({ menuItem, count }) => ({
+                    menuItemId: menuItem.id,
+                    name: menuItem.name,
+                    category: menuItem.category,
+                    quantity: count,
+                    originalPrice: menuItem.price
+                }));
+
+                const summaryText = formattedComboProducts
+                    .map(cp => cp.quantity > 1 ? `${cp.quantity}x ${cp.name}` : cp.name)
+                    .join(' + ');
+
+                itemsWithPromos.push({
+                    menuItemId: o.menuItem.id,
+                    name: o.menuItem.name,
+                    price: o.menuItem.price,
+                    quantity: o.quantity,
+                    notes: o.notes || orderNote || (summaryText ? `Incluye: ${summaryText}` : undefined),
+                    isCombo: true,
+                    comboId: o.comboId,
+                    comboProducts: formattedComboProducts
+                });
+            } else {
+                const lineBaseTotal = o.menuItem.price * o.quantity;
+                const applicablePromos = promotions.filter(p =>
+                    p.targetItemIds.includes(o.menuItem.id) &&
+                    p.type !== 'combo' &&
+                    isPromotionActive(p, now)
+                );
+
+                let bestTotal = lineBaseTotal;
+                applicablePromos.forEach(p => {
+                    let promoTotal = lineBaseTotal;
+                    if (p.type === 'percentage' && p.value) {
+                        promoTotal = lineBaseTotal * (1 - p.value / 100);
+                    } else if (p.type === 'quantity_offer' && p.pay && p.take) {
+                        const sets = Math.floor(o.quantity / p.take);
+                        const remainder = o.quantity % p.take;
+                        promoTotal = (sets * p.pay + remainder) * o.menuItem.price;
+                    }
+                    if (promoTotal < bestTotal) bestTotal = promoTotal;
+                });
+
+                itemsWithPromos.push({
+                    menuItemId: o.menuItem.id,
+                    name: o.menuItem.name,
+                    price: bestTotal / o.quantity,
+                    quantity: o.quantity,
+                    notes: o.notes || orderNote
+                });
+            }
         });
 
-        // Verificar si hay un descuento restante (de combos)
+        // Verificar si hay un descuento automático restante para items normales
         const itemsSum = itemsWithPromos.reduce((a, b) => a + (b.price * b.quantity), 0);
         const comboDiscount = itemsSum - baseTotal;
 
@@ -888,7 +1000,7 @@ export const useMenuEditor = ({
         handlers: {
             resetMode, handleBackgroundClick, handleAddCategory, handleDeleteCategory, startRenameCategory, saveRenameCategory,
             handleDeleteSubCategory, handleDeleteSection, selectAddType, cancelAdd, saveNewSubCat, saveNewSection,
-            saveNewItem, startEdit, saveEdit, toggleAvailability, handleDeleteItem, handleAddToOrder,
+            saveNewItem, startEdit, saveEdit, toggleAvailability, handleDeleteItem, handleAddToOrder, handleAddComboToOrder,
             handleIncreaseQuantity, handleDecreaseQuantity, handleRemoveFromOrder, calculateTotal, handleSubmitOrder,
             toggleDeleteSubCatMode, toggleDeleteSectionMode, toggleEditItemMode, toggleDeleteItemMode,
             handleReorder,

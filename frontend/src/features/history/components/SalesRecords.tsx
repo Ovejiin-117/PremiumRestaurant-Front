@@ -71,15 +71,40 @@ export default function SalesRecords({
                     if (item.menuItemId === 'tax-line' || item.menuItemId === 'promo-discount') {
                         return;
                     }
-                    salesData.push({
-                        orderId: order.id,
-                        productName: item.name,
-                        quantity: item.quantity,
-                        unitPrice: item.price,
-                        total: item.price * item.quantity,
-                        vendedor: order.orderedBy,
-                        fecha: order.createdAt
-                    });
+                    if (item.isCombo && item.comboProducts && item.comboProducts.length > 0) {
+                        const totalOriginalPrice = item.comboProducts.reduce((sum, p) => sum + (p.originalPrice || 0) * p.quantity, 0);
+                        const comboTotalRevenue = item.price * item.quantity;
+                        const totalUnitsInCombo = item.comboProducts.reduce((sum, p) => sum + p.quantity, 0);
+
+                        item.comboProducts.forEach(prod => {
+                            const soldQuantity = prod.quantity * item.quantity;
+                            let prodRevenue = 0;
+                            if (totalOriginalPrice > 0) {
+                                prodRevenue = ((prod.originalPrice || 0) * prod.quantity / totalOriginalPrice) * comboTotalRevenue;
+                            } else if (totalUnitsInCombo > 0) {
+                                prodRevenue = (comboTotalRevenue / totalUnitsInCombo) * prod.quantity;
+                            }
+                            salesData.push({
+                                orderId: order.id,
+                                productName: `${prod.name} (${item.name})`,
+                                quantity: soldQuantity,
+                                unitPrice: soldQuantity > 0 ? prodRevenue / soldQuantity : 0,
+                                total: prodRevenue,
+                                vendedor: order.orderedBy,
+                                fecha: order.createdAt
+                            });
+                        });
+                    } else {
+                        salesData.push({
+                            orderId: order.id,
+                            productName: item.name,
+                            quantity: item.quantity,
+                            unitPrice: item.price,
+                            total: item.price * item.quantity,
+                            vendedor: order.orderedBy,
+                            fecha: order.createdAt
+                        });
+                    }
                 });
             });
 
@@ -102,15 +127,40 @@ export default function SalesRecords({
                         if (item.menuItemId === 'tax-line' || item.menuItemId === 'promo-discount') {
                             return;
                         }
-                        unassignedSales.push({
-                            orderId: order.id,
-                            productName: item.name,
-                            quantity: item.quantity,
-                            unitPrice: item.price,
-                            total: item.price * item.quantity,
-                            vendedor: order.orderedBy,
-                            fecha: order.createdAt
-                        });
+                        if (item.isCombo && item.comboProducts && item.comboProducts.length > 0) {
+                            const totalOriginalPrice = item.comboProducts.reduce((sum, p) => sum + (p.originalPrice || 0) * p.quantity, 0);
+                            const comboTotalRevenue = item.price * item.quantity;
+                            const totalUnitsInCombo = item.comboProducts.reduce((sum, p) => sum + p.quantity, 0);
+
+                            item.comboProducts.forEach(prod => {
+                                const soldQuantity = prod.quantity * item.quantity;
+                                let prodRevenue = 0;
+                                if (totalOriginalPrice > 0) {
+                                    prodRevenue = ((prod.originalPrice || 0) * prod.quantity / totalOriginalPrice) * comboTotalRevenue;
+                                } else if (totalUnitsInCombo > 0) {
+                                    prodRevenue = (comboTotalRevenue / totalUnitsInCombo) * prod.quantity;
+                                }
+                                unassignedSales.push({
+                                    orderId: order.id,
+                                    productName: `${prod.name} (${item.name})`,
+                                    quantity: soldQuantity,
+                                    unitPrice: soldQuantity > 0 ? prodRevenue / soldQuantity : 0,
+                                    total: prodRevenue,
+                                    vendedor: order.orderedBy,
+                                    fecha: order.createdAt
+                                });
+                            });
+                        } else {
+                            unassignedSales.push({
+                                orderId: order.id,
+                                productName: item.name,
+                                quantity: item.quantity,
+                                unitPrice: item.price,
+                                total: item.price * item.quantity,
+                                vendedor: order.orderedBy,
+                                fecha: order.createdAt
+                            });
+                        }
                     });
                 });
 

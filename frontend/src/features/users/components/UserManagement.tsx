@@ -448,6 +448,8 @@ export default function UserManagement({
                         setPendingAction({ type: 'reveal', data: null });
                         setShowSecurityModal(true);
                     }}
+                    canEdit={infoUser ? canEditUser(infoUser) : false}
+                    onStartEdit={startEdit}
                 />
 
                 {/* Modal de edición de usuario */}

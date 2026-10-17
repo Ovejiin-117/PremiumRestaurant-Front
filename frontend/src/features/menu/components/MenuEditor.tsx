@@ -4,6 +4,7 @@ import { useMenuEditor } from '../hooks/useMenuEditor';
 import { isPromotionActive } from '../../../utils/promotionUtils';
 import MenuHeader from './MenuHeader';
 import CategoryCard from './CategoryCard';
+import PromotionsCategoryCard from './PromotionsCategoryCard';
 import OrderPanel from './OrderPanel';
 import MenuFilter from './MenuFilter';
 import ItemList from './ItemList';
@@ -38,7 +39,13 @@ interface Props {
     showImages?: boolean;
 }
 
-const PromoBanner = ({ promotions }: { promotions: import('../../../types').Promotion[] }) => {
+interface PromoBannerProps {
+    promotions: import('../../../types').Promotion[];
+    menu: import('../../../types').MenuItem[];
+    onSelectCombo: (promo: import('../../../types').Promotion) => void;
+}
+
+const PromoBanner = ({ promotions, menu, onSelectCombo }: PromoBannerProps) => {
     const activePromos = promotions.filter(p => isPromotionActive(p));
     if (activePromos.length === 0) return null;
 
@@ -48,52 +55,144 @@ const PromoBanner = ({ promotions }: { promotions: import('../../../types').Prom
             overflowX: 'auto',
             display: 'flex',
             gap: '1rem',
-            padding: '1rem 0.5rem',
+            padding: '0.5rem 0.25rem',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
         }}>
-            {activePromos.map(promo => (
-                <div key={promo.id} style={{
-                    minWidth: '280px',
-                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05))',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)',
-                    borderRadius: '16px',
-                    padding: '1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}>
-                    <div style={{
-                        position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px',
-                        background: 'var(--primary-color)', opacity: 0.05, borderRadius: '50%'
-                    }} />
+            {activePromos.map(promo => {
+                const isCombo = promo.type === 'combo';
+                const comboItems = isCombo && promo.targetItemIds
+                    ? (promo.targetItemIds.map(id => menu.find(m => m.id === id)).filter(Boolean) as import('../../../types').MenuItem[])
+                    : [];
+                const comboNames = comboItems.map(m => m.name).join(' + ');
+                const regularPrice = comboItems.reduce((acc, it) => acc + it.price, 0);
+                const comboPrice = promo.value ?? 0;
+                const savings = regularPrice > comboPrice ? regularPrice - comboPrice : 0;
 
-                    <div style={{
-                        width: '45px', height: '45px', borderRadius: '12px',
-                        background: 'var(--primary-color)', color: 'white',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem',
-                        boxShadow: '0 4px 10px var(--primary-color-alpha-20)'
-                    }}>
-                        {promo.type === 'percentage' ? '🏷️' : '🎁'}
-                    </div>
+                return (
+                    <div
+                        key={promo.id}
+                        onClick={() => {
+                            if (isCombo) {
+                                onSelectCombo(promo);
+                            }
+                        }}
+                        style={{
+                            minWidth: '300px',
+                            maxWidth: '380px',
+                            background: isCombo
+                                ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.05))'
+                                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.05))',
+                            backdropFilter: 'blur(10px)',
+                            border: isCombo
+                                ? '1px solid rgba(34, 197, 94, 0.35)'
+                                : '1px solid rgba(59, 130, 246, 0.25)',
+                            borderRadius: '16px',
+                            padding: '1rem 1.25rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            cursor: isCombo ? 'pointer' : 'default',
+                            transition: 'all 0.2s ease-in-out'
+                        }}
+                        className={isCombo ? "hover:scale-[1.02] hover:shadow-lg active:scale-98" : ""}
+                        title={isCombo ? "Haz clic para agregar este combo al pedido" : undefined}
+                    >
+                        <div style={{
+                            position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px',
+                            background: isCombo ? 'var(--success-color)' : 'var(--primary-color)', opacity: 0.08, borderRadius: '50%'
+                        }} />
 
-                    <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--primary-color)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                            ¡Promoción Activa!
+                        <div style={{
+                            width: '45px', height: '45px', borderRadius: '12px',
+                            background: isCombo ? 'var(--success-color)' : 'var(--primary-color)', color: 'white',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem',
+                            boxShadow: isCombo ? '0 4px 10px rgba(34, 197, 94, 0.3)' : '0 4px 10px var(--primary-color-alpha-20)',
+                            flexShrink: 0
+                        }}>
+                            {isCombo ? '🎁' : promo.type === 'percentage' ? '🏷️' : '✨'}
                         </div>
-                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-color)', marginBottom: '2px' }}>
-                            {promo.name}
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                                fontSize: '0.72rem',
+                                fontWeight: '800',
+                                color: isCombo ? 'var(--success-color)' : 'var(--primary-color)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                marginBottom: '2px'
+                            }}>
+                                {isCombo ? '¡Combo Disponible!' : '¡Promoción Activa!'}
+                            </div>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-color)', marginBottom: '2px', wordBreak: 'break-word' }}>
+                                {promo.name}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                {isCombo ? (
+                                    <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            <strong style={{ color: 'var(--success-color)', fontSize: '0.95em' }}>
+                                                ${comboPrice.toFixed(2)}
+                                            </strong>
+                                            {savings > 0 && (
+                                                <span style={{ textDecoration: 'line-through', opacity: 0.6, fontSize: '0.85em' }}>
+                                                    ${regularPrice.toFixed(2)}
+                                                </span>
+                                            )}
+                                            {savings > 0 && (
+                                                <span style={{ fontSize: '0.72em', color: 'var(--success-color)', background: 'rgba(34, 197, 94, 0.15)', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                                                    Ahorra ${savings.toFixed(2)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div style={{ fontSize: '0.75em', opacity: 0.8, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={comboNames}>
+                                            {comboNames || 'Productos del combo'}
+                                        </div>
+                                    </div>
+                                ) : promo.type === 'percentage' ? (
+                                    <span><strong>{promo.value}% de Descuento</strong> en productos</span>
+                                ) : (
+                                    <span><strong>{promo.take}x{promo.pay}</strong> en productos</span>
+                                )}
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            {promo.type === 'percentage' ? `${promo.value}% de Descuento` : `${promo.take}x${promo.pay} en productos`}
-                        </div>
+
+                        {isCombo && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectCombo(promo);
+                                }}
+                                style={{
+                                    background: 'var(--success-color)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 6px rgba(34, 197, 94, 0.3)',
+                                    flexShrink: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    transition: 'all 0.15s ease'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.filter = 'brightness(1.1)'}
+                                onMouseOut={e => e.currentTarget.style.filter = 'none'}
+                            >
+                                <span>+</span>
+                                <span>Agregar</span>
+                            </button>
+                        )}
                     </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 };
@@ -227,11 +326,17 @@ export default function MenuEditor(props: Props) {
                         </div>
                     )}
 
-                    {showOrderingUI && <PromoBanner promotions={promotions} />}
+                    {showOrderingUI && (
+                        <PromoBanner
+                            promotions={promotions}
+                            menu={menu}
+                            onSelectCombo={handlers.handleAddComboToOrder}
+                        />
+                    )}
 
                     <MenuFilter
                         onFilterChange={setFilters}
-                        categories={props.categories}
+                        categories={promotions.some(p => isPromotionActive(p)) && !props.categories.includes('Promociones') ? ['Promociones', ...props.categories] : props.categories}
                         subcategories={props.subCategories}
                         sections={props.sections}
                         onToggleAll={handlers.toggleGlobalCollapse}
@@ -277,6 +382,19 @@ export default function MenuEditor(props: Props) {
                             paddingBottom: '6.25em',
                             alignItems: 'start'
                         }}>
+                            {/* Categoría permanente de Promociones */}
+                            <PromotionsCategoryCard
+                                promotions={promotions}
+                                menu={menu}
+                                onSelectCombo={handlers.handleAddComboToOrder}
+                                onSelectItem={handlers.handleAddToOrder}
+                                globalCollapseState={state.globalCollapseState}
+                                isReorderMode={state.isReorderMode}
+                                filters={filters}
+                                isShiftOpen={!!currentShiftId}
+                                showOrderingUI={showOrderingUI}
+                            />
+
                             {categories.map(cat => (
                                 <CategoryCard
                                     key={cat}

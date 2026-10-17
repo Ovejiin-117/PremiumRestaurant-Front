@@ -1,10 +1,10 @@
 import React from 'react';
-import type { MenuItem, Promotion, TaxConfig } from '../../../types';
+import type { Promotion, TaxConfig, CartItem } from '../../../types';
 import { getPromotionalPrice, isPromotionActive, getOrderItemLineTotal } from '../../../utils/promotionUtils';
 import { calculateOrderTax } from '../../../utils/taxUtils';
 
 interface OrderPanelProps {
-    currentOrder: { menuItem: MenuItem; quantity: number }[];
+    currentOrder: CartItem[];
     calculateTotal: () => number;
     handleDecreaseQuantity: (index: number) => void;
     handleIncreaseQuantity: (index: number) => void;
@@ -30,7 +30,10 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
 }) => {
     const totalSum = calculateTotal();
 
-    const getLineTotal = (item: { menuItem: MenuItem; quantity: number }) => {
+    const getLineTotal = (item: CartItem) => {
+        if (item.isCombo) {
+            return item.menuItem.price * item.quantity;
+        }
         const now = new Date();
         const baseTotal = item.menuItem.price * item.quantity;
         const applicablePromos = promotions.filter(p =>
@@ -105,23 +108,59 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                 <>
                     <div style={{ marginBottom: '1rem', maxHeight: '40vh', overflowY: 'auto', paddingRight: '0.5rem' }}>
                         {currentOrder.map((orderItem, index) => (
-                            <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: '0.75rem', background: 'var(--card-hover-bg)', borderRadius: '0.5rem', marginBottom: '0.5rem', border: '1px solid var(--card-border)' }}>
+                            <div key={index} style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.6rem',
+                                padding: '0.75rem',
+                                background: orderItem.isCombo ? 'rgba(34, 197, 94, 0.06)' : 'var(--card-hover-bg)',
+                                borderRadius: '0.5rem',
+                                marginBottom: '0.5rem',
+                                border: orderItem.isCombo ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid var(--card-border)'
+                            }}>
                                 {/* Fila 1: Nombre y eliminación */}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{
                                             fontWeight: 'bold',
                                             fontSize: '0.9em',
-                                            color: 'var(--text-color)',
+                                            color: orderItem.isCombo ? 'var(--success-color)' : 'var(--text-color)',
                                             wordBreak: 'break-word',
-                                            lineHeight: '1.2'
+                                            lineHeight: '1.2',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.35rem',
+                                            flexWrap: 'wrap'
                                         }} title={orderItem.menuItem.name}>
-                                            {orderItem.menuItem.name}
+                                            {orderItem.isCombo && <span>🎁</span>}
+                                            <span>{orderItem.menuItem.name}</span>
+                                            {orderItem.isCombo && (
+                                                <span style={{
+                                                    fontSize: '0.62rem',
+                                                    background: 'rgba(34, 197, 94, 0.18)',
+                                                    color: 'var(--success-color)',
+                                                    border: '1px solid rgba(34, 197, 94, 0.35)',
+                                                    borderRadius: '4px',
+                                                    padding: '1px 5px',
+                                                    fontWeight: '800',
+                                                    letterSpacing: '0.04em'
+                                                }}>
+                                                    COMBO
+                                                </span>
+                                            )}
                                         </div>
-                                        <div style={{ fontSize: '0.65em', color: 'var(--text-secondary)', opacity: 0.6, marginTop: '2px' }}>
-                                            {orderItem.menuItem.category}
-                                            {orderItem.menuItem.subcategory && ` > ${orderItem.menuItem.subcategory}`}
-                                            {orderItem.menuItem.section && ` > ${orderItem.menuItem.section}`}
+                                        <div style={{ fontSize: '0.68em', color: 'var(--text-secondary)', opacity: 0.8, marginTop: '3px' }}>
+                                            {orderItem.isCombo ? (
+                                                <span title={orderItem.menuItem.description || ''}>
+                                                    {orderItem.menuItem.description ? `Incluye: ${orderItem.menuItem.description}` : 'Combo Especial'}
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    {orderItem.menuItem.category}
+                                                    {orderItem.menuItem.subcategory && ` > ${orderItem.menuItem.subcategory}`}
+                                                    {orderItem.menuItem.section && ` > ${orderItem.menuItem.section}`}
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                     <button
@@ -180,15 +219,17 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                                             </button>
                                         </div>
                                         <div style={{ fontSize: '0.75em', color: 'var(--text-secondary)', opacity: 0.7 }}>
-                                            x ${(() => {
+                                            x ${orderItem.isCombo ? orderItem.menuItem.price.toFixed(2) : (() => {
                                                 const promoPrice = getPromotionalPrice(orderItem.menuItem, promotions);
                                                 return promoPrice !== null ? promoPrice.toFixed(2) : orderItem.menuItem.price.toFixed(2);
                                             })()}
                                         </div>
                                     </div>
 
-                                    <div style={{ fontWeight: '800', textAlign: 'right', fontSize: '1em', color: 'var(--text-color)' }}>
-                                        {(() => {
+                                    <div style={{ fontWeight: '800', textAlign: 'right', fontSize: '1em', color: orderItem.isCombo ? 'var(--success-color)' : 'var(--text-color)' }}>
+                                        {orderItem.isCombo ? (
+                                            `$${(orderItem.menuItem.price * orderItem.quantity).toFixed(2)}`
+                                        ) : (() => {
                                             const lineInfo = getOrderItemLineTotal(orderItem, promotions);
                                             if (lineInfo.finalTotal < lineInfo.originalTotal) {
                                                 return (
@@ -228,6 +269,35 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
                                 </div>
                             </div>
                         )}
+
+                        {(() => {
+                            const baseItemsSum = currentOrder.reduce((sum, item) => sum + (item.menuItem.price * item.quantity), 0);
+                            const totalSavings = baseItemsSum - totalSum;
+                            if (totalSavings > 0.01) {
+                                return (
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        fontSize: '0.88em',
+                                        color: 'var(--success-color)',
+                                        fontWeight: 'bold',
+                                        marginBottom: '0.75rem',
+                                        background: 'rgba(34, 197, 94, 0.1)',
+                                        padding: '6px 10px',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(34, 197, 94, 0.25)'
+                                    }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span>🎁</span>
+                                            <span>Ahorro en Promoción / Combo:</span>
+                                        </span>
+                                        <span>-${totalSavings.toFixed(2)}</span>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.35em', fontWeight: '900', marginBottom: '1.5rem', color: 'var(--text-color)' }}>
                             <span>Total:</span>

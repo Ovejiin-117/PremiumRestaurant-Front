@@ -40,12 +40,32 @@ export interface MenuItem {
 
 export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'delivered';
 
+export interface ComboProductItem {
+    menuItemId: string;
+    name: string;
+    quantity: number;
+    category?: string;
+    originalPrice?: number;
+}
+
 export interface OrderItem {
     menuItemId: string;
     name: string;
     price: number;
     quantity: number;
     notes?: string;
+    isCombo?: boolean;
+    comboId?: string;
+    comboProducts?: ComboProductItem[];
+}
+
+export interface CartItem {
+    menuItem: MenuItem;
+    quantity: number;
+    notes?: string;
+    isCombo?: boolean;
+    comboId?: string;
+    comboProducts?: MenuItem[];
 }
 
 export interface Shift {

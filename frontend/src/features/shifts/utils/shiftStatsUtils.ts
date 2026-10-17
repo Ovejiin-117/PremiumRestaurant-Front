@@ -85,18 +85,48 @@ export function calculateShiftStats(
         order.items.forEach(item => {
             if (item.menuItemId === 'tax-line' || item.menuItemId === 'promo-discount') return;
 
-            if (!salesByUser[user].items[item.name]) {
-                salesByUser[user].items[item.name] = { quantity: 0, totalPrice: 0 };
-            }
-            salesByUser[user].items[item.name].quantity += item.quantity;
-            salesByUser[user].items[item.name].totalPrice += item.price * item.quantity;
+            if (item.isCombo && item.comboProducts && item.comboProducts.length > 0) {
+                const totalOriginalPrice = item.comboProducts.reduce((sum, p) => sum + (p.originalPrice || 0) * p.quantity, 0);
+                const comboTotalRevenue = item.price * item.quantity;
+                const totalUnitsInCombo = item.comboProducts.reduce((sum, p) => sum + p.quantity, 0);
 
-            if (!allItems[item.name]) {
-                allItems[item.name] = { quantity: 0, totalPrice: 0 };
+                item.comboProducts.forEach(prod => {
+                    const soldQuantity = prod.quantity * item.quantity;
+                    let prodRevenue = 0;
+                    if (totalOriginalPrice > 0) {
+                        prodRevenue = ((prod.originalPrice || 0) * prod.quantity / totalOriginalPrice) * comboTotalRevenue;
+                    } else if (totalUnitsInCombo > 0) {
+                        prodRevenue = (comboTotalRevenue / totalUnitsInCombo) * prod.quantity;
+                    }
+
+                    if (!salesByUser[user].items[prod.name]) {
+                        salesByUser[user].items[prod.name] = { quantity: 0, totalPrice: 0 };
+                    }
+                    salesByUser[user].items[prod.name].quantity += soldQuantity;
+                    salesByUser[user].items[prod.name].totalPrice += prodRevenue;
+
+                    if (!allItems[prod.name]) {
+                        allItems[prod.name] = { quantity: 0, totalPrice: 0 };
+                    }
+                    allItems[prod.name].quantity += soldQuantity;
+                    allItems[prod.name].totalPrice += prodRevenue;
+
+                    totalItemsSold += soldQuantity;
+                });
+            } else {
+                if (!salesByUser[user].items[item.name]) {
+                    salesByUser[user].items[item.name] = { quantity: 0, totalPrice: 0 };
+                }
+                salesByUser[user].items[item.name].quantity += item.quantity;
+                salesByUser[user].items[item.name].totalPrice += item.price * item.quantity;
+
+                if (!allItems[item.name]) {
+                    allItems[item.name] = { quantity: 0, totalPrice: 0 };
+                }
+                allItems[item.name].quantity += item.quantity;
+                allItems[item.name].totalPrice += item.price * item.quantity;
+                totalItemsSold += item.quantity;
             }
-            allItems[item.name].quantity += item.quantity;
-            allItems[item.name].totalPrice += item.price * item.quantity;
-            totalItemsSold += item.quantity;
         });
     });
 

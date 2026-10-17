@@ -114,34 +114,54 @@ export default function EditUserModal({
                     </div>
 
                     {/* Switch de estado */}
-                    <div className="flex items-center justify-between gap-3 bg-card-hover p-3 rounded-lg border border-card-border mt-1">
-                        <div className="flex flex-col">
+                    <div
+                        onClick={() => {
+                            const newVal = !editActive;
+                            if (editRole === 'waiter' && !isShiftOpen && newVal) {
+                                alert("No se puede activar un mesero con el turno cerrado");
+                                return;
+                            }
+                            setEditActive(newVal);
+                        }}
+                        className={`flex items-center justify-between gap-4 p-3.5 rounded-xl border transition-all duration-200 cursor-pointer select-none mt-1 ${
+                            editActive
+                                ? 'bg-success/10 border-success/30 hover:bg-success/15 hover:border-success/50'
+                                : 'bg-card-hover border-card-border hover:bg-white/5'
+                        }`}
+                    >
+                        <div className="flex flex-col gap-1">
                             <span className="text-xs font-bold text-text-main">
                                 Estado de la cuenta
                             </span>
-                            <span className={`text-[0.75em] font-semibold ${
-                                editActive ? 'text-success' : 'text-text-muted'
-                            }`}>
-                                {editActive ? 'USUARIO ACTIVO' : 'USUARIO DESHABILITADO'}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className={`w-2 h-2 rounded-full ${
+                                        editActive ? 'bg-success animate-pulse' : 'bg-text-muted'
+                                    }`}
+                                />
+                                <span
+                                    className={`text-xs font-semibold tracking-wide ${
+                                        editActive ? 'text-success' : 'text-text-muted'
+                                    }`}
+                                >
+                                    {editActive ? 'USUARIO ACTIVO' : 'USUARIO DESHABILITADO'}
+                                </span>
+                            </div>
                         </div>
 
+                        {/* Switch pill */}
                         <div
-                            onClick={() => {
-                                const newVal = !editActive;
-                                if (editRole === 'waiter' && !isShiftOpen && newVal) {
-                                    alert("No se puede activar un mesero con el turno cerrado");
-                                    return;
-                                }
-                                setEditActive(newVal);
-                            }}
-                            className={`w-[50px] h-6 rounded-full relative cursor-pointer transition-all border border-white/10 shrink-0 ${
-                                editActive ? 'bg-success' : 'bg-input-border'
+                            role="switch"
+                            aria-checked={editActive}
+                            className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition-colors duration-200 ease-in-out border ${
+                                editActive
+                                    ? 'bg-success border-success/40 shadow-[0_0_12px_rgba(34,197,94,0.35)]'
+                                    : 'bg-card-border/80 border-white/10'
                             }`}
                         >
-                            <div
-                                className={`w-[18px] h-[18px] bg-white rounded-full absolute top-[2px] transition-all shadow-sm ${
-                                    editActive ? 'left-[28px]' : 'left-[3px]'
+                            <span
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+                                    editActive ? 'translate-x-5' : 'translate-x-0'
                                 }`}
                             />
                         </div>

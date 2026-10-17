@@ -61,9 +61,18 @@ export default function HistoryTicketCard({
                     <tbody>
                         {displayItems.map((item, idx) => (
                             <tr key={idx}>
-                                <td style={{ padding: '0.25rem 0' }}>{item.quantity}</td>
-                                <td style={{ padding: '0.25rem 0' }}>{item.name}</td>
-                                <td style={{ padding: '0.25rem 0', textAlign: 'right' }}>{formatCurrency(item.price * item.quantity)}</td>
+                                <td style={{ padding: '0.25rem 0', verticalAlign: 'top' }}>{item.quantity}</td>
+                                <td style={{ padding: '0.25rem 0', verticalAlign: 'top' }}>
+                                    <div style={{ fontWeight: item.isCombo ? 'bold' : 'normal' }}>
+                                        {item.isCombo ? `🎁 ${item.name}` : item.name}
+                                    </div>
+                                    {item.isCombo && item.comboProducts && item.comboProducts.length > 0 && (
+                                        <div style={{ fontSize: '0.85em', opacity: 0.75, marginTop: '1px' }}>
+                                            {item.comboProducts.map(p => `${p.quantity > 1 ? `${p.quantity}x ` : ''}${p.name}`).join(' + ')}
+                                        </div>
+                                    )}
+                                </td>
+                                <td style={{ padding: '0.25rem 0', textAlign: 'right', verticalAlign: 'top' }}>{formatCurrency(item.price * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
