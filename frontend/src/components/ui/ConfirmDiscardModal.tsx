@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface ConfirmDiscardModalProps {
     isOpen: boolean;
@@ -32,7 +33,7 @@ const ConfirmDiscardModal: React.FC<ConfirmDiscardModalProps> = ({
 
     if (!isOpen) return null;
 
-    return (
+    const modalContent = (
         <div
             style={{
                 position: 'fixed',
@@ -126,6 +127,8 @@ const ConfirmDiscardModal: React.FC<ConfirmDiscardModalProps> = ({
             </div>
         </div>
     );
+
+    return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
 
 export default ConfirmDiscardModal;

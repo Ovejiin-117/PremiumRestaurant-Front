@@ -48,3 +48,49 @@ export const getPromotionalPrice = (item: MenuItem, promotions: Promotion[], dat
 
     return item.price * (1 - (bestPromo.value || 0) / 100);
 };
+
+/**
+ * Calcula el subtotal con descuento para un renglón del pedido (porcentaje u oferta de cantidad NxM).
+ */
+export const getOrderItemLineTotal = (
+    orderItem: { menuItem: MenuItem; quantity: number },
+    promotions: Promotion[],
+    date: Date = new Date()
+): { originalTotal: number; finalTotal: number; promoLabel?: string } => {
+    const itemPrice = orderItem.menuItem.price;
+    const originalTotal = itemPrice * orderItem.quantity;
+
+    const activePromos = promotions.filter(p =>
+        p.targetItemIds.includes(orderItem.menuItem.id) &&
+        p.type !== 'combo' &&
+        isPromotionActive(p, date)
+    );
+
+    if (activePromos.length === 0) {
+        return { originalTotal, finalTotal: originalTotal };
+    }
+
+    let bestTotal = originalTotal;
+    let bestLabel: string | undefined = undefined;
+
+    for (const p of activePromos) {
+        let currentTotal = originalTotal;
+        let label = '';
+        if (p.type === 'percentage' && p.value) {
+            currentTotal = originalTotal * (1 - p.value / 100);
+            label = `-${p.value}%`;
+        } else if (p.type === 'quantity_offer' && p.pay && p.take && orderItem.quantity >= p.take) {
+            const sets = Math.floor(orderItem.quantity / p.take);
+            const remainder = orderItem.quantity % p.take;
+            currentTotal = (sets * p.pay * itemPrice) + (remainder * itemPrice);
+            label = `${p.take}x${p.pay}`;
+        }
+
+        if (currentTotal < bestTotal) {
+            bestTotal = currentTotal;
+            bestLabel = label;
+        }
+    }
+
+    return { originalTotal, finalTotal: bestTotal, promoLabel: bestLabel };
+};

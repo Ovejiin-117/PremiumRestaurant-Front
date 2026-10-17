@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { Order, UIScale, Shift, LayoutOrientation } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
-import { formatDateTime, getShiftLabel } from '../../../utils/dateUtils';
+import { formatDateTime, getShiftLabel, getLocalDateString } from '../../../utils/dateUtils';
 import { formatCurrency } from '../../../utils/currencyUtils';
 
 interface Props {
@@ -46,7 +46,7 @@ export default function SalesRecords({
         if (shiftFilterDate) {
             // Buscar turnos que coincidan con el mismo día que shiftFilterDate
             relevantShifts = shifts.filter(s => {
-                const localStartTime = new Date(s.startTime).toLocaleDateString('en-CA');
+                const localStartTime = getLocalDateString(new Date(s.startTime));
                 return localStartTime === shiftFilterDate;
             });
         } else {
@@ -61,13 +61,16 @@ export default function SalesRecords({
             else relevantShifts = pastShifts;
         }
 
-        return relevantShifts.map(shift => {
+        const groups = relevantShifts.map(shift => {
             const shiftOrders = history.filter(o => o.shiftId === shift.id);
 
             // Aplanar pedidos del turno en ventas individuales de artículos
             const salesData: SaleItemRecord[] = [];
             shiftOrders.forEach(order => {
                 order.items.forEach(item => {
+                    if (item.menuItemId === 'tax-line' || item.menuItemId === 'promo-discount') {
+                        return;
+                    }
                     salesData.push({
                         orderId: order.id,
                         productName: item.name,
@@ -84,10 +87,44 @@ export default function SalesRecords({
                 shift,
                 sales: salesData,
                 label: getShiftLabel(shift, shift.id === currentShiftId),
-                totalAmount: salesData.reduce((acc, s) => acc + s.total, 0),
+                totalAmount: shiftOrders.reduce((acc, o) => acc + o.total, 0),
                 totalCount: salesData.length
             };
         });
+
+        // Grupo para pedidos sin turno asignado (historial heredado o de respaldo)
+        if (!shiftFilterDate) {
+            const unassignedOrders = history.filter(o => !o.shiftId || !shifts.some(s => s.id === o.shiftId));
+            if (unassignedOrders.length > 0) {
+                const unassignedSales: SaleItemRecord[] = [];
+                unassignedOrders.forEach(order => {
+                    order.items.forEach(item => {
+                        if (item.menuItemId === 'tax-line' || item.menuItemId === 'promo-discount') {
+                            return;
+                        }
+                        unassignedSales.push({
+                            orderId: order.id,
+                            productName: item.name,
+                            quantity: item.quantity,
+                            unitPrice: item.price,
+                            total: item.price * item.quantity,
+                            vendedor: order.orderedBy,
+                            fecha: order.createdAt
+                        });
+                    });
+                });
+
+                groups.push({
+                    shift: { id: 'unassigned', startTime: '', name: 'Pedidos Anteriores' } as Shift,
+                    sales: unassignedSales,
+                    label: 'Pedidos Anteriores (Sin Turno Asignado)',
+                    totalAmount: unassignedOrders.reduce((acc, o) => acc + o.total, 0),
+                    totalCount: unassignedSales.length
+                });
+            }
+        }
+
+        return groups;
     }, [shifts, currentShiftId, history, shiftFilterDate]);
 
     const toggleShift = (shiftId: string) => {

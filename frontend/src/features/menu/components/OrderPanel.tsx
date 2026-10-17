@@ -1,6 +1,6 @@
 import React from 'react';
 import type { MenuItem, Promotion, TaxConfig } from '../../../types';
-import { getPromotionalPrice, isPromotionActive } from '../../../utils/promotionUtils';
+import { getPromotionalPrice, isPromotionActive, getOrderItemLineTotal } from '../../../utils/promotionUtils';
 import { calculateOrderTax } from '../../../utils/taxUtils';
 
 interface OrderPanelProps {
@@ -189,18 +189,25 @@ const OrderPanel: React.FC<OrderPanelProps> = ({
 
                                     <div style={{ fontWeight: '800', textAlign: 'right', fontSize: '1em', color: 'var(--text-color)' }}>
                                         {(() => {
-                                            const promoPrice = getPromotionalPrice(orderItem.menuItem, promotions);
-                                            const originalLineTotal = orderItem.menuItem.price * orderItem.quantity;
-                                            if (promoPrice !== null) {
-                                                const promoLineTotal = promoPrice * orderItem.quantity;
+                                            const lineInfo = getOrderItemLineTotal(orderItem, promotions);
+                                            if (lineInfo.finalTotal < lineInfo.originalTotal) {
                                                 return (
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1' }}>
-                                                        <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.7em', fontWeight: 'normal' }}>${originalLineTotal.toFixed(2)}</span>
-                                                        <span style={{ color: 'var(--primary-color)' }}>${promoLineTotal.toFixed(2)}</span>
+                                                        <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.7em', fontWeight: 'normal' }}>
+                                                            ${lineInfo.originalTotal.toFixed(2)}
+                                                        </span>
+                                                        <span style={{ color: 'var(--primary-color)' }}>
+                                                            ${lineInfo.finalTotal.toFixed(2)}
+                                                            {lineInfo.promoLabel && (
+                                                                <span style={{ fontSize: '0.65em', marginLeft: '4px', opacity: 0.85 }}>
+                                                                    ({lineInfo.promoLabel})
+                                                                </span>
+                                                            )}
+                                                        </span>
                                                     </div>
                                                 );
                                             }
-                                            return `$${originalLineTotal.toFixed(2)}`;
+                                            return `$${lineInfo.originalTotal.toFixed(2)}`;
                                         })()}
                                     </div>
                                 </div>

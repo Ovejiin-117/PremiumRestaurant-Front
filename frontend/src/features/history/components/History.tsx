@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react';
 import type { Order, UIScale, LayoutOrientation, User, Shift } from '../../../types';
 import SettingsControls from '../../../components/ui/SettingsControls';
 import CustomSelect from '../../../components/ui/CustomSelect';
-import { formatDateTime, getShiftLabel } from '../../../utils/dateUtils';
-import { formatCurrency } from '../../../utils/currencyUtils';
+import { formatDateTime, getShiftLabel, getLocalDateString } from '../../../utils/dateUtils';
+import HistoryFilterBar from './HistoryFilterBar';
+import HistoryTicketCard from './HistoryTicketCard';
+import ReprintNotification from './ReprintNotification';
 
 interface Props {
     user: User;
@@ -47,7 +49,7 @@ export default function History({
         if (shiftFilterDate) {
             // Modo de filtro por calendario: mostrar todos los turnos de esa fecha
             relevantShifts = shifts.filter(s => {
-                const localStartTime = new Date(s.startTime).toLocaleDateString('en-CA');
+                const localStartTime = getLocalDateString(new Date(s.startTime));
                 return localStartTime === shiftFilterDate;
             });
         } else {
@@ -63,9 +65,7 @@ export default function History({
         }
 
         // Agrupar pedidos por turno
-        // Si un pedido no tiene shiftId (legado), podríamos agruparlo en "Sin Turno" u ocultarlo.
-        // Por ahora, seguimos estrictamente los turnos.
-        return relevantShifts.map(shift => {
+        const groups = relevantShifts.map(shift => {
             const shiftOrders = history.filter(o => o.shiftId === shift.id);
             return {
                 shift,
@@ -73,6 +73,20 @@ export default function History({
                 label: getShiftLabel(shift, shift.id === currentShiftId)
             };
         });
+
+        // Incluir pedidos anteriores o sin turno asignado si no hay filtro de fecha activo
+        if (!shiftFilterDate) {
+            const unassignedOrders = history.filter(o => !o.shiftId || !shifts.some(s => s.id === o.shiftId));
+            if (unassignedOrders.length > 0) {
+                groups.push({
+                    shift: { id: 'unassigned', startTime: '', name: 'Pedidos Anteriores' } as Shift,
+                    orders: unassignedOrders,
+                    label: 'Pedidos Anteriores (Sin Turno Asignado)'
+                });
+            }
+        }
+
+        return groups;
     }, [shifts, currentShiftId, history, shiftFilterDate]);
 
 
@@ -205,35 +219,24 @@ export default function History({
                 )}
 
                 {/* Filtros avanzados (precio, hora, usuario) */}
-                {showFilters && (
-                    <div className="glass-card" style={{
-                        marginBottom: '1.5rem',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: '1.5rem'
-                    }}>
-                        <div>
-                            <label className="form-label" style={{ fontSize: '0.75em' }}>PRECIO ($)</label>
-                            <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                <input type="number" placeholder="Min" value={filterMinPrice} onChange={e => setFilterMinPrice(e.target.value)} style={{ flex: 1, minWidth: 0, padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', fontSize: '0.95em' }} />
-                                <input type="number" placeholder="Max" value={filterMaxPrice} onChange={e => setFilterMaxPrice(e.target.value)} style={{ flex: 1, minWidth: 0, padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', fontSize: '0.95em' }} />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="form-label" style={{ fontSize: '0.75em' }}>HORA</label>
-                            <input type="text" placeholder="HH:mm" value={filterTime} onChange={e => setFilterTime(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', fontSize: '0.95em' }} />
-                        </div>
-                        {isAdmin && (
-                            <div>
-                                <label className="form-label" style={{ fontSize: '0.75em' }}>USUARIO</label>
-                                <input type="text" placeholder="Nombre..." value={filterUser} onChange={e => setFilterUser(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-color)', fontSize: '0.95em' }} />
-                            </div>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                            <button onClick={() => { setFilterMinPrice(""); setFilterMaxPrice(""); setFilterTime(""); setFilterUser(""); }} style={{ width: '100%', padding: '0.85rem', borderRadius: '0.5rem', background: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger-color)', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.9em', transition: 'all 0.2s' }}>LIMPIAR FILTROS</button>
-                        </div>
-                    </div>
-                )}
+                <HistoryFilterBar
+                    showFilters={showFilters}
+                    filterMinPrice={filterMinPrice}
+                    setFilterMinPrice={setFilterMinPrice}
+                    filterMaxPrice={filterMaxPrice}
+                    setFilterMaxPrice={setFilterMaxPrice}
+                    filterTime={filterTime}
+                    setFilterTime={setFilterTime}
+                    filterUser={filterUser}
+                    setFilterUser={setFilterUser}
+                    isAdmin={isAdmin}
+                    onClear={() => {
+                        setFilterMinPrice("");
+                        setFilterMaxPrice("");
+                        setFilterTime("");
+                        setFilterUser("");
+                    }}
+                />
 
                 {/* LISTA ACORDEÓN DE TURNOS */}
                 {organizedShifts.length === 0 ? (
@@ -309,98 +312,21 @@ export default function History({
                                                     gap: '2rem',
                                                     padding: '1rem'
                                                 }}>
-                                                    {displayedOrders.map(order => {
-                                                        const isExpanded = expandedOrders.has(order.id);
-                                                        const displayItems = isExpanded ? order.items : order.items.slice(0, 5);
-                                                        const hasMore = order.items.length > 5;
-
-                                                        return (
-                                                            <div key={order.id} className="history-ticket" style={{
-                                                                background: '#f8fafc',
-                                                                color: '#1e293b',
-                                                                padding: `${ticketWidth <= 58 ? 12 : 24}px`,
-                                                                width: '100%',
-                                                                maxWidth: `${ticketWidth * 4}px`,
-                                                                borderRadius: '0.25rem',
-                                                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
-                                                                fontFamily: '"Courier New", Courier, monospace',
-                                                                position: 'relative',
-                                                                borderTop: '0.6rem solid #cbd5e1',
-                                                                fontSize: ticketWidth <= 58 ? '11px' : '13px',
-                                                                margin: '0 auto'
-                                                            }}>
-                                                                {/* Encabezado del ticket */}
-                                                                <div style={{ textAlign: 'center', marginBottom: '1rem', borderBottom: '1px dashed #94a3b8', paddingBottom: '0.75rem' }}>
-                                                                    <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>RESTAURANT PRO</div>
-                                                                    <div style={{ fontSize: '0.85em' }}>Ticket de Venta</div>
-                                                                    <div style={{ fontSize: '10px', marginTop: '0.25rem', opacity: 0.8 }}>{formatDateTime(order.createdAt).full}</div>
-                                                                </div>
-
-                                                                {/* Información del ticket */}
-                                                                <div style={{ marginBottom: '1rem', fontSize: '0.9em' }}>
-                                                                    <div><strong>Usuario:</strong> {order.orderedBy}</div>
-                                                                    <div style={{ opacity: 0.7 }}><strong>ID:</strong> {order.id.slice(0, 8)}</div>
-                                                                </div>
-
-                                                                {/* Artículos */}
-                                                                <div style={{ borderBottom: '1px dashed #94a3b8', marginBottom: '1rem', paddingBottom: '0.5rem' }}>
-                                                                    <table style={{ width: '100%', fontSize: 'inherit', borderCollapse: 'collapse' }}>
-                                                                        <thead>
-                                                                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
-                                                                                <th style={{ padding: '0.25rem 0' }}>Cant</th>
-                                                                                <th style={{ padding: '0.25rem 0' }}>Producto</th>
-                                                                                <th style={{ padding: '0.25rem 0', textAlign: 'right' }}>$</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {displayItems.map((item, idx) => (
-                                                                                <tr key={idx}>
-                                                                                    <td style={{ padding: '0.25rem 0' }}>{item.quantity}</td>
-                                                                                    <td style={{ padding: '0.25rem 0' }}>{item.name}</td>
-                                                                                    <td style={{ padding: '0.25rem 0', textAlign: 'right' }}>{formatCurrency(item.price * item.quantity)}</td>
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </table>
-                                                                    {hasMore && (
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                const next = new Set(expandedOrders);
-                                                                                if (isExpanded) next.delete(order.id);
-                                                                                else next.add(order.id);
-                                                                                setExpandedOrders(next);
-                                                                            }}
-                                                                            style={{ width: '100%', marginTop: '0.5rem', padding: '0.4rem', background: 'transparent', border: '1px dashed #94a3b8', color: '#475569', fontSize: '10px', cursor: 'pointer', borderRadius: '4px' }}
-                                                                        >
-                                                                            {isExpanded ? (
-                                                                                <>
-                                                                                    <span style={{ fontSize: '12px' }}>▲</span> Ver menos
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <span style={{ fontSize: '12px' }}>▼</span> Ver {order.items.length - 5} más...
-                                                                                </>
-                                                                            )}
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Total */}
-                                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2em', marginBottom: '1.5rem' }}>
-                                                                    <span>TOTAL:</span>
-                                                                    <span>{formatCurrency(order.total)}</span>
-                                                                </div>
-
-                                                                {/* Botón de reimpresión */}
-                                                                <button onClick={() => handleReprint(order)} style={{ width: '100%', padding: '0.75rem', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '0.25rem', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85em' }}>
-                                                                    REIMPRIMIR TICKET
-                                                                </button>
-
-                                                                {/* Elemento visual al pie del ticket */}
-                                                                <div style={{ position: 'absolute', bottom: '-10px', left: 0, width: '100%', height: '10px', background: 'linear-gradient(-45deg, #f8fafc 5px, transparent 0), linear-gradient(45deg, #f8fafc 5px, transparent 0)', backgroundSize: '10px 10px' }}></div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                    {displayedOrders.map(order => (
+                                                        <HistoryTicketCard
+                                                            key={order.id}
+                                                            order={order}
+                                                            ticketWidth={ticketWidth}
+                                                            isExpanded={expandedOrders.has(order.id)}
+                                                            onToggleExpand={() => {
+                                                                const next = new Set(expandedOrders);
+                                                                if (expandedOrders.has(order.id)) next.delete(order.id);
+                                                                else next.add(order.id);
+                                                                setExpandedOrders(next);
+                                                            }}
+                                                            onReprint={handleReprint}
+                                                        />
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
@@ -413,83 +339,10 @@ export default function History({
                 )}
             </div>
             {/* Notificación superpuesta de reimpresión */}
-            {
-                reprintingOrder && (
-                    <div style={{
-                        position: 'fixed',
-                        bottom: '2rem',
-                        right: 'min(2rem, 4vw)',
-                        maxWidth: 'calc(100vw - 2rem)',
-                        zIndex: 2000,
-                        animation: 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}>
-                        <div style={{
-                            background: 'rgba(15, 23, 42, 0.9)',
-                            backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            padding: '1.25rem 2rem',
-                            borderRadius: '1rem',
-                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1.25rem',
-                            maxWidth: '100%',
-                            boxSizing: 'border-box'
-                        }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '4px',
-                                background: reprintStatus === 'printing' ? 'var(--primary-color-alpha-20)' : 'rgba(16, 185, 129, 0.2)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '1.2rem',
-                                animation: reprintStatus === 'printing' ? 'pulse 2s infinite' : 'none'
-                            }}>
-                                {reprintStatus === 'printing' ? '🖨️' : '✅'}
-                            </div>
-
-                            <div style={{ flex: 1 }}>
-                                <div style={{
-                                    fontSize: '0.95rem',
-                                    fontWeight: 'bold',
-                                    color: 'white',
-                                    marginBottom: '4px'
-                                }}>
-                                    {reprintStatus === 'printing' ? 'Reimprimiendo ticket...' : '¡Impresión enviada!'}
-                                </div>
-                                <div style={{
-                                    fontSize: '0.75rem',
-                                    color: 'rgba(255,255,255,0.6)',
-                                    letterSpacing: '0.02em',
-                                    textTransform: 'uppercase'
-                                }}>
-                                    ID: {reprintingOrder.slice(0, 8)}
-                                </div>
-
-                                {/* Contenedor de barra de progreso */}
-                                <div style={{
-                                    width: '100%',
-                                    height: '3px',
-                                    background: 'rgba(255,255,255,0.1)',
-                                    borderRadius: '3px',
-                                    marginTop: '10px',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{
-                                        height: '100%',
-                                        background: reprintStatus === 'printing' ? 'var(--primary-color)' : '#10b981',
-                                        width: reprintStatus === 'printing' ? '100%' : '100%',
-                                        transition: 'width 2.5s linear, background 0.3s',
-                                        animation: reprintStatus === 'printing' ? 'printingProgress 2.5s linear forwards' : 'none'
-                                    }} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
+            <ReprintNotification
+                reprintingOrder={reprintingOrder}
+                reprintStatus={reprintStatus}
+            />
         </div >
     );
 }

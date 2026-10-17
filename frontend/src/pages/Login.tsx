@@ -38,25 +38,29 @@ export default function Login({ users, onLogin, isShiftOpen, onShowSetup, theme,
 
     const handleLogin = () => {
         const cleanUsername = username.trim();
-        // Buscar usuario por nombre de usuario (sin distinción de mayúsculas/minúsculas) y verificar si está activo
-        const foundUser = users.find(u => u.username.toLowerCase() === cleanUsername.toLowerCase() && u.active !== false);
+        const existingUser = users.find(u => u.username.toLowerCase() === cleanUsername.toLowerCase());
 
-        if (!foundUser) {
+        if (!existingUser) {
             showError("USUARIO NO EXISTENTE");
             return;
         }
 
-        if (foundUser.role === 'waiter' && !isShiftOpen) {
+        if (existingUser.active === false) {
+            showError("USUARIO DESACTIVADO - CONSULTE AL ADMINISTRADOR");
+            return;
+        }
+
+        if (existingUser.role === 'waiter' && !isShiftOpen) {
             showError("TURNO CERRADO - MESEROS NO PUEDEN ACCEDER");
             return;
         }
 
-        if (foundUser.password !== password) {
+        if (existingUser.password !== password) {
             showError("CONTRASEÑA INCORRECTA");
             return;
         }
 
-        onLogin(foundUser);
+        onLogin(existingUser);
     };
 
     return (

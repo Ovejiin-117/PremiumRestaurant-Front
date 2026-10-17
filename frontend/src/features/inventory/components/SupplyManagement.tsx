@@ -48,7 +48,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
             setEditingId(null);
         } else {
             const newSupply: SupplyItem = {
-                id: Date.now().toString(),
+                id: crypto.randomUUID(),
                 name: formData.name!,
                 currentStock: formData.currentStock || 0,
                 unit: (formData.unit as SupplyItem['unit']) || 'unit',
@@ -152,7 +152,7 @@ export default function SupplyManagement({ supplies, setSupplies, logAction, bac
 
                         <div style={{ width: '100%', height: '6px', background: 'var(--card-border)', borderRadius: '3px', marginBottom: '1rem', overflow: 'hidden' }}>
                             <div style={{
-                                width: `${Math.min(100, (supply.currentStock / (supply.minStock * 2)) * 100)}%`,
+                                width: `${supply.minStock > 0 ? Math.min(100, Math.max(0, (supply.currentStock / (supply.minStock * 2)) * 100)) : (supply.currentStock > 0 ? 100 : 0)}%`,
                                 height: '100%',
                                 background: getStatusColor(supply),
                                 transition: 'width 0.3s ease'

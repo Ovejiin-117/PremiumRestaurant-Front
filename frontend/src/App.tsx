@@ -17,64 +17,9 @@ const VisualSettings = lazy(() => import('./pages/VisualSettings'));
 const SupplyManagement = lazy(() => import('./features/inventory/components/SupplyManagement'));
 
 import type { User, MenuItem, Order, UIScale, LayoutOrientation, Shift, Theme, AuditLogEntry, AuditAction, AuditConfig, TaxConfig, Promotion, SupplyItem } from './types';
+import { getLocalDateString } from './utils/dateUtils';
+import { INITIAL_USERS, INITIAL_MENU, DEFAULT_AUDIT_CONFIG, DEFAULT_TAX_CONFIG } from './constants/initialData';
 import './App.css';
-
-// ... (INITIAL_USERS e INITIAL_MENU permanecen igual, no se muestran aquí para ahorrar espacio, basándose en el contexto existente)
-const INITIAL_USERS: User[] = [
-  { id: 'dev-001', username: 'Desarrollador', role: 'developer', password: 'DEVELOPERON', registrationDate: '2026-01-01', birthDate: '1990-01-01', loginDates: [] },
-  { id: 'mgr-001', username: 'Gerente', role: 'manager', password: '123', registrationDate: '2026-01-01', birthDate: '1985-05-15', loginDates: [] },
-  { id: 'wait-001', username: 'Mesero', role: 'waiter', password: '123', registrationDate: '2026-01-01', birthDate: '1998-10-20', loginDates: [] },
-];
-
-
-const INITIAL_MENU: MenuItem[] = [
-  { id: '1', name: 'Hamburguesa', price: 10, category: 'Comida', type: 'alimento', available: true },
-  { id: '2', name: 'Refresco', price: 2, category: 'Bebidas', type: 'bebida', available: true },
-  { id: '3', name: 'Papas Fritas', price: 3, category: 'Extras', type: 'alimento', available: true },
-];
-
-const DEFAULT_AUDIT_CONFIG: AuditConfig = {
-  user_login: false,
-  user_logout: false,
-  shift_open: true,
-  shift_close: true,
-  user_create: true,
-  user_update: true,
-  user_delete: true,
-  user_status_change: true,
-  menu_create: true,
-  menu_update: true,
-  menu_delete: true,
-  menu_stock_toggle: true,
-  category_create: true,
-  category_rename: true,
-  category_delete: true,
-  subcategory_create: true,
-  subcategory_rename: true,
-  subcategory_delete: true,
-  section_create: true,
-  section_rename: true,
-  section_delete: true,
-  ticket_reprint: true,
-  audit_config_update: true,
-  tax_config_update: true,
-  promotion_create: true,
-  promotion_update: true,
-  promotion_delete: true,
-  promotion_toggle: true,
-  supply_create: true,
-  supply_update: true,
-  supply_delete: true,
-  supply_stock_adjust: true
-};
-
-const DEFAULT_TAX_CONFIG: TaxConfig = {
-  enabled: false,
-  name: 'IVA',
-  percentage: 16,
-  mode: 'exclusive',
-  rounding: 'total'
-};
 
 type View = 'login' | 'dashboard' | 'gestion' | 'menu_editor' | 'menu_ordering' | 'historial' | 'turno_gestion' | 'audit_log' | 'tax_settings' | 'promotions' | 'registro_ventas' | 'visual_settings' | 'inventory';
 
@@ -249,19 +194,20 @@ function App() {
 
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('rp_users');
-    let loadedUsers: User[] = saved ? JSON.parse(saved) : (localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : []);
-    if (loadedUsers.length > 0) {
-      const hasGerente = loadedUsers.some(u => u.username === 'Gerente');
-      const hasMesero = loadedUsers.some(u => u.username === 'Mesero');
-      if (!hasGerente || !hasMesero) {
-        const missing = INITIAL_USERS.filter(u =>
-          (u.username === 'Gerente' && !hasGerente) ||
-          (u.username === 'Mesero' && !hasMesero)
+    if (saved) {
+      try {
+        const parsed: User[] = JSON.parse(saved);
+        // Garantizar que el usuario Desarrollador siempre tenga rol developer
+        const corrected = parsed.map(u =>
+          (u.username === 'Desarrollador' || u.id === 'dev-001') ? { ...u, role: 'developer' as const } : u
         );
-        loadedUsers = [...loadedUsers, ...missing];
+        localStorage.setItem('rp_users', JSON.stringify(corrected));
+        return corrected;
+      } catch {
+        // En caso de error de análisis, continuar al valor por defecto
       }
     }
-    return loadedUsers;
+    return localStorage.getItem('rp_setup_complete') === 'true' ? INITIAL_USERS : [];
   });
 
   const [categories, setCategories] = useState<string[]>(() => {
@@ -396,25 +342,21 @@ function App() {
   useEffect(() => { localStorage.setItem('rp_auditConfig', JSON.stringify(auditConfig)); }, [auditConfig]);
   useEffect(() => { localStorage.setItem('rp_taxConfig', JSON.stringify(taxConfig)); }, [taxConfig]);
 
-
   const handleLogin = (loggedInUser: User) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString(new Date());
 
-    // Registrar fechas únicas de inicio de sesión
-    setUsers(prev => prev.map(u => {
-      if (u.username === loggedInUser.username) {
-        const dates = u.loginDates || [];
-        if (!dates.includes(today)) {
-          return { ...u, loginDates: [...dates, today] };
-        }
-      }
-      return u;
-    }));
+    // Garantizar rol developer si el usuario es Desarrollador
+    const isDev = loggedInUser.username === 'Desarrollador' || loggedInUser.id === 'dev-001';
+    const normalizedUser: User = isDev ? { ...loggedInUser, role: 'developer' } : loggedInUser;
 
-    // Encontrar el usuario actualizado para establecerlo como activo
-    const updatedUser = users.find(u => u.username === loggedInUser.username) || loggedInUser;
-    setUser(updatedUser);
-    applyUserPreferences(loggedInUser.username);
+    // Registrar fechas únicas de inicio de sesión de forma inmediata y consistente
+    const dates = normalizedUser.loginDates || [];
+    const updatedDates = dates.includes(today) ? dates : [...dates, today];
+    const userWithLogin: User = { ...normalizedUser, loginDates: updatedDates };
+
+    setUsers(prev => prev.map(u => u.username === userWithLogin.username ? userWithLogin : u));
+    setUser(userWithLogin);
+    applyUserPreferences(userWithLogin.username);
     setView('dashboard');
 
     // Registrar inicio de sesión (directamente aquí ya que tenemos el contexto del usuario)
